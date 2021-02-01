@@ -1,22 +1,20 @@
 import { REQUEST } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilterQuery, Model } from 'mongoose';
-import { Comment } from '../database/comment.model';
-import { COMMENT_MODEL, POST_MODEL } from '../database/database.constants';
-import { Post } from '../database/post.model';
-import { PostService } from './post.service';
+import { CUSTOMER_MODEL } from '../database/database.constants';
+import { Customer } from '../database/customer.model';
+import { CustomerService } from './customer.service';
 
-describe('PostService', () => {
-  let service: PostService;
-  let model: Model<Post>;
-  let commentModel: Model<Comment>;
+describe('CustomerService', () => {
+  let service: CustomerService;
+  let model: Model<Customer>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        PostService,
+        CustomerService,
         {
-          provide: POST_MODEL,
+          provide: CUSTOMER_MODEL,
           useValue: {
             new: jest.fn(),
             constructor: jest.fn(),
@@ -34,21 +32,6 @@ describe('PostService', () => {
           },
         },
         {
-          provide: COMMENT_MODEL,
-          useValue: {
-            new: jest.fn(),
-            constructor: jest.fn(),
-            find: jest.fn(),
-            findOne: jest.fn(),
-            updateOne: jest.fn(),
-            deleteOne: jest.fn(),
-            update: jest.fn(),
-            create: jest.fn(),
-            remove: jest.fn(),
-            exec: jest.fn(),
-          },
-        },
-        {
           provide: REQUEST,
           useValue: {
             user: {
@@ -59,37 +42,42 @@ describe('PostService', () => {
       ],
     }).compile();
 
-    service = await module.resolve<PostService>(PostService);
-    model = module.get<Model<Post>>(POST_MODEL);
-    commentModel = module.get<Model<Comment>>(COMMENT_MODEL);
+    service = await module.resolve<CustomerService>(CustomerService);
+    model = module.get<Model<Customer>>(CUSTOMER_MODEL);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('findAll should return all posts', async () => {
-    const posts = [
+  it('findAll should return all customers', async () => {
+    const customers = [
       {
         _id: '5ee49c3115a4e75254bb732e',
-        title: 'Generate a NestJS project',
-        content: 'content',
+        isCompany: true,
+        name: 'FutureSoft',
+        email: 'aliesky@example.com',
+        phone: '832-555-5555',
       },
       {
         _id: '5ee49c3115a4e75254bb732f',
-        title: 'Create CRUD RESTful APIs',
-        content: 'content',
+        isCompany: true,
+        name: 'World Records',
+        email: 'ernesto@example.com',
+        phone: '832-111-3333',
       },
       {
         _id: '5ee49c3115a4e75254bb7330',
-        title: 'Connect to MongoDB',
-        content: 'content',
+        isCompany: true,
+        name: 'TED SuperStars',
+        email: 'ernesto@example.com',
+        phone: '832-222-8888',
       },
     ];
     jest.spyOn(model, 'find').mockReturnValue({
       skip: jest.fn().mockReturnValue({
         limit: jest.fn().mockReturnValue({
-          exec: jest.fn().mockResolvedValueOnce(posts) as any,
+          exec: jest.fn().mockResolvedValueOnce(customers) as any,
         }),
       }),
     } as any);
@@ -102,13 +90,13 @@ describe('PostService', () => {
       .spyOn(model, 'find')
       .mockImplementation(
         (
-          conditions: FilterQuery<Post>,
-          callback?: (err: any, res: Post[]) => void,
+          conditions: FilterQuery<Customer>,
+          callback?: (err: any, res: Customer[]) => void,
         ) => {
           return {
             skip: jest.fn().mockReturnValue({
               limit: jest.fn().mockReturnValue({
-                exec: jest.fn().mockResolvedValueOnce([posts[0]]),
+                exec: jest.fn().mockResolvedValueOnce([customers[0]]),
               }),
             }),
           } as any;
@@ -123,11 +111,13 @@ describe('PostService', () => {
   });
 
   describe('findByid', () => {
-    it('if exists return one post', (done) => {
+    it('if exists return one customer', (done) => {
       const found = {
         _id: '5ee49c3115a4e75254bb732e',
-        title: 'Generate a NestJS project',
-        content: 'content',
+        isCompany: true,
+        name: 'FutureSoft',
+        email: 'aliesky@example.com',
+        phone: '832-555-5555',
       };
 
       jest.spyOn(model, 'findOne').mockReturnValue({
@@ -136,8 +126,8 @@ describe('PostService', () => {
 
       service.findById('1').subscribe({
         next: (data) => {
-          expect(data._id).toBe('5ee49c3115a4e75254bb732e');
-          expect(data.title).toEqual('Generate a NestJS project');
+          expect(data._id).toBe('5ee49c3115a4e75254bb732f');
+          expect(data.name).toEqual('Ernesto');
         },
         error: (error) => console.log(error),
         complete: done(),
@@ -161,10 +151,12 @@ describe('PostService', () => {
     });
   });
 
-  it('should save post', async () => {
+  it('should save customer', async () => {
     const toCreated = {
-      title: 'test title',
-      content: 'test content',
+      isCompany: true,
+      name: 'TestSoft',
+      email: 'test@example.com',
+      phone: '832-111-1111',
     };
 
     const toReturned = {
@@ -172,7 +164,7 @@ describe('PostService', () => {
       ...toCreated,
     };
 
-    jest.spyOn(model, 'create').mockResolvedValue(toReturned as Post);
+    jest.spyOn(model, 'create').mockResolvedValue();
 
     const data = await service.save(toCreated).toPromise();
     expect(data._id).toBe('5ee49c3115a4e75254bb732e');
@@ -186,11 +178,13 @@ describe('PostService', () => {
   });
 
   describe('update', () => {
-    it('perform update if post exists', (done) => {
+    it('perform update if customer exists', (done) => {
       const toUpdated = {
         _id: '5ee49c3115a4e75254bb732e',
-        title: 'test title',
-        content: 'test content',
+        isCompany: true,
+        name: 'TestSoft',
+        email: 'test@example.com',
+        phone: '832-111-1111',
       };
 
       jest.spyOn(model, 'findOneAndUpdate').mockReturnValue({
@@ -207,11 +201,13 @@ describe('PostService', () => {
       });
     });
 
-    it('throw an NotFoundException if post not exists', (done) => {
+    it('throw an NotFoundException if customer not exists', (done) => {
       const toUpdated = {
         _id: '5ee49c3115a4e75254bb732e',
-        title: 'test title',
-        content: 'test content',
+        isCompany: true,
+        name: 'TestSoft',
+        email: 'test@example.com',
+        phone: '832-111-1111',
       };
       jest.spyOn(model, 'findOneAndUpdate').mockReturnValue({
         exec: jest.fn().mockResolvedValue(null) as any,
@@ -228,11 +224,13 @@ describe('PostService', () => {
   });
 
   describe('delete', () => {
-    it('perform delete if post exists', (done) => {
+    it('perform delete if customer exists', (done) => {
       const toDeleted = {
         _id: '5ee49c3115a4e75254bb732e',
-        title: 'test title',
-        content: 'test content',
+        isCompany: true,
+        name: 'TestSoft',
+        email: 'test@example.com',
+        phone: '832-111-1111',
       };
       jest.spyOn(model, 'findOneAndDelete').mockReturnValue({
         exec: jest.fn().mockResolvedValueOnce(toDeleted),
@@ -248,7 +246,7 @@ describe('PostService', () => {
       });
     });
 
-    it('throw an NotFoundException if post not exists', (done) => {
+    it('throw an NotFoundException if customer not exists', (done) => {
       jest.spyOn(model, 'findOneAndDelete').mockReturnValue({
         exec: jest.fn().mockResolvedValue(null),
       } as any);
@@ -262,7 +260,7 @@ describe('PostService', () => {
     });
   });
 
-  it('should delete all post', (done) => {
+  it('should delete all customers', (done) => {
     jest.spyOn(model, 'deleteMany').mockReturnValue({
       exec: jest.fn().mockResolvedValueOnce({
         deletedCount: 1,
@@ -274,49 +272,5 @@ describe('PostService', () => {
       error: (error) => console.log(error),
       complete: done(),
     });
-  });
-
-  it('should create comment ', async () => {
-    const comment = { content: 'test' };
-    jest.spyOn(commentModel, 'create').mockResolvedValue({
-      ...comment,
-      post: { _id: 'test' },
-    } as any);
-
-    const result = await service.createCommentFor('test', comment).toPromise();
-    expect(result.content).toEqual('test');
-    expect(commentModel.create).toBeCalledWith({
-      ...comment,
-      post: { _id: 'test' },
-      createdBy: { _id: 'dummyId' },
-    });
-  });
-
-  it('should get comments of post ', async () => {
-    jest
-      .spyOn(commentModel, 'find')
-      .mockImplementation(
-        (
-          conditions: FilterQuery<Comment>,
-          callback?: (err: any, res: Comment[]) => void,
-        ) => {
-          return {
-            select: jest.fn().mockReturnValue({
-              exec: jest.fn().mockResolvedValue([
-                {
-                  _id: 'test',
-                  content: 'content',
-                  post: { _id: '_test_id' },
-                },
-              ] as any),
-            }),
-          } as any;
-        },
-      );
-
-    const result = await service.commentsOf('test').toPromise();
-    expect(result.length).toBe(1);
-    expect(result[0].content).toEqual('content');
-    expect(commentModel.find).toBeCalledWith({ post: { _id: 'test' } });
   });
 });

@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
-import { PostModule } from './post/post.module';
+import { CustomerModule } from './insurance/customer.module';
 import { SendgridModule } from './sendgrid/sendgrid.module';
 import { UserModule } from './user/user.module';
 import { LoggerModule } from './logger/logger.module';
@@ -13,7 +13,7 @@ import { LoggerModule } from './logger/logger.module';
   imports: [
     ConfigModule.forRoot({ ignoreEnvFile: true }),
     DatabaseModule,
-    PostModule,
+    CustomerModule,
     AuthModule,
     UserModule,
     SendgridModule,

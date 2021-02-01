@@ -1,4 +1,5 @@
 export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
-export const POST_MODEL = 'POST_MODEL';
 export const USER_MODEL = 'USER_MODEL';
-export const COMMENT_MODEL = 'COMMENT_MODEL';
+export const CUSTOMER_MODEL = 'CUSTOMER_MODEL';
+export const INSURER_MODEL = 'INSURER_MODEL';
+export const SALE_MODEL = 'SALE_MODEL';

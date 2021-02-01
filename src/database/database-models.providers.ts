@@ -1,24 +1,34 @@
 import { Connection } from 'mongoose';
-import { CommentSchema } from './comment.model';
+
 import {
-  COMMENT_MODEL, DATABASE_CONNECTION,
-  POST_MODEL,
-  USER_MODEL
+  DATABASE_CONNECTION,
+  CUSTOMER_MODEL, 
+  INSURER_MODEL,
+  SALE_MODEL,
+  USER_MODEL,
 } from './database.constants';
-import { Post, PostSchema } from './post.model';
+import { Customer, CustomerSchema } from './customer.model';
+import { Insurer, InsurerSchema } from './insurer.model';
+import { Sale, SaleSchema } from './sale.model';
 import { userModelFn } from './user.model';
 
 export const databaseModelsProviders = [
   {
-    provide: POST_MODEL,
+    provide: CUSTOMER_MODEL,
     useFactory: (connection: Connection) =>
-      connection.model<Post>('Post', PostSchema, 'posts'),
+      connection.model<Customer>('Customer', CustomerSchema, 'customers'),
     inject: [DATABASE_CONNECTION],
   },
   {
-    provide: COMMENT_MODEL,
+    provide: INSURER_MODEL,
     useFactory: (connection: Connection) =>
-      connection.model<Post>('Comment', CommentSchema, 'comments'),
+      connection.model<Insurer>('Insurer', InsurerSchema, 'insurer'),
+    inject: [DATABASE_CONNECTION],
+  },
+  {
+    provide: SALE_MODEL,
+    useFactory: (connection: Connection) =>
+      connection.model<Sale>('Sale', SaleSchema, 'sale'),
     inject: [DATABASE_CONNECTION],
   },
   {

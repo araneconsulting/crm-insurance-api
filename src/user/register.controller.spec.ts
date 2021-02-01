@@ -33,7 +33,7 @@ describe('Register Controller', () => {
   });
 
   describe('register', () => {
-    it('should throw ConflictException when username is existed ', async () => {
+    it('should throw ConflictException when username exists already ', async () => {
       const existsByUsernameSpy = jest.spyOn(service, 'existsByUsername').mockReturnValue(of(true));
       const existsByEmailSpy = jest.spyOn(service, 'existsByEmail').mockReturnValue(of(true));
       const saveSpy = jest.spyOn(service, 'register').mockReturnValue(of({} as User));
@@ -53,7 +53,7 @@ describe('Register Controller', () => {
       }
     });
 
-    it('should throw ConflictException when email is existed ', async () => {
+    it('should throw ConflictException when email exists already ', async () => {
       const existsByUsernameSpy = jest.spyOn(service, 'existsByUsername').mockReturnValue(of(false));
       const existsByEmailSpy = jest.spyOn(service, 'existsByEmail').mockReturnValue(of(true));
       const saveSpy = jest.spyOn(service, 'register').mockReturnValue(of({} as User));

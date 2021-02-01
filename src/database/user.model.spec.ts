@@ -27,7 +27,7 @@ import { hash } from "bcrypt";
 
 describe('UserSchema', () => {
 
-    it('should called Schame.virtual ', () => {
+    it('should called Schema.virtual ', () => {
         expect(UserSchema).toBeDefined()
 
         expect(getMock).toBeCalled()

@@ -18,14 +18,14 @@ export class RegisterController {
         return this.userService.existsByUsername(username).pipe(
             mergeMap(exists => {
                 if (exists) {
-                    throw new ConflictException(`username:${username} is existed`)
+                    throw new ConflictException(`username:${username} exists already`)
                 }
                 else {
                     const email = registerDto.email;
                     return this.userService.existsByEmail(email).pipe(
                         mergeMap(exists => {
                             if (exists) {
-                                throw new ConflictException(`email:${email} is existed`)
+                                throw new ConflictException(`email:${email} exists already`)
                             }
                             else {
                                 return this.userService.register(registerDto).pipe(

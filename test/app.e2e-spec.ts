@@ -23,7 +23,7 @@ describe('API endpoints testing (e2e)', () => {
   });
 
   describe('/register a new user', () => {
-    it('if username is existed', async () => {
+    it('if username exists already', async () => {
       const res = await request(app.getHttpServer())
         .post('/register')
         .send({
@@ -36,7 +36,7 @@ describe('API endpoints testing (e2e)', () => {
       expect(res.status).toBe(409);
     });
 
-    it('if email is existed', async () => {
+    it('if email exists already', async () => {
       const res = await request(app.getHttpServer())
         .post('/register')
         .send({
