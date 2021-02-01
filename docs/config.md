@@ -40,7 +40,7 @@ Internally, Nestjs will scan `.env` file in the root folder.
 The following is a sample of the content of the `.env` file.
 
 ```env
-MONGO_URI=mongodb://localhost/blog
+MONGO_URI=mongodb://localhost/aranecrm
 ```
 
 If you want to read configuration from an environment-aware file, eg. `.dev.env` for development phase, then configure the location in `ConfigModule`.
@@ -80,7 +80,7 @@ In the config folder, add a new configuration for *Mongo* database.
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('mongodb', () => ({
-  uri: process.env.MONGODB_URI || 'mongodb://localhost/blog',
+  uri: process.env.MONGODB_URI || 'mongodb://localhost/aranecrm',
 }));
 ```
 
@@ -188,7 +188,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 In a production environment, it is easy to change these settings by simply declaring an environment variables like this.
 
 ```base
-export MONGODB_URI=mongodb://localhost:27019/blog
+export MONGODB_URI=mongodb://localhost:27019/aranecrm
 ```
 
 Or set it in the docker-compose file like this.
@@ -199,7 +199,7 @@ services:
   //...  
   api:
     environment:
-      - "MONGODB_URI=mongodb://mongodb:27017/blog"
+      - "MONGODB_URI=mongodb://mongodb:27017/aranecrm"
 	//...
 ```
 

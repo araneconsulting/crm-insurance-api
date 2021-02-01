@@ -17,6 +17,6 @@ describe('mongodbConfig', () => {
   });
 
   it('should contains uri key', async () => {
-    expect(config.uri).toBe('mongodb://localhost/blog');
+    expect(config.uri).toBe('mongodb://localhost/aranecrm');
   });
 });

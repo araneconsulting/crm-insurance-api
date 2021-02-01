@@ -67,7 +67,7 @@ describe('UserService', () => {
     const saveSpy = jest.spyOn(model, 'create').mockResolvedValue({
       _id: '123',
       ...sampleData
-    } as any);
+    } as never);
 
     const pipeMock = {
       pipe: jest.fn()
@@ -171,7 +171,7 @@ describe('UserService', () => {
   describe('existsByUsername', () => {
 
     it('should return true if exists ', async () => {
-      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(true);
+      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(true as never);
       const result = await service.existsByUsername('liuver').toPromise();
 
       expect(existsSpy).toBeCalledWith({ username: 'liuver' });
@@ -180,7 +180,7 @@ describe('UserService', () => {
     });
 
     it('should return false if not exists ', async () => {
-      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(false);
+      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(false as never);
       const result = await service.existsByUsername('liuver').toPromise();
 
       expect(existsSpy).toBeCalledWith({ username: 'liuver' });
@@ -192,7 +192,7 @@ describe('UserService', () => {
   describe('existsByEmail', () => {
 
     it('should return true if exists ', async () => {
-      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(true);
+      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(true as never);
       const result = await service.existsByEmail('liuver@example.com').toPromise();
 
       expect(existsSpy).toBeCalledWith({ email: 'liuver@example.com' });
@@ -201,7 +201,7 @@ describe('UserService', () => {
     });
 
     it('should return false if not exists ', async () => {
-      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(false);
+      const existsSpy = jest.spyOn(model, 'exists').mockResolvedValue(false as never);
       const result = await service.existsByEmail('liuver@example.com').toPromise();
 
       expect(existsSpy).toBeCalledWith({ email: 'liuver@example.com' });

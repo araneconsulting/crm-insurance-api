@@ -31,7 +31,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
       //...other modules imports
       // add MongooseModule
-      MongooseModule.forRoot('mongodb://localhost/blog')
+      MongooseModule.forRoot('mongodb://localhost/aranecrm')
   ],
   //... providers, controllers
 })
