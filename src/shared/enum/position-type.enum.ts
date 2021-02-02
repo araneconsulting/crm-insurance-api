@@ -1,0 +1,6 @@
+export enum PositionType {
+  SALES_AGENT = 'SALES_AGENT',
+  SALES_CONSULTANT = 'SALES_CONSULTANT',
+  MANAGER = 'MANAGER',
+  OTHER = 'OTHER',
+}
