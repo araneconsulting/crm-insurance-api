@@ -6,6 +6,7 @@ import { USER_MODEL } from '../database/database.constants';
 import { User, UserModel } from '../database/user.model';
 import { SendgridService } from '../sendgrid/sendgrid.service';
 import { RegisterDto } from './register.dto';
+import { UpdateUserDto } from './update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,10 @@ export class UserService {
 
   existsByUsername(username: string): Observable<boolean> {
     return from(this.userModel.exists({ username }));
+  }
+
+  existsById(id: string): Observable<boolean> {
+    return from(this.userModel.exists({ id }));
   }
 
   existsByEmail(email: string): Observable<boolean> {
@@ -86,14 +91,41 @@ export class UserService {
     // );
   }
 
-  findById(id: string, withPosts = false): Observable<User> {
+
+  updateUser(id: string, data: UpdateUserDto): Observable<User> {
+
+    const updateQuery = this.userModel.findByIdAndUpdate({ _id: id }, data);
+    return from(updateQuery.exec()).pipe(
+      mergeMap((p) => (p ? of(p) : EMPTY)),
+      throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),
+    );
+  }
+
+  delete(id: string): Observable<User> {
+
+    const deleteQuery = this.userModel.findByIdAndDelete({ _id: id });
+    return from(deleteQuery.exec()).pipe(
+      mergeMap((p) => (p ? of(p) : EMPTY)),
+      throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),
+    );
+  }
+
+  findById(id: string, withSales = false): Observable<User> {
     const userQuery = this.userModel.findOne({ _id: id });
-    if (withPosts) {
-      userQuery.populate("posts");
+    if (withSales) {
+      userQuery.populate("sales");
     }
     return from(userQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),
     );
+  }
+
+  findAll(withSales = false): Observable<User[]> {
+    const userQuery = this.userModel.find();
+    if (withSales) {
+      userQuery.populate("sales");
+    }
+    return from(userQuery.exec());
   }
 }

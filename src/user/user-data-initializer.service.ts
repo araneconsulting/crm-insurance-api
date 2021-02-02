@@ -18,16 +18,28 @@ export class UserDataInitializerService
     await this.userModel.deleteMany({});
     const user = {
       username: 'liuver',
+      firstName: 'Liuver',
+      lastName: 'Duran',
       password: 'password',
       email: 'liuver@example.com',
       roles: [RoleType.USER],
+      location: 'MEXICO',
+      position: 'SALES_AGENT',
+      baseSalary: 400,
+      saleBonusPercentage: 0.01,
     };
 
     const admin = {
       username: 'admin',
+      firstName: 'Edgar',
+      lastName: 'Barzaga',
       password: 'password',
       email: 'admin@example.com',
       roles: [RoleType.ADMIN],
+      location: 'USA',
+      position: 'MANAGER',
+      baseSalary: 800,
+      saleBonusPercentage: 0.01,
     };
     await Promise.all(
       [

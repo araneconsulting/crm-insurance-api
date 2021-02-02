@@ -34,7 +34,11 @@ describe('UserController', () => {
         password: 'mysecret',
         email: 'liuver@example.com',
         firstName: "Liuver",
-        lastName: "Duran"
+        lastName: "Duran",
+        location: 'MEXICO',
+        position: 'SALES_AGENT',
+        baseSalary: 400,
+        saleBonusPercentage: 0.01,
       } as any)));
     const user = await controller.getUser("id", false).toPromise();
     expect(user.firstName).toBe("Liuver");

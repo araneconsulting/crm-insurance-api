@@ -12,7 +12,11 @@ describe('RegisterDto', () => {
       password: 'password',
       firstName: 'Liuver',
       lastName: 'Duran',
-      email: 'liuver@gmail.com'
+      email: 'liuver@gmail.com',
+      location: 'MEXICO',
+      position: 'SALES_AGENT',
+      baseSalary: 400,
+      saleBonusPercentage: 0.01,
     };
 
     expect(dto).toEqual(
@@ -21,7 +25,11 @@ describe('RegisterDto', () => {
         password: 'password',
         firstName: 'Liuver',
         lastName: 'Duran',
-        email: 'liuver@gmail.com'
+        email: 'liuver@gmail.com',
+        location: 'MEXICO',
+        position: 'SALES_AGENT',
+        baseSalary: 400,
+        saleBonusPercentage: 0.01,
       }
     );
 

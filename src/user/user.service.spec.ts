@@ -48,7 +48,11 @@ describe('UserService', () => {
       email: 'liuver@example.com',
       firstName: 'Liuver',
       lastName: 'Duran',
-      password: 'mysecret'
+      password: 'mysecret',
+      location: 'MEXICO',
+      position: 'SALES_AGENT',
+      baseSalary: 400,
+      saleBonusPercentage: 0.01,
     }
 
     const msg = {

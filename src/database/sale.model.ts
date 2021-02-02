@@ -28,8 +28,8 @@ type SaleModel = Model<Sale>;
 const SaleSchema = new Schema<any>(
   {
     soldAt: SchemaTypes.Date,
-    customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: false },
-    seller: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
+    customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
+    seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     liabilityInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', required: false },
     liabilityCharge: SchemaTypes.Number,
     cargoInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', required: false },

@@ -15,7 +15,6 @@ interface Insurer extends Document {
 
 const InsurerSchema = new Schema<any>(
   {
-
     name: SchemaTypes.String,
     email: SchemaTypes.String,
     phone: SchemaTypes.String,
