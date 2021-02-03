@@ -1,64 +1,60 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Observable, of } from 'rxjs';
 import { anyNumber, anyString, instance, mock, verify, when } from 'ts-mockito';
-import { Customer } from '../database/customer.model';
-import { CreateCustomerDto } from './create-customer.dto';
-import { CustomerController } from './customer.controller';
-import { CustomerService } from './customer.service';
-import { CustomerServiceStub } from './customer.service.stub';
-import { UpdateCustomerDto } from './update-customer.dto';
-import { createMock } from '@golevelup/ts-jest';
-import { Response } from 'express';
+import { Insurer } from '../../database/insurer.model';
+import { InsurerController } from './insurer.controller';
+import { InsurerService } from './insurer.service';
+import { InsurerServiceStub } from './insurer.service.stub';
 
-describe('Customer Controller', () => {
-  describe('Replace CustomerService in provider(useClass: CustomerServiceStub)', () => {
-    let controller: CustomerController;
+describe('Insurer Controller', () => {
+  describe('Replace InsurerService in provider(useClass: InsurerServiceStub)', () => {
+    let controller: InsurerController;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
         providers: [
           {
-            provide: CustomerService,
-            useClass: CustomerServiceStub,
+            provide: InsurerService,
+            useClass: InsurerServiceStub,
           },
         ],
-        controllers: [CustomerController],
+        controllers: [InsurerController],
       }).compile();
 
-      controller = await module.resolve<CustomerController>(CustomerController);
+      controller = await module.resolve<InsurerController>(InsurerController);
     });
 
     it('should be defined', () => {
       expect(controller).toBeDefined();
     });
 
-    it('GET on /customers should return all customers', async () => {
-      const customers = await controller.getAllCustomers().toPromise();
-      expect(customers.length).toBe(3);
+    it('GET on /insurers should return all insurers', async () => {
+      const insurers = await controller.getAllInsurers().toPromise();
+      expect(insurers.length).toBe(3);
     });
 
-    it('GET on /customers/:id should return one customer ', (done) => {
-      controller.getCustomerById('1').subscribe((data) => {
+    it('GET on /insurers/:id should return one insurer ', (done) => {
+      controller.getInsurerById('1').subscribe((data) => {
         expect(data._id).toEqual('1');
         done();
       });
     });
 
- /*    it('POST on /customers should save customer', async () => {
-      const customer: CreateCustomerDto = {
+ /*    it('POST on /insurers should save insurer', async () => {
+      const insurer: CreateInsurerDto = {
         isCompany: true,
         name: 'TestSoft',
         email: 'test@example.com',
         phone: '832-111-1111',
       };
       const saved = await controller
-        .createCustomer(
-          customer,
+        .createInsurer(
+          insurer,
           createMock<Response>({
             location: jest.fn().mockReturnValue({
               status: jest.fn().mockReturnValue({
                 send: jest.fn().mockReturnValue({
-                  headers: { location: '/customers/customer_id' },
+                  headers: { location: '/insurers/insurer_id' },
                   status: 201,
                 }),
               }),
@@ -70,8 +66,8 @@ describe('Customer Controller', () => {
       expect(saved.status).toBe(201);
     });
 
-    it('PUT on /customers/:id should update the existing customer', (done) => {
-      const customer: UpdateCustomerDto = {
+    it('PUT on /insurers/:id should update the existing insurer', (done) => {
+      const insurer: UpdateInsurerDto = {
         firstName: 'Test',
         lastName: 'Test',
         name: 'TestSoft',
@@ -79,9 +75,9 @@ describe('Customer Controller', () => {
         phone: '832-111-1111',
       };
       controller
-        .updateCustomer(
+        .updateInsurer(
           '1',
-          customer,
+          insurer,
           createMock<Response>({
             status: jest.fn().mockReturnValue({
               send: jest.fn().mockReturnValue({
@@ -96,9 +92,9 @@ describe('Customer Controller', () => {
         });
     });
 
-    it('DELETE on /customers/:id should delete customer', (done) => {
+    it('DELETE on /insurers/:id should delete insurer', (done) => {
       controller
-        .deleteCustomerById(
+        .deleteInsurerById(
           '1',
           createMock<Response>({
             status: jest.fn().mockReturnValue({
@@ -115,14 +111,14 @@ describe('Customer Controller', () => {
     }); */
   });
 
-  describe('Replace CustomerService in provider(useValue: fake object)', () => {
-    let controller: CustomerController;
+  describe('Replace InsurerService in provider(useValue: fake object)', () => {
+    let controller: InsurerController;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
         providers: [
           {
-            provide: CustomerService,
+            provide: InsurerService,
             useValue: {
               findAll: (_keyword?: string, _skip?: number, _limit?: number) =>
                 of<any[]>([
@@ -135,27 +131,27 @@ describe('Customer Controller', () => {
             },
           },
         ],
-        controllers: [CustomerController],
+        controllers: [InsurerController],
       }).compile();
 
-      controller = await module.resolve<CustomerController>(CustomerController);
+      controller = await module.resolve<InsurerController>(InsurerController);
     });
 
-    it('should get all customers(useValue: fake object)', async () => {
-      const result = await controller.getAllCustomers().toPromise();
+    it('should get all insurers(useValue: fake object)', async () => {
+      const result = await controller.getAllInsurers().toPromise();
       expect(result[0]._id).toEqual('testid');
     });
   });
 
-  describe('Replace CustomerService in provider(useValue: jest mocked object)', () => {
-    let controller: CustomerController;
-    let customerService: CustomerService;
+  describe('Replace InsurerService in provider(useValue: jest mocked object)', () => {
+    let controller: InsurerController;
+    let insurerService: InsurerService;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
         providers: [
           {
-            provide: CustomerService,
+            provide: InsurerService,
             useValue: {
               constructor: jest.fn(),
               findAll: jest
@@ -173,32 +169,32 @@ describe('Customer Controller', () => {
             },
           },
         ],
-        controllers: [CustomerController],
+        controllers: [InsurerController],
       }).compile();
 
-      controller = await module.resolve<CustomerController>(CustomerController);
-      customerService = module.get<CustomerService>(CustomerService);
+      controller = await module.resolve<InsurerController>(InsurerController);
+      insurerService = module.get<InsurerService>(InsurerService);
     });
 
-    it('should get all customers(useValue: jest mocking)', async () => {
-      const result = await controller.getAllCustomers('test', 10, 0).toPromise();
+    it('should get all insurers(useValue: jest mocking)', async () => {
+      const result = await controller.getAllInsurers('test', 10, 0).toPromise();
       expect(result[0]._id).toEqual('testid');
-      expect(customerService.findAll).toBeCalled();
-      expect(customerService.findAll).lastCalledWith('test', 0, 10);
+      expect(insurerService.findAll).toBeCalled();
+      expect(insurerService.findAll).lastCalledWith('test', 0, 10);
     });
   });
 
-  describe('Mocking CustomerService using ts-mockito', () => {
-    let controller: CustomerController;
-    const mockedCustomerService: CustomerService = mock(CustomerService);
+  describe('Mocking InsurerService using ts-mockito', () => {
+    let controller: InsurerController;
+    const mockedInsurerService: InsurerService = mock(InsurerService);
 
     beforeEach(async () => {
-      controller = new CustomerController(instance(mockedCustomerService));
+      controller = new InsurerController(instance(mockedInsurerService));
     });
 
-    it('should get all customers(ts-mockito)', async () => {
+    it('should get all insurers(ts-mockito)', async () => {
       when(
-        mockedCustomerService.findAll(anyString(), anyNumber(), anyNumber()),
+        mockedInsurerService.findAll(anyString(), anyNumber(), anyNumber()),
       ).thenReturn(
         of([
           {
@@ -207,13 +203,13 @@ describe('Customer Controller', () => {
             email: 'test@example.com',
             phone: '832-111-1111',
           },
-        ]) as Observable<Customer[]>,
+        ]) as Observable<Insurer[]>,
       );
-      const result = await controller.getAllCustomers('', 10, 0).toPromise();
+      const result = await controller.getAllInsurers('', 10, 0).toPromise();
       expect(result.length).toEqual(1);
       expect(result[0].name).toBe('Test');
       verify(
-        mockedCustomerService.findAll(anyString(), anyNumber(), anyNumber()),
+        mockedInsurerService.findAll(anyString(), anyNumber(), anyNumber()),
       ).once();
     });
   });

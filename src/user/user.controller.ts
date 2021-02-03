@@ -1,4 +1,6 @@
-import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, Post, Put, Query, Res } from '@nestjs/common';
+import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'auth/guard/jwt-auth.guard';
+import { RolesGuard } from 'auth/guard/roles.guard';
 import { User } from 'database/user.model';
 import { Observable } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
@@ -13,6 +15,7 @@ export class UserController {
   constructor(private userService: UserService) { }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   getUser(
     @Param('id', ParseObjectIdPipe) id: string,
     @Query('withSales', new DefaultValuePipe(false)) withSales?: boolean
@@ -21,6 +24,7 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   getAllUsers(
     @Query('withSales', new DefaultValuePipe(false)) withSales?: boolean
   ): Observable<Partial<User>[]> {
@@ -30,7 +34,8 @@ export class UserController {
 
   @Post()
   @HttpCode(201)
-  register(
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  createUser(
     @Body() registerDto: RegisterDto): Observable<User> {
     const username = registerDto.username;
 
@@ -57,6 +62,7 @@ export class UserController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   updateUser(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto): Observable<Partial<User>> {
@@ -73,6 +79,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   deleteUser(
     @Param('id', ParseObjectIdPipe) id: string): Observable<User> {
       return this.userService.findById(id).pipe(

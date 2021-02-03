@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '../database/database.module';
-import { InsuranceDataInitializerService } from './insurance-data-initializer.service';
+import { DatabaseModule } from '../../database/database.module';
+import { CustomerDataInitializerService } from './customer-data-initializer.service';
 import { CustomerController } from './customer.controller';
 import { CustomerService } from './customer.service';
 
 @Module({
   imports: [DatabaseModule],
   controllers: [CustomerController],
-  providers: [CustomerService, InsuranceDataInitializerService],
+  providers: [CustomerService, CustomerDataInitializerService],
 })
 export class CustomerModule{}
 //  implements NestModule {

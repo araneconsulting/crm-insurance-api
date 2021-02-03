@@ -1,11 +1,12 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
-import { Observable } from 'rxjs';
-import { defaultIfEmpty } from 'rxjs/operators';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 export class CreateInsurerDto {
+
   @IsNotEmpty()
   readonly name: string;
+  @IsOptional()
   @IsNotEmpty()
   readonly email: string;
+  @IsOptional()
   @IsNotEmpty()
   readonly phone: string;
   @IsNumber()

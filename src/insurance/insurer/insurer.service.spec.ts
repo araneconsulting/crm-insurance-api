@@ -1,20 +1,21 @@
 import { REQUEST } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilterQuery, Model } from 'mongoose';
-import { CUSTOMER_MODEL } from '../database/database.constants';
-import { Customer } from '../database/customer.model';
-import { CustomerService } from './customer.service';
+import { INSURER_MODEL } from '../../database/database.constants';
+import { Insurer } from '../../database/insurer.model';
+import { InsurerService} from './insurer.service';
 
-describe('CustomerService', () => {
-  let service: CustomerService;
-  let model: Model<Customer>;
+
+describe('InsurerService', () => {
+  let service: InsurerService;
+  let model: Model<Insurer>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CustomerService,
+        InsurerService,
         {
-          provide: CUSTOMER_MODEL,
+          provide: INSURER_MODEL,
           useValue: {
             new: jest.fn(),
             constructor: jest.fn(),
@@ -42,16 +43,16 @@ describe('CustomerService', () => {
       ],
     }).compile();
 
-    service = await module.resolve<CustomerService>(CustomerService);
-    model = module.get<Model<Customer>>(CUSTOMER_MODEL);
+    service = await module.resolve<InsurerService>(InsurerService);
+    model = module.get<Model<Insurer>>(INSURER_MODEL);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('findAll should return all customers', async () => {
-    const customers = [
+  it('findAll should return all insurers', async () => {
+    const insurers = [
       {
         _id: '5ee49c3115a4e75254bb732e',
         isCompany: true,
@@ -77,7 +78,7 @@ describe('CustomerService', () => {
     jest.spyOn(model, 'find').mockReturnValue({
       skip: jest.fn().mockReturnValue({
         limit: jest.fn().mockReturnValue({
-          exec: jest.fn().mockResolvedValueOnce(customers) as any,
+          exec: jest.fn().mockResolvedValueOnce(insurers) as any,
         }),
       }),
     } as any);
@@ -90,13 +91,13 @@ describe('CustomerService', () => {
       .spyOn(model, 'find')
       .mockImplementation(
         (
-          conditions: FilterQuery<Customer>,
-          callback?: (err: any, res: Customer[]) => void,
+          conditions: FilterQuery<Insurer>,
+          callback?: (err: any, res: Insurer[]) => void,
         ) => {
           return {
             skip: jest.fn().mockReturnValue({
               limit: jest.fn().mockReturnValue({
-                exec: jest.fn().mockResolvedValueOnce([customers[0]]),
+                exec: jest.fn().mockResolvedValueOnce([insurers[0]]),
               }),
             }),
           } as any;
@@ -111,7 +112,7 @@ describe('CustomerService', () => {
   });
 
   describe('findByid', () => {
-    it('if exists return one customer', (done) => {
+    it('if exists return one insurer', (done) => {
       const found = {
         _id: '5ee49c3115a4e75254bb732e',
         isCompany: true,
@@ -151,12 +152,15 @@ describe('CustomerService', () => {
     });
   });
 
-  it('should save customer', async () => {
+  it('should save insurer', async () => {
     const toCreated = {
-      isCompany: true,
-      name: 'TestSoft',
-      email: 'test@example.com',
-      phone: '832-111-1111',
+      name: 'Triple-Sured LLC',
+      email: '3sured@example.com',
+      phone: '832-888-5335',
+      liabilityCommission: 0.1,
+      cargoCommission: 0.1,
+      physicalDamageCommission: 0.08,
+      wcGlUmbCommission: 0.1
     };
 
     const toReturned = {
@@ -178,13 +182,15 @@ describe('CustomerService', () => {
   });
 
   describe('update', () => {
-    it('perform update if customer exists', (done) => {
+    it('perform update if insurer exists', (done) => {
       const toUpdated = {
-        _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
-        name: 'TestSoft',
-        email: 'test@example.com',
-        phone: '832-111-1111',
+        name: 'Triple-Sured LLC',
+        email: '3sured@example.com',
+        phone: '832-888-5335',
+        liabilityCommission: 0.1,
+        cargoCommission: 0.1,
+        physicalDamageCommission: 0.08,
+        wcGlUmbCommission: 0.1
       };
 
       jest.spyOn(model, 'findOneAndUpdate').mockReturnValue({
@@ -201,14 +207,16 @@ describe('CustomerService', () => {
       });
     });
 
-    it('throw an NotFoundException if customer not exists', (done) => {
+    it('throw an NotFoundException if insurer not exists', (done) => {
       const toUpdated = {
-        _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
-        name: 'TestSoft',
-        email: 'test@example.com',
-        phone: '832-111-1111',
-      };
+      name: 'Triple-Sured LLC',
+      email: '3sured@example.com',
+      phone: '832-888-5335',
+      liabilityCommission: 0.1,
+      cargoCommission: 0.1,
+      physicalDamageCommission: 0.08,
+      wcGlUmbCommission: 0.1
+    };
       jest.spyOn(model, 'findOneAndUpdate').mockReturnValue({
         exec: jest.fn().mockResolvedValue(null) as any,
       } as any);
@@ -224,13 +232,15 @@ describe('CustomerService', () => {
   });
 
   describe('delete', () => {
-    it('perform delete if customer exists', (done) => {
+    it('perform delete if insurer exists', (done) => {
       const toDeleted = {
-        _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
-        name: 'TestSoft',
-        email: 'test@example.com',
-        phone: '832-111-1111',
+        name: 'Triple-Sured LLC',
+        email: '3sured@example.com',
+        phone: '832-888-5335',
+        liabilityCommission: 0.1,
+        cargoCommission: 0.1,
+        physicalDamageCommission: 0.08,
+        wcGlUmbCommission: 0.1
       };
       jest.spyOn(model, 'findOneAndDelete').mockReturnValue({
         exec: jest.fn().mockResolvedValueOnce(toDeleted),
@@ -246,7 +256,7 @@ describe('CustomerService', () => {
       });
     });
 
-    it('throw an NotFoundException if customer not exists', (done) => {
+    it('throw an NotFoundException if insurer not exists', (done) => {
       jest.spyOn(model, 'findOneAndDelete').mockReturnValue({
         exec: jest.fn().mockResolvedValue(null),
       } as any);
@@ -260,7 +270,7 @@ describe('CustomerService', () => {
     });
   });
 
-  it('should delete all customers', (done) => {
+  it('should delete all insurers', (done) => {
     jest.spyOn(model, 'deleteMany').mockReturnValue({
       exec: jest.fn().mockResolvedValueOnce({
         deletedCount: 1,

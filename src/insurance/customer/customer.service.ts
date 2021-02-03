@@ -4,8 +4,8 @@ import { Customer } from 'database/customer.model';
 import { Model } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
-import { AuthenticatedRequest } from '../auth/interface/authenticated-request.interface';
-import { CUSTOMER_MODEL } from '../database/database.constants';
+import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
+import { CUSTOMER_MODEL } from '../../database/database.constants';
 import { CreateCustomerDto } from './create-customer.dto';
 import { UpdateCustomerDto } from './update-customer.dto';
 

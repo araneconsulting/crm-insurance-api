@@ -94,7 +94,7 @@ export class UserService {
 
   updateUser(id: string, data: UpdateUserDto): Observable<User> {
 
-    const updateQuery = this.userModel.findByIdAndUpdate({ _id: id }, data);
+    const updateQuery = this.userModel.findByIdAndUpdate({ _id: id }, data, {new: true});
     return from(updateQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),

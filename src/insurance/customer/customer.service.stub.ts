@@ -2,8 +2,8 @@ import { of, Observable } from 'rxjs';
 import { CreateCustomerDto } from './create-customer.dto';
 import { UpdateCustomerDto } from './update-customer.dto';
 import { CustomerService } from './customer.service';
-import { Customer } from '../database/customer.model';
-import { Comment } from '../database/comment.model';
+import { Customer } from '../../database/customer.model';
+import { Comment } from '../../database/comment.model';
 
 // To unite the method signature of the mocked CustomerServiceStub and CustomerService,
 // use `Pick<T, key of T>` instead of writing an extra interface.
