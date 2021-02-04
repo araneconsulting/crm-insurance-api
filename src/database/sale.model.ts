@@ -78,8 +78,13 @@ function netProfitGetHook() {
 }
 SaleSchema.virtual('netProfit').get(netProfitGetHook);
 
+SaleSchema.virtual('cargoInsurerDetails', {
+  ref: 'Insurer',
+  localField: '_id',
+  foreignField: 'cargoInsurer',
+});
 
 const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
   conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');
 
-export { Sale, SaleSchema, SaleModel, totalChargeGetHook, sellerBonusGetHook, netProfitGetHook }
+export { Sale, SaleSchema, SaleModel, totalChargeGetHook, sellerBonusGetHook, netProfitGetHook, saleModelFn}

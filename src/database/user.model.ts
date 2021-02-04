@@ -77,7 +77,7 @@ UserSchema.virtual('name').get(nameGetHook);
 UserSchema.virtual('sales', {
   ref: 'Sale',
   localField: '_id',
-  foreignField: 'createdBy',
+  foreignField: 'seller',
 });
 
 const userModelFn: (conn: Connection) => UserModel = (conn: Connection) =>

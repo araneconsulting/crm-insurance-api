@@ -174,9 +174,7 @@ describe('InsurerService', () => {
     expect(data._id).toBe('5ee49c3115a4e75254bb732e');
     expect(model.create).toBeCalledWith({
       ...toCreated,
-      createdBy: {
-        _id: 'dummyId',
-      },
+      createdBy: {_id: 'dummyId',},
     });
     expect(model.create).toBeCalledTimes(1);
   });

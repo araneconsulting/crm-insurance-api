@@ -9,10 +9,12 @@ import { SendgridModule } from './sendgrid/sendgrid.module';
 import { UserModule } from './user/user.module';
 import { LoggerModule } from './logger/logger.module';
 import { InsurerModule } from 'insurance/insurer/insurer.module';
+import { SaleModule } from 'insurance/sale/sale.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ ignoreEnvFile: true }),
+    SaleModule,
     DatabaseModule,
     CustomerModule,
     InsurerModule,
