@@ -24,6 +24,12 @@ interface Sale extends Document<any> {
   readonly chargesPaid: number,
   readonly createdBy?: Partial<User>,
   readonly updatedBy?: Partial<User>,
+  
+  readonly totalCharge: number,
+  readonly sellerBonus: number,
+  readonly grossProfit: number,
+  readonly netProfit: number,
+  readonly amountReceivable: number,
 }
 
 type SaleModel = Model<Sale>;
@@ -45,6 +51,11 @@ const SaleSchema = new Schema<any>(
     permits: SchemaTypes.Number,
     tips: SchemaTypes.Number,
     chargesPaid: SchemaTypes.Number,
+    totalCharge: SchemaTypes.Number,
+    sellerBonus: SchemaTypes.Number,
+    grossProfit: SchemaTypes.Number,
+    netProfit: SchemaTypes.Number,
+    amountReceivable: SchemaTypes.Number,
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
@@ -52,20 +63,45 @@ const SaleSchema = new Schema<any>(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
 
-SaleSchema.virtual('totalCharge').get(function () {
-  const total = this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits + this.tips;
-  return Number(total.toFixed(2));
+SaleSchema.pre('save', function () {
+  this.set({
+    totalCharge: this.calculateTotalCharge(),
+    sellerBonus: this.calculateSellerBonus(),
+    grossProfit: this.calculateGrossProfit(),
+    netProfit: this.calculateNetProfit(),
+    amountReceivable: this.calculateAmountReceivable(),
+  });
 });
 
-SaleSchema.virtual('sellerBonus').get(function () {
-  const bonus = (this.totalCharge * CommisionPercentages.SALE
+SaleSchema.pre('updateOne', function () {
+  this.set({
+    totalCharge: this.calculateTotalCharge(),
+    sellerBonus: this.calculateSellerBonus(),
+    grossProfit: this.calculateGrossProfit(),
+    netProfit: this.calculateNetProfit(),
+    amountReceivable: this.calculateAmountReceivable(),
+  });
+});
+
+SaleSchema.methods.calculateTotalCharge = function () {
+  const total = this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits + this.tips;
+  return Number(total.toFixed(2));
+};
+
+SaleSchema.methods.calculateAmountReceivable = function () {
+  const total = this.calculateTotalCharge() - this.chargesPaid;
+  return Number(total.toFixed(2));
+};
+
+SaleSchema.methods.calculateSellerBonus = function () {
+  const bonus = (this.calculateTotalCharge() * CommisionPercentages.SALE
     + this.fees * CommisionPercentages.FEES
     + this.permits * CommisionPercentages.PERMITS
     + this.tips * CommisionPercentages.TIPS);
-    return Number(bonus.toFixed(2));
-});
+  return Number(bonus.toFixed(2));
+};
 
-SaleSchema.virtual('grossProfit').get(function () {
+SaleSchema.methods.calculateGrossProfit = function () {
   const liabilityCommission = this.liabilityInsurer != null ? this.liabilityInsurer.liabilityCommission : CommisionPercentages.INSURER_DEFAULT;
   const cargoCommission = this.cargoInsurer != null ? this.cargoInsurer.cargoCommission : CommisionPercentages.INSURER_DEFAULT;
   const physicalDamageCommission = this.physicalDamageInsurer != null ? this.physicalDamageInsurer.physicalDamageCommission : CommisionPercentages.INSURER_DEFAULT;
@@ -77,12 +113,12 @@ SaleSchema.virtual('grossProfit').get(function () {
     + this.wcGlUmbCharge * wcGlUmbCommission
     + this.fees + this.permits + this.tips;
 
-    return Number(profit.toFixed(2));
-});
+  return Number(profit.toFixed(2));
+};
 
-SaleSchema.virtual('netProfit').get(function () {
-  return Number((this.grossProfit - this.sellerBonus).toFixed(2));
-});
+SaleSchema.methods.calculateNetProfit = function () {
+  return Number((this.calculateGrossProfit() - this.sellerBonus).toFixed(2));
+};
 
 const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
   conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');

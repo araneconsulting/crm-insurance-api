@@ -79,4 +79,19 @@ export class UpdateSaleDto {
   @IsNumber()
   @IsNotEmpty()
   chargesPaid: number;
+
+  @IsOptional()
+  totalCharge: number;
+  
+  @IsOptional()
+  sellerBonus: number;
+
+  @IsOptional()
+  grossProfit: number;
+
+  @IsOptional()
+  netProfit: number;
+
+  @IsOptional()
+  amountReceivable: number;
 }

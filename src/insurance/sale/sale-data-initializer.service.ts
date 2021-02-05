@@ -34,7 +34,12 @@ export class SaleDataInitializerService
       fees: 230,
       permits: 120,
       tips: 20,
-      chargesPaid: 1400.00
+      chargesPaid: 1400.00,
+      totalCharge: 0,
+      sellerBonus: 0,
+      grossProfit: 0,
+      netProfit: 0,
+      amountReceivable: 0,
     },
     {
       soldAt: "02-20-2020",
@@ -51,7 +56,12 @@ export class SaleDataInitializerService
       fees: 200,
       permits: 100,
       tips: 50,
-      chargesPaid: 1200.00
+      chargesPaid: 1200.00,
+      totalCharge: 0,
+      sellerBonus: 0,
+      grossProfit: 0,
+      netProfit: 0,
+      amountReceivable: 0,
     },
     {
       soldAt: "01-30-2021",
@@ -68,7 +78,12 @@ export class SaleDataInitializerService
       fees: 500,
       permits: 150,
       tips: 30,
-      chargesPaid: 1130.00
+      chargesPaid: 1130.00,
+      totalCharge: 0,
+      sellerBonus: 0,
+      grossProfit: 0,
+      netProfit: 0,
+      amountReceivable: 0,
     },
   ];
 
