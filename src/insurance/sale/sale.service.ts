@@ -41,7 +41,7 @@ export class SaleService {
 
     if (withInsurers) {
       saleQuery.populate("liabilityInsurer");
-      saleQuery.populate("cargoInsurerDetails");
+      saleQuery.populate("cargoInsurer");
       saleQuery.populate("physicalDamageInsurer");
       saleQuery.populate("wcGlUmbInsurer");
     }
@@ -65,7 +65,7 @@ export class SaleService {
 
     if (withInsurers) {
       saleQuery.populate("liabilityInsurer");
-      saleQuery.populate("cargoInsurerDetails");
+      saleQuery.populate("cargoInsurer");
       saleQuery.populate("physicalDamageInsurer");
       saleQuery.populate("wcGlUmbInsurer");
     }
