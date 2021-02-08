@@ -12,6 +12,7 @@ import { CUSTOMER_MODEL } from 'database/database.constants';
 import { Insurer } from 'database/insurer.model';
 import { User } from 'database/user.model';
 import { Observable } from 'rxjs';
+import * as moment from 'moment';
 
 @Injectable()
 export class SaleDataInitializerService
@@ -96,7 +97,6 @@ export class SaleDataInitializerService
 
   async onModuleInit(): Promise<void> {
     console.log('(InsuranceModule) is initialized...');
-    //let customer: Customer = await this.customerModel.find()[0];
 
     await this.saleModel.deleteMany({});
     await this.saleModel.insertMany(this.saleData).then((r) => console.log(r));

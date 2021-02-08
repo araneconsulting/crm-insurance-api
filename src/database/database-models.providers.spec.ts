@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Connection, Model } from 'mongoose';
-import { Comment } from './comment.model';
 import {
   DATABASE_CONNECTION,
   USER_MODEL,

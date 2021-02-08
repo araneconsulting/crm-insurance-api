@@ -31,7 +31,7 @@ export class UserService {
     return from(this.userModel.exists({ email }));
   }
 
-  register(data: RegisterDto): Observable<User> {
+  createUser(data: RegisterDto): Observable<User> {
 
     // Simply here we can send a verification email to the new registered user
     // by calling SendGrid directly.
@@ -67,7 +67,7 @@ export class UserService {
 
     const created = this.userModel.create({
       ...data,
-      roles: [RoleType.USER]
+      //roles: [RoleType.USER]
     });
 
     return from(created);

@@ -1,7 +1,5 @@
 import { Connection, Document, Model, Mongoose, Schema, SchemaType, SchemaTypes } from 'mongoose';
-import { EMPTY, Observable, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
-import { CommisionPercentages } from 'shared/enum/commission-percentages.enum';
+import { CommissionPercentage } from 'shared/enum/commission-percentage.enum';
 import { Customer } from './customer.model';
 import { Insurer } from './insurer.model';
 import { User } from './user.model';
@@ -24,7 +22,7 @@ interface Sale extends Document<any> {
   readonly chargesPaid: number,
   readonly createdBy?: Partial<User>,
   readonly updatedBy?: Partial<User>,
-  
+
   readonly totalCharge: number,
   readonly sellerBonus: number,
   readonly grossProfit: number,
@@ -39,13 +37,13 @@ const SaleSchema = new Schema<any>(
     soldAt: SchemaTypes.Date,
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
-    liabilityInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommisionPercentages.INSURER_DEFAULT, required: false },
+    liabilityInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommissionPercentage.INSURER_DEFAULT, required: false },
     liabilityCharge: SchemaTypes.Number,
-    cargoInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommisionPercentages.INSURER_DEFAULT, required: false },
+    cargoInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommissionPercentage.INSURER_DEFAULT, required: false },
     cargoCharge: SchemaTypes.Number,
-    physicalDamageInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommisionPercentages.INSURER_DEFAULT, required: false },
+    physicalDamageInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommissionPercentage.INSURER_DEFAULT, required: false },
     physicalDamageCharge: SchemaTypes.Number,
-    wcGlUmbInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommisionPercentages.INSURER_DEFAULT, required: false },
+    wcGlUmbInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', default: CommissionPercentage.INSURER_DEFAULT, required: false },
     wcGlUmbCharge: SchemaTypes.Number,
     fees: SchemaTypes.Number,
     permits: SchemaTypes.Number,
@@ -94,18 +92,18 @@ SaleSchema.methods.calculateAmountReceivable = function () {
 };
 
 SaleSchema.methods.calculateSellerBonus = function () {
-  const bonus = (this.calculateTotalCharge() * CommisionPercentages.SALE
-    + this.fees * CommisionPercentages.FEES
-    + this.permits * CommisionPercentages.PERMITS
-    + this.tips * CommisionPercentages.TIPS);
+  const bonus = (this.calculateTotalCharge() * CommissionPercentage.SALE
+    + this.fees * CommissionPercentage.FEES
+    + this.permits * CommissionPercentage.PERMITS
+    + this.tips * CommissionPercentage.TIPS);
   return Number(bonus.toFixed(2));
 };
 
 SaleSchema.methods.calculateGrossProfit = function () {
-  const liabilityCommission = this.liabilityInsurer != null ? this.liabilityInsurer.liabilityCommission : CommisionPercentages.INSURER_DEFAULT;
-  const cargoCommission = this.cargoInsurer != null ? this.cargoInsurer.cargoCommission : CommisionPercentages.INSURER_DEFAULT;
-  const physicalDamageCommission = this.physicalDamageInsurer != null ? this.physicalDamageInsurer.physicalDamageCommission : CommisionPercentages.INSURER_DEFAULT;
-  const wcGlUmbCommission = this.wcGlUmbInsurer != null ? this.wcGlUmbInsurer.wcGlUmbCommission : CommisionPercentages.INSURER_DEFAULT;
+  const liabilityCommission = this.liabilityInsurer != null ? this.liabilityInsurer.liabilityCommission : CommissionPercentage.INSURER_DEFAULT;
+  const cargoCommission = this.cargoInsurer != null ? this.cargoInsurer.cargoCommission : CommissionPercentage.INSURER_DEFAULT;
+  const physicalDamageCommission = this.physicalDamageInsurer != null ? this.physicalDamageInsurer.physicalDamageCommission : CommissionPercentage.INSURER_DEFAULT;
+  const wcGlUmbCommission = this.wcGlUmbInsurer != null ? this.wcGlUmbInsurer.wcGlUmbCommission : CommissionPercentage.INSURER_DEFAULT;
 
   const profit = this.liabilityCharge * liabilityCommission
     + this.cargoCharge * cargoCommission

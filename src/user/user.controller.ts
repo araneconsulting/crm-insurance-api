@@ -52,7 +52,7 @@ export class UserController {
                 throw new ConflictException(`email:${email} exists already`)
               }
               else {
-                return this.userService.register(registerDto);
+                return this.userService.createUser(registerDto);
               }
             })
           );
