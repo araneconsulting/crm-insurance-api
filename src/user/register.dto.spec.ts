@@ -14,7 +14,7 @@ describe('RegisterDto', () => {
       lastName: 'Duran',
       email: 'liuver@gmail.com',
       location: 'MEXICO',
-      position: 'SALES_AGENT',
+      position: "SALES_AGENT",
       baseSalary: 400,
       saleBonusPercentage: 0.01,
     };

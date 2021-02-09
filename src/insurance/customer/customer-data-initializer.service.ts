@@ -16,24 +16,6 @@ export class CustomerDataInitializerService
 
 
   private customerData: CreateCustomerDto[] = [
-    {
-      isCompany: true,
-      name: 'FutureSoft',
-      email: 'aliesky@example.com',
-      phone: '832-555-5555'
-    },
-    {
-      isCompany: true,
-      name: 'World Records',
-      email: 'ernesto@example.com',
-      phone: '832-111-3333'
-    },
-    {
-      isCompany: true,
-      name: 'TED SuperStars',
-      email: 'ernesto@example.com',
-      phone: '832-222-8888'
-    },
   ];
 
   constructor(
@@ -43,8 +25,7 @@ export class CustomerDataInitializerService
 
   async onModuleInit(): Promise<void> {
     console.log('(InsuranceModule) is initialized...');
-    await this.customerModel.deleteMany({});
-    await this.saleModel.deleteMany({});
-    await this.customerModel.insertMany(this.customerData).then((r) => console.log(r));
+    //await this.customerModel.deleteMany({});
+    //await this.customerModel.insertMany(this.customerData).then((r) => console.log(r));
   }
 }

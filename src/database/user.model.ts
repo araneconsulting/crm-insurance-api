@@ -11,6 +11,7 @@ interface User extends Document<any> {
   readonly password: string;
   readonly firstName: string;
   readonly lastName: string;
+  readonly phone: string;
   readonly roles: RoleType[];
   readonly location: LocationType;
   readonly position: PositionType;
@@ -27,16 +28,16 @@ const UserSchema = new Schema<any>(
     email: SchemaTypes.String,
     firstName: { type: SchemaTypes.String, required: false },
     lastName: { type: SchemaTypes.String, required: false },
+    phone: { type: SchemaTypes.String, required: false },
     location: { type: SchemaTypes.String, enum: ['MEXICO', 'USA'], required: true },
-    position: { type: SchemaTypes.String, enum: ['MANAGER', 'SALES_CONSULTANT', 'SALES_AGENT', 'OTHER'], required: true },
+    position: { type: SchemaTypes.String, enum: ['MANAGER', 'SALES_CONSULTANT', 'SALES_AGENT', 'OTHER','SYSTEM_ADMINISTRATOR'], required: true },
     baseSalary: SchemaTypes.Number,
     saleBonusPercentage: SchemaTypes.Number,
     roles: [
       { type: SchemaTypes.String, enum: ['ADMIN', 'USER'], required: false },
     ],
-    // use timestamps option to generate it automaticially.
-    //   createdAt: { type: SchemaTypes.Date, required: false },
-    //   updatedAt: { type: SchemaTypes.Date, required: false },
+    createdAt: { type: SchemaTypes.Date, required: false },
+    updatedAt: { type: SchemaTypes.Date, required: false },
   },
   {
     timestamps: true,

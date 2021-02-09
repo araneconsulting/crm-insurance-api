@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,6 +11,7 @@ export class AuthController {
   constructor(private authService: AuthService) { }
 
   @UseGuards(LocalAuthGuard)
+  @HttpCode(200)
   @Post('login')
   login(@Req() req: AuthenticatedRequest, @Res() res: Response): Observable<Response> {
     return this.authService.login(req.user)

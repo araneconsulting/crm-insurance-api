@@ -12,6 +12,7 @@ export class UpdateSaleDto {
   @IsNotEmpty()
   soldAt: string;
   
+  @IsOptional()
   @IsNotEmpty()
   @IsMongoId()
   customer: Partial<Customer>;

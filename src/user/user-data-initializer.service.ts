@@ -15,40 +15,30 @@ export class UserDataInitializerService
 
   async onModuleInit(): Promise<void> {
     console.log('(UserModule) is initialized...');
+
+    /* 
     await this.userModel.deleteMany({});
-    const user = {
-      username: 'liuver',
-      firstName: 'Liuver',
-      lastName: 'Duran',
-      password: 'password',
-      email: 'liuver@example.com',
-      roles: [RoleType.USER],
-      location: 'MEXICO',
-      position: 'SALES_AGENT',
-      baseSalary: 400,
-      saleBonusPercentage: 0.01,
-    };
 
     const admin = {
       username: 'admin',
-      firstName: 'Edgar',
-      lastName: 'Barzaga',
+      firstName: 'John',
+      lastName: 'Dowd',
       password: 'password',
-      email: 'admin@example.com',
+      email: 'admin@araneconsulting.com',
       roles: [RoleType.ADMIN],
       location: 'USA',
-      position: 'MANAGER',
+      position: 'SYSTEM_ADMINISTRATOR',
       baseSalary: 800,
       saleBonusPercentage: 0.01,
     };
     await Promise.all(
       [
-        this.userModel.create(user),
         this.userModel.create(admin)
       ]
     ).then(
       data => console.log(data)
-    );
+    ); 
+    */
   }
 
 }
