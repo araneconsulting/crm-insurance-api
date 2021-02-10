@@ -31,7 +31,7 @@ import { MongooseModule } from '@nestjs/mongoose';
   imports: [
       //...other modules imports
       // add MongooseModule
-      MongooseModule.forRoot('mongodb://localhost/aranecrm')
+      MongooseModule.forRoot('mongodb://localhost/arane_insurance_crm')
   ],
   //... providers, controllers
 })

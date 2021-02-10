@@ -1,4 +1,4 @@
-import { Document, Schema, SchemaTypes } from 'mongoose';
+import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { User } from './user.model';
 
 interface Customer extends Document<any> {
@@ -9,6 +9,8 @@ interface Customer extends Document<any> {
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
 }
+
+type CustomerModel = Model<Customer>;
 
 const CustomerSchema = new Schema<any>(
   {
@@ -24,4 +26,7 @@ const CustomerSchema = new Schema<any>(
   { timestamps: true },
 );
 
-export { Customer, CustomerSchema }
+const customerModelFn: (conn: Connection) => CustomerModel = (conn: Connection) =>
+  conn.model<Customer, CustomerModel>('Customer', CustomerSchema, 'customer');
+
+export { Customer, CustomerSchema, customerModelFn }

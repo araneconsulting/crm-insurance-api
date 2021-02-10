@@ -10,14 +10,3 @@ import { InsurerService } from './insurer.service';
   providers: [InsurerService, InsurerDataInitializerService],
 })
 export class InsurerModule{}
-//  implements NestModule {
-//   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-//     consumer
-//       .apply(AuthenticationMiddleware)
-//       .forRoutes(
-//         { method: RequestMethod.POST, path: '/insurers' },
-//         { method: RequestMethod.PUT, path: '/insurers/:id' },
-//         { method: RequestMethod.DELETE, path: '/insurers/:id' },
-//       );
-//   }
-// }

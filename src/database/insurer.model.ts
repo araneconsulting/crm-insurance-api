@@ -1,4 +1,4 @@
-import { Document, Schema, SchemaTypes } from 'mongoose';
+import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { User } from './user.model';
 
 interface Insurer extends Document {
@@ -12,6 +12,8 @@ interface Insurer extends Document {
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
 }
+
+type InsurerModel = Model<Insurer>;
 
 const InsurerSchema = new Schema<any>(
   {
@@ -28,4 +30,7 @@ const InsurerSchema = new Schema<any>(
   { timestamps: true },
 );
 
-export { Insurer, InsurerSchema }
+const insurerModelFn: (conn: Connection) => InsurerModel = (conn: Connection) =>
+  conn.model<Insurer, InsurerModel>('Insurer', InsurerSchema, 'insurers');
+
+export { Insurer, InsurerSchema, insurerModelFn}

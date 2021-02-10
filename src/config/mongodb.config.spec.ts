@@ -17,6 +17,6 @@ describe('mongodbConfig', () => {
   });
 
   it('should contains uri key', async () => {
-    expect(config.uri).toBe('mongodb://localhost/aranecrm');
+    expect(config.uri).toBe('mongodb://localhost/arane_insurance_crm');
   });
 });

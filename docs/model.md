@@ -60,7 +60,7 @@ export const databaseProviders = [
   {
     provide: DATABASE_CONNECTION,
     useFactory: (): Promise<typeof mongoose> =>
-      connect('mongodb://localhost/aranecrm', {
+      connect('mongodb://localhost/arane_insurance_crm', {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       }),

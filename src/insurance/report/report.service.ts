@@ -4,7 +4,7 @@ import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Model } from 'mongoose';
+import { Aggregate, Model } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import { CUSTOMER_MODEL, INSURER_MODEL, SALE_MODEL, USER_MODEL } from '../../database/database.constants';
@@ -21,32 +21,74 @@ export class ReportService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  salesReport(dateRangeCode?:string, keyword?: string, skip = 0, limit = 10): Observable<Sale[]> {
+  async salesReport(dateRangeCode?: string) {
+
     const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
-    
-    if (dateRangeCode) {
-      return from(
-        this.saleModel
-          .find({
-            soldAt: {
-              $gte: dates[0],
-              $lte: dates[1],
-            }
-          })
-          .populate('customer')
-          .populate('seller')
-          .populate("liabilityInsurer")
-          .populate("cargoInsurer")
-          .populate("physicalDamageInsurer")
-          .populate("wcGlUmbInsurer")
-          .skip(skip)
-          .limit(limit)
-          .exec(),
-      );
-    } else {
-      return from(this.saleModel.find({}).skip(skip).limit(limit).exec());
-    }
+
+    let filter = !dateRangeCode ? {} : {
+      soldAt: {
+        $gte: dates[0],
+        $lte: dates[1],
+      }
+    };
+
+    return this.saleModel.aggregate([
+
+      { "$match": filter },
+      { "$unwind": "$seller"},
+      {
+        "$lookup": {
+          "from": "users", // <-- collection to join
+          "localField": "seller",
+          "foreignField": "_id",
+          "as": "seller_joined"
+        }
+      },
+      { "$unwind": "$seller_joined"},
+
+      { "$unwind": "$cargoInsurer"},
+      {
+        "$lookup": {
+          "from": "insurer", // <-- collection to join
+          "localField": "cargoInsurer",
+          "foreignField": "_id",
+          "as": "cargoInsurer_joined"
+        }
+      },
+      { "$unwind": "$cargoInsurer_joined"},
+
+      {
+        "$group": {
+          "_id": {
+            "id": "$seller.id",
+            "firstName": "$seller_joined.firstName",
+            "lastName": "$seller_joined.lastName",
+          },
+
+          "liabilityCharge": { "$sum": "$liabilityCharge" },
+          "cargoCharge": { "$sum": "$cargoCharge" },
+          "physicalDamageCharge": { "$sum": "$physicalDamageCharge" },
+          "wcGlUmbCharge": { "$sum": "$wcGlUmbCharge" },
+          "tips": { "$sum": "$tips" },
+          "permits": { "$sum": "$permits" },
+          "fees": { "$sum": "$fees" },
+          "sellerBonus": { "$sum": "$sellerBonus" },
+
+          "totalCharge": { "$sum": "$totalCharge" },
+          "netProfit": { "$sum": "$netProfit" },
+          "grossProfit": { "$sum": "$grossProfit" },
+          "amountReceivable": { "$sum": "$amountReceivable" },
+          "sales": { "$sum": 1 }
+        },
+      },
+
+      /* {
+        "$addFields": {
+          "netProfit": { "$multiply": ["$cargoCharge", "$cargoInsurer_joined.cargoCommission"] },
+        }
+      } */
+    ]);
   }
 
-  
+
 }
