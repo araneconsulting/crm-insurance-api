@@ -34,8 +34,8 @@ export function dateRangeByName(rangeName?: String, format?: String): Array<stri
 
 export function today(format: String): Array<string> {
     return [
-        moment().startOf('day').subtract(1, 'day').format(format ? format : this.DEFAULT_FORMAT),
-        moment().startOf('day').subtract(1, 'day').format(format ? format : this.DEFAULT_FORMAT)
+        moment().startOf('day').format(format ? format : this.DEFAULT_FORMAT),
+        moment().startOf('day').format(format ? format : this.DEFAULT_FORMAT)
     ];
 }
 
@@ -55,14 +55,14 @@ export function weekToDate(format: String): Array<string> {
 
 export function lastWeek(format: String): Array<string> {
     return [
-        moment().startOf('week').format(format ? format : this.DEFAULT_FORMAT),
-        moment().format(format ? format : this.DEFAULT_FORMAT)
+        moment().startOf('week').subtract(1, 'week').format(format ? format : this.DEFAULT_FORMAT),
+        moment().endOf('week').subtract(1, 'week').endOf('week').format(format ? format : this.DEFAULT_FORMAT)
     ];
 }
 
 export function monthToDate(format: String): Array<string> {
     return [
-        moment().startOf('month').subtract(1, 'month').format(format ? format : this.DEFAULT_FORMAT),
+        moment().startOf('month').format(format ? format : this.DEFAULT_FORMAT),
         moment().format(format ? format : this.DEFAULT_FORMAT)
     ];
 }

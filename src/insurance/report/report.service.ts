@@ -4,8 +4,7 @@ import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Aggregate, Model } from 'mongoose';
-import { from, Observable } from 'rxjs';
+import { Model } from 'mongoose';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import { CUSTOMER_MODEL, INSURER_MODEL, SALE_MODEL, USER_MODEL } from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-factory';
@@ -21,21 +20,21 @@ export class ReportService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  async salesReport(dateRangeCode?: string) {
+  async salesReport(dateRangeCode: string="MTD") {
 
     const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
 
-    let filter = !dateRangeCode ? {} : {
-      soldAt: {
-        $gte: dates[0],
-        $lte: dates[1],
-      }
-    };
+    console.log("Fecha 1:"+dates[0]);
+    console.log("Fecha 2:"+dates[1]);
 
     return this.saleModel.aggregate([
-
-      { "$match": filter },
-      { "$unwind": "$seller"},
+      {
+        "$match":
+        {
+          //"soldAt": { "$gte": dates[0], "$lte": dates[1] }
+        }
+      },
+      { "$unwind": "$seller" },
       {
         "$lookup": {
           "from": "users", // <-- collection to join
@@ -44,9 +43,9 @@ export class ReportService {
           "as": "seller_joined"
         }
       },
-      { "$unwind": "$seller_joined"},
+      { "$unwind": "$seller_joined" },
 
-      { "$unwind": "$cargoInsurer"},
+      { "$unwind": "$cargoInsurer" },
       {
         "$lookup": {
           "from": "insurer", // <-- collection to join
@@ -55,7 +54,7 @@ export class ReportService {
           "as": "cargoInsurer_joined"
         }
       },
-      { "$unwind": "$cargoInsurer_joined"},
+      { "$unwind": "$cargoInsurer_joined" },
 
       {
         "$group": {

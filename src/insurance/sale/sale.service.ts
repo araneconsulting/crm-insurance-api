@@ -16,7 +16,7 @@ export class SaleService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  findAll(keyword?: string, skip = 0, limit = 10, withSeller = false, withCustomer = false, withInsurers = false): Observable<Sale[]> {
+  findAll(keyword?: string, skip = 0, limit = 0, withSeller = false, withCustomer = false, withInsurers = false): Observable<Sale[]> {
 
     let saleQuery = (keyword) 
     ? this.saleModel
