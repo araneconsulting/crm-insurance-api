@@ -1,38 +1,55 @@
-import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import { ExecutionContext, Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Sale } from 'database/sale.model';
-import { Model } from 'mongoose';
+import { User } from 'database/user.model';
+import { Model, Mongoose, SchemaTypes } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
+import { RoleType } from 'shared/enum/role-type.enum';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
-import { SALE_MODEL } from '../../database/database.constants';
+import { SALE_MODEL, USER_MODEL } from '../../database/database.constants';
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
+import * as DateFactory from 'shared/util/date-factory';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
+    @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  findAll(keyword?: string, skip = 0, limit = 0, withSeller = false, withCustomer = false, withInsurers = false): Observable<Sale[]> {
+  findAll(
+    user: Partial<User>,
+    //keyword?: string, 
+    skip = 0,
+    limit = 0,
+    withSeller = false,
+    withCustomer = false,
+    withInsurers = false,
+  ): Observable<Sale[]> {
 
-    let saleQuery = (keyword) 
-    ? this.saleModel
-    .find({
-      $or: [{ name: { $regex: '.*' + keyword + '.*' } },
-      { email: { $regex: '.*' + keyword + '.*' } }, ]
-    })
-    .skip(skip)
-    .limit(limit)
-    : this.saleModel.find({}).skip(skip).limit(limit);
+    const userId = user.id;
+    const userRole = user.roles && user.roles[0] ? user.roles[0] : RoleType.USER;
 
-    
+    console.log("user: " + user);
+    console.log("user id: " + userId);
+    console.log("user role: " + userRole);
 
+    let saleQuery = (userRole == RoleType.USER)
+      ? this.saleModel
+        .find(
+          {
+
+          }
+        )
+        .skip(skip)
+        .limit(limit)
+      : this.saleModel.find({}).skip(skip).limit(limit);
 
     if (withSeller) {
-      saleQuery.populate("seller");
+      saleQuery.populate({ path: "seller" });
     }
 
     if (withCustomer) {
@@ -45,10 +62,7 @@ export class SaleService {
       saleQuery.populate("physicalDamageInsurer");
       saleQuery.populate("wcGlUmbInsurer");
     }
-
-    
-      return from(saleQuery.exec());
-    
+    return from(saleQuery.exec());
   }
 
   findById(id: string, withSeller = false, withCustomer = false, withInsurers = false): Observable<Sale> {
@@ -98,7 +112,7 @@ export class SaleService {
       throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
     );
 
-    
+
     // const filter = { _id: id };
     // const update = { ...data, updatedBy: { _id: this.req.user.id } };
     // return from(this.saleModel.findOne(filter).exec()).pipe(

@@ -3,6 +3,7 @@ import {
   Controller,
   DefaultValuePipe,
   Delete,
+  ExecutionContext,
   Get,
   HttpCode,
   Param,
@@ -11,6 +12,7 @@ import {
   Put,
   Query,
   Redirect,
+  Req,
   Res,
   Scope,
   UseGuards
@@ -25,6 +27,8 @@ import { Sale } from '../../database/sale.model';
 import { CreateSaleDto } from './create-sale.dto';
 import { SaleService } from './sale.service';
 import { UpdateSaleDto } from './update-sale.dto';
+import { Request } from 'express';
+import { User } from 'database/user.model';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {
@@ -33,15 +37,16 @@ export class SaleController {
   @Get('')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  getAllSales(
-    @Query('q') keyword?: string,
+  async getAllSales(
+    @Req() req: Request,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
     @Query('withInsurers', new DefaultValuePipe(false)) withInsurers?: boolean,
-  ): Observable<Sale[]> {
-    return this.saleService.findAll(keyword, skip, limit, withSeller, withCustomer, withInsurers);
+  ){
+    const user:Partial<User> = req.user;
+    return await this.saleService.findAll(user, skip, limit, withSeller, withCustomer, withInsurers);
   }
 
   @Get(':id')

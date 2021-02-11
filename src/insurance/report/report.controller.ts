@@ -5,6 +5,7 @@ import {
   HttpCode,
   ParseIntPipe,
   Query,
+  Req,
   Response,
   Scope,
   UseGuards
@@ -16,6 +17,8 @@ import { ReportService } from './report.service';
 import { Sale } from 'database/sale.model';
 import { RoleType } from 'shared/enum/role-type.enum';
 import { HasRoles } from 'auth/guard/has-roles.decorator';
+import { User } from 'database/user.model';
+import { Request } from 'express';
 
 @Controller({ path: 'reports', scope: Scope.REQUEST })
 export class ReportController {
@@ -26,14 +29,20 @@ export class ReportController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.USER, RoleType.ADMIN)
   async getSales(
+    @Req() req: Request,
     @Response() res,
     @Query('date_range') dateRangeCode?: string,
     @Query('q') keyword?: string,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number
   ) {
+
+    const user:Partial<User> = req.user;
+
     const response = {
-      "metrics": await this.reportService.salesReport(dateRangeCode),
+      "metrics": await this.reportService.salesReport(user),
+      "sales": await this.reportService.findAllSales(user),
+
     }
     return res.json(response);
   }

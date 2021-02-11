@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import { CUSTOMER_MODEL, INSURER_MODEL, SALE_MODEL, USER_MODEL } from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-factory';
+import { RoleType } from 'shared/enum/role-type.enum';
 
 
 @Injectable({ scope: Scope.REQUEST })
@@ -20,12 +21,9 @@ export class ReportService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  async salesReport(dateRangeCode: string="MTD") {
+  async salesReport(user: Partial<User>) {
 
-    const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
-
-    console.log("Fecha 1:"+dates[0]);
-    console.log("Fecha 2:"+dates[1]);
+    //const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
 
     return this.saleModel.aggregate([
       {
@@ -40,28 +38,19 @@ export class ReportService {
           "from": "users", // <-- collection to join
           "localField": "seller",
           "foreignField": "_id",
-          "as": "seller_joined"
+          "as": "seller"
         }
       },
-      { "$unwind": "$seller_joined" },
-
-      { "$unwind": "$cargoInsurer" },
+      { "$unwind": "$seller" },
       {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "cargoInsurer",
-          "foreignField": "_id",
-          "as": "cargoInsurer_joined"
-        }
+        "$match": { "seller.email": user.email },
       },
-      { "$unwind": "$cargoInsurer_joined" },
-
       {
         "$group": {
           "_id": {
             "id": "$seller.id",
-            "firstName": "$seller_joined.firstName",
-            "lastName": "$seller_joined.lastName",
+            "firstName": "$seller.firstName",
+            "lastName": "$seller.lastName",
           },
 
           "liabilityCharge": { "$sum": "$liabilityCharge" },
@@ -87,6 +76,118 @@ export class ReportService {
         }
       } */
     ]);
+  }
+
+  async findAllSales(
+    user: Partial<User>,
+    dateRangeCode?: string,
+  ) {
+
+    const userId = user.id;
+    const userRole = user.roles && user.roles[0] ? user.roles[0] : RoleType.USER;
+
+    console.log("user: " + user);
+    console.log("user id: " + userId);
+    console.log("user role: " + userRole);
+
+    const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
+
+    return this.saleModel.aggregate([
+      { $project: { 
+        'soldAt': '$soldAt',
+        'liabilityCharge': '$liabilityCharge',
+        'cargoCharge': '$cargoCharge',
+        'physicalDamageCharge': '$physicalDamageCharge',
+        'wcGlUmbCharge': '$wcGlUmbCharge',
+        'fees': '$fees',
+        'permits': '$permits',
+        'tips': '$tips',
+        'chargesPaid': '$chargesPaid',
+        'totalCharge': '$totalCharge',
+        'sellerBonus': '$sellerBonus',
+        'amountReceivable': '$amountReceivable',
+        'createdBy': '$createdBy',
+        'updatedBy': '$updatedBy',
+        'seller': 1, 
+        'customer': 1,
+        'liabilityInsurer': 1, 
+        'cargoInsurer': 1, 
+        'physicalDamageInsurer': 1, 
+        'wcGlUmbInsurer': 1,
+      } },
+      { "$unwind": "$customer" },
+      {
+        "$lookup": {
+          "from": "customers", // <-- collection to join
+          "localField": "customer",
+          "foreignField": "_id",
+          "as": "customer"
+        }
+      },
+      { "$unwind": "$customer" },
+      { "$unwind": "$seller" },
+      {
+        "$lookup": {
+          "from": "users", // <-- collection to join
+          "localField": "seller",
+          "foreignField": "_id",
+          "as": "seller"
+        }
+      },
+      { "$unwind": "$seller" },
+      {
+        "$match": { "seller.email": user.email },
+      },
+
+      { "$unwind": "$liabilityInsurer" },
+      {
+        "$lookup": {
+          "from": "insurer", // <-- collection to join
+          "localField": "liabilityInsurer",
+          "foreignField": "_id",
+          "as": "liabilityInsurer"
+        }
+      },
+      { "$unwind": "$liabilityInsurer" },
+ 
+      { "$unwind": "$cargoInsurer" },
+      {
+        "$lookup": {
+          "from": "insurer", // <-- collection to join
+          "localField": "cargoInsurer",
+          "foreignField": "_id",
+          "as": "cargoInsurer"
+        }
+      },
+      { "$unwind": "$cargoInsurer" },
+
+      { "$unwind": "$physicalDamageInsurer" },
+      {
+        "$lookup": {
+          "from": "insurer", // <-- collection to join
+          "localField": "physicalDamageInsurer",
+          "foreignField": "_id",
+          "as": "physicalDamageInsurer"
+        }
+      },
+      { "$unwind": "$physicalDamageInsurer" },
+
+      { "$unwind": "$wcGlUmbInsurer" },
+      {
+        "$lookup": {
+          "from": "insurer", // <-- collection to join
+          "localField": "wcGlUmbInsurer",
+          "foreignField": "_id",
+          "as": "wcGlUmbInsurer"
+        }
+      },
+      { "$unwind": "$wcGlUmbInsurer" },
+
+      
+
+    ]);
+
+
   }
 
 

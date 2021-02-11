@@ -27,22 +27,5 @@ describe('UserController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('getUser', async () => {
-    jest.spyOn(service, "findById")
-      .mockImplementationOnce((id: string, withPosts: boolean) => (of({
-        username: 'admin',
-        password: 'mysecret',
-        email: 'admin@araneconsulting.com',
-        firstName: "John",
-        lastName: "Dowd",
-        location: 'MEXICO',
-        position: 'SYSTEM_ADMINISTRATOR',
-        baseSalary: 800,
-        saleBonusPercentage: 0.01,
-      } as any)));
-    const user = await controller.getUser("id", false).toPromise();
-    expect(user.firstName).toBe("John");
-    expect(user.lastName).toBe("Dowd");
-    expect(service.findById).toBeCalledWith("id", false);
-  });
+  
 });

@@ -18,7 +18,6 @@ export class AuthController {
       .pipe(
         map(token => {
           return res
-            .header('Authorization', 'Bearer ' + token.access_token)
             .json(token)
             .send()
         })
