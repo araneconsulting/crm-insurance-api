@@ -16,7 +16,7 @@ export class InsurerService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  findAll(keyword?: string, skip = 0, limit = 10): Observable<Insurer[]> {
+  findAll(keyword?: string, skip = 0, limit = 0): Observable<Insurer[]> {
     if (keyword) {
       return from(
         this.insurerModel

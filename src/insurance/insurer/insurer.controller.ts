@@ -35,7 +35,7 @@ export class InsurerController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   getAllInsurers(
     @Query('q') keyword?: string,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
   ): Observable<Insurer[]> {
     return this.insurerService.findAll(keyword, skip, limit);

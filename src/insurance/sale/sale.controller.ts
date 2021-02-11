@@ -35,7 +35,7 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   getAllSales(
     @Query('q') keyword?: string,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,

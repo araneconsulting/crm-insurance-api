@@ -93,7 +93,7 @@ Change the content to the following:
 export class PostService {
   constructor(@InjectModel('posts') private postModel: Model<Post>) {}
 
-  findAll(keyword?: string, skip = 0, limit = 10): Observable<Post[]> {
+  findAll(keyword?: string, skip = 0, limit = 0): Observable<Post[]> {
     if (keyword) {
       return from(
         this.postModel
@@ -170,7 +170,7 @@ export class PostController {
   @Get('')
   getAllPosts(
     @Query('q') keyword?: string,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
   ): Observable<BlogPost[]> {
     return this.postService.findAll(keyword, skip, limit);

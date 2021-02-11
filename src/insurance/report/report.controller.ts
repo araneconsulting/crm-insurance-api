@@ -29,7 +29,7 @@ export class ReportController {
     @Response() res,
     @Query('date_range') dateRangeCode?: string,
     @Query('q') keyword?: string,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number
   ) {
     const response = {

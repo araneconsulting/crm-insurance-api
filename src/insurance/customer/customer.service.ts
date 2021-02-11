@@ -16,7 +16,7 @@ export class CustomerService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  findAll(keyword?: string, skip = 0, limit = 10): Observable<Customer[]> {
+  findAll(keyword?: string, skip = 0, limit = 0): Observable<Customer[]> {
     if (keyword) {
       return from(
         this.customerModel
