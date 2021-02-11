@@ -33,7 +33,7 @@ export class ReportController {
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number
   ) {
     const response = {
-      "stats": await this.reportService.salesReport(dateRangeCode),
+      "metrics": await this.reportService.salesReport(dateRangeCode),
     }
     return res.json(response);
   }
