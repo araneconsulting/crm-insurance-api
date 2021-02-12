@@ -66,9 +66,10 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.USER, RoleType.ADMIN)
   createSale(
+    @Req() req,
     @Body() sale: CreateSaleDto
   ): Observable<Sale> {
-    return from(this.saleService.save(sale));
+    return from(this.saleService.save(sale, req.user));
   }
 
   @Put(':id')
@@ -76,11 +77,12 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.USER, RoleType.ADMIN)
   updateSale(
+    @Req() req,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() sale: UpdateSaleDto,
     
   ): Observable<Sale> {
-    return from(this.saleService.update(id, sale));
+    return from(this.saleService.update(id, sale, req.user));
   }
 
   @Delete(':id')

@@ -90,15 +90,31 @@ export class SaleService {
     );
   }
 
-  save(data: CreateSaleDto): Observable<Sale> {
-    //console.log('req.user:'+JSON.stringify(this.req.user));
+  save(data: CreateSaleDto, user: Partial<User>): Observable<Sale> {
+    if (user.roles[0] == 'USER') {
+      data.seller = user.id;
+    } else if (user.roles[0] == 'ADMIN') {
+      if (!data.seller) {
+        data.seller = user.id;
+      }
+    }
     const createSale = this.saleModel.create({
       ...data
     });
+
     return from(createSale);
   }
 
-  update(id: string, data: UpdateSaleDto): Observable<Sale> {
+  update(id: string, data: UpdateSaleDto, user: Partial<User>): Observable<Sale> {
+
+    if (user.roles[0] == 'USER') {
+      data.seller = user.id;
+    } else if (user.roles[0] == 'ADMIN') {
+      if (!data.seller) {
+        data.seller = user.id;
+      }
+    }
+
     return from(
       this.saleModel
         .findOneAndUpdate(
