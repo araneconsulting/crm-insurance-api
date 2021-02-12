@@ -1,4 +1,6 @@
 import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+
+export const DEFAULT_COMMISSION: number = -1;
 export class CreateInsurerDto {
 
   @IsNotEmpty()
@@ -10,11 +12,11 @@ export class CreateInsurerDto {
   @IsNotEmpty()
   readonly phone: string;
   @IsNumber()
-  readonly liabilityCommission: number;
+  readonly liabilityCommission: number = DEFAULT_COMMISSION;
   @IsNumber()
-  readonly cargoCommission: number;
+  readonly cargoCommission: number = DEFAULT_COMMISSION;
   @IsNumber()
-  readonly physicalDamageCommission: number;
+  readonly physicalDamageCommission: number = DEFAULT_COMMISSION;
   @IsNumber()
-  readonly wcGlUmbCommission: number;
+  readonly wcGlUmbCommission: number = DEFAULT_COMMISSION;
 }
