@@ -31,7 +31,7 @@ export class ReportController {
   async getSales(
     @Req() req: Request,
     @Response() res,
-    @Query('date_range') dateRangeCode?: string,
+    @Query('date_range') dateRange?: string,
     @Query('q') keyword?: string,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number
@@ -40,8 +40,8 @@ export class ReportController {
     const user:Partial<User> = req.user;
 
     const response = {
-      "metrics": await this.reportService.salesReport(user),
-      "sales": await this.reportService.findAllSales(user),
+      "metrics": await this.reportService.salesReport(user, dateRange),
+      "sales": await this.reportService.findAllSales(user, dateRange),
 
     }
     return res.json(response);

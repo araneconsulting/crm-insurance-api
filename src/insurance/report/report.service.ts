@@ -21,300 +21,302 @@ export class ReportService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  async salesReport(user: Partial<User>) {
+  async salesReport(user: Partial<User>, dateRange?: String) {
 
-    //const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
+    const dates: string[] = DateFactory.dateRangeByName(dateRange);
 
-    if (user.roles[0]=='USER'){
+    let dateRangeExpression = dateRange
+      ? { $gte: new Date(dates[0]), $lte: new Date(dates[1]) }
+      : { $lte: new Date() }
 
-    return this.saleModel.aggregate([
-      { "$unwind": "$seller" },
-      {
-        "$lookup": {
-          "from": "users", // <-- collection to join
-          "localField": "seller",
-          "foreignField": "_id",
-          "as": "seller"
-        }
-      },
-      { "$unwind": "$seller" },
-      {
-        "$match": { "seller.email": user.email },
-      },
-      {
-        "$group": {
-          "_id": {
-            "id": "$seller.id",
-            "firstName": "$seller.firstName",
-            "lastName": "$seller.lastName",
-          },
 
-          "liabilityCharge": { "$sum": "$liabilityCharge" },
-          "cargoCharge": { "$sum": "$cargoCharge" },
-          "physicalDamageCharge": { "$sum": "$physicalDamageCharge" },
-          "wcGlUmbCharge": { "$sum": "$wcGlUmbCharge" },
-          "tips": { "$sum": "$tips" },
-          "permits": { "$sum": "$permits" },
-          "fees": { "$sum": "$fees" },
-          "sellerBonus": { "$sum": "$sellerBonus" },
+    if (user.roles[0] == 'USER') {
 
-          "totalCharge": { "$sum": "$totalCharge" },
-          "netProfit": { "$sum": "$netProfit" },
-          "grossProfit": { "$sum": "$grossProfit" },
-          "amountReceivable": { "$sum": "$amountReceivable" },
-          "sales": { "$sum": 1 }
+      return this.saleModel.aggregate([
+        { "$match": { "soldAt": dateRangeExpression } },
+        { "$unwind": "$seller" },
+        {
+          "$lookup": {
+            "from": "users", // <-- collection to join
+            "localField": "seller",
+            "foreignField": "_id",
+            "as": "seller"
+          }
         },
-      },
-
-      /* {
-        "$addFields": {
-          "netProfit": { "$multiply": ["$cargoCharge", "$cargoInsurer_joined.cargoCommission"] },
-        }
-      } */
-    ]);
-  } else {
-    return this.saleModel.aggregate([
-      { "$unwind": "$seller" },
-      {
-        "$lookup": {
-          "from": "users", // <-- collection to join
-          "localField": "seller",
-          "foreignField": "_id",
-          "as": "seller"
-        }
-      },
-      { "$unwind": "$seller" },
-      {
-        "$group": {
-          "_id": {
-            "id": "$seller.id",
-            "firstName": "$seller.firstName",
-            "lastName": "$seller.lastName",
-          },
-
-          "liabilityCharge": { "$sum": "$liabilityCharge" },
-          "cargoCharge": { "$sum": "$cargoCharge" },
-          "physicalDamageCharge": { "$sum": "$physicalDamageCharge" },
-          "wcGlUmbCharge": { "$sum": "$wcGlUmbCharge" },
-          "tips": { "$sum": "$tips" },
-          "permits": { "$sum": "$permits" },
-          "fees": { "$sum": "$fees" },
-          "sellerBonus": { "$sum": "$sellerBonus" },
-
-          "totalCharge": { "$sum": "$totalCharge" },
-          "netProfit": { "$sum": "$netProfit" },
-          "grossProfit": { "$sum": "$grossProfit" },
-          "amountReceivable": { "$sum": "$amountReceivable" },
-          "sales": { "$sum": 1 }
+        { "$unwind": "$seller" },
+        {
+          "$match": { "seller.email": user.email },
         },
-      },
-    ]);
-  }
+        {
+          "$group": {
+            "_id": {
+              "id": "$seller.id",
+              "firstName": "$seller.firstName",
+              "lastName": "$seller.lastName",
+            },
+
+            "liabilityCharge": { "$sum": "$liabilityCharge" },
+            "cargoCharge": { "$sum": "$cargoCharge" },
+            "physicalDamageCharge": { "$sum": "$physicalDamageCharge" },
+            "wcGlUmbCharge": { "$sum": "$wcGlUmbCharge" },
+            "tips": { "$sum": "$tips" },
+            "permits": { "$sum": "$permits" },
+            "fees": { "$sum": "$fees" },
+            "sellerBonus": { "$sum": "$sellerBonus" },
+
+            "totalCharge": { "$sum": "$totalCharge" },
+            "netProfit": { "$sum": "$netProfit" },
+            "grossProfit": { "$sum": "$grossProfit" },
+            "amountReceivable": { "$sum": "$amountReceivable" },
+            "sales": { "$sum": 1 }
+          },
+        },
+
+        /* {
+          "$addFields": {
+            "netProfit": { "$multiply": ["$cargoCharge", "$cargoInsurer_joined.cargoCommission"] },
+          }
+        } */
+      ]);
+    } else {
+      return this.saleModel.aggregate([
+        { "$match": { "soldAt": dateRangeExpression } },
+        { "$unwind": "$seller" },
+        {
+          "$lookup": {
+            "from": "users", // <-- collection to join
+            "localField": "seller",
+            "foreignField": "_id",
+            "as": "seller"
+          }
+        },
+        { "$unwind": "$seller" },
+        {
+          "$group": {
+            "_id": null,
+
+            "liabilityCharge": { "$sum": "$liabilityCharge" },
+            "cargoCharge": { "$sum": "$cargoCharge" },
+            "physicalDamageCharge": { "$sum": "$physicalDamageCharge" },
+            "wcGlUmbCharge": { "$sum": "$wcGlUmbCharge" },
+            "tips": { "$sum": "$tips" },
+            "permits": { "$sum": "$permits" },
+            "fees": { "$sum": "$fees" },
+            "sellerBonus": { "$sum": "$sellerBonus" },
+
+            "totalCharge": { "$sum": "$totalCharge" },
+            "netProfit": { "$sum": "$netProfit" },
+            "grossProfit": { "$sum": "$grossProfit" },
+            "amountReceivable": { "$sum": "$amountReceivable" },
+            "sales": { "$sum": 1 }
+          },
+        },
+      ]);
+    }
   }
 
   async findAllSales(
     user: Partial<User>,
-    dateRangeCode?: string,
+    dateRange?: string,
   ) {
 
     const userId = user.id;
     const userRole = user.roles && user.roles[0] ? user.roles[0] : RoleType.USER;
 
-    console.log("user: " + user);
-    console.log("user id: " + userId);
-    console.log("user role: " + userRole);
+    const dates: string[] = DateFactory.dateRangeByName(dateRange);
 
-    const dates: string[] = DateFactory.dateRangeByName(dateRangeCode);
+    let dateRangeExpression = dateRange
+      ? { $gte: new Date(dates[0]), $lte: new Date(dates[1]) }
+      : { $lte: new Date() }
 
-    console.log('ROLE: '+ user.roles[0]);
+    if (user.roles[0] == 'USER') {
+      return this.saleModel.aggregate([
+        { "$match": { "soldAt": dateRangeExpression } },
+        {
+          $project: {
+            'soldAt': '$soldAt',
+            'liabilityCharge': '$liabilityCharge',
+            'cargoCharge': '$cargoCharge',
+            'physicalDamageCharge': '$physicalDamageCharge',
+            'wcGlUmbCharge': '$wcGlUmbCharge',
+            'fees': '$fees',
+            'permits': '$permits',
+            'tips': '$tips',
+            'chargesPaid': '$chargesPaid',
+            'totalCharge': '$totalCharge',
+            'sellerBonus': '$sellerBonus',
+            'amountReceivable': '$amountReceivable',
+            'createdBy': '$createdBy',
+            'updatedBy': '$updatedBy',
+            'seller': 1,
+            'customer': 1,
+            'liabilityInsurer': 1,
+            'cargoInsurer': 1,
+            'physicalDamageInsurer': 1,
+            'wcGlUmbInsurer': 1,
+          }
+        },
+        { "$unwind": "$customer" },
+        {
+          "$lookup": {
+            "from": "customers", // <-- collection to join
+            "localField": "customer",
+            "foreignField": "_id",
+            "as": "customer"
+          }
+        },
+        { "$unwind": "$customer" },
+        { "$unwind": "$seller" },
+        {
+          "$lookup": {
+            "from": "users", // <-- collection to join
+            "localField": "seller",
+            "foreignField": "_id",
+            "as": "seller"
+          }
+        },
+        { "$unwind": "$seller" },
+        {
+          "$match": { "seller.email": user.email },
+        },
 
-    if (user.roles[0]=='USER')
-    {
-    return this.saleModel.aggregate([
-      {
-        $project: {
-          'soldAt': '$soldAt',
-          'liabilityCharge': '$liabilityCharge',
-          'cargoCharge': '$cargoCharge',
-          'physicalDamageCharge': '$physicalDamageCharge',
-          'wcGlUmbCharge': '$wcGlUmbCharge',
-          'fees': '$fees',
-          'permits': '$permits',
-          'tips': '$tips',
-          'chargesPaid': '$chargesPaid',
-          'totalCharge': '$totalCharge',
-          'sellerBonus': '$sellerBonus',
-          'amountReceivable': '$amountReceivable',
-          'createdBy': '$createdBy',
-          'updatedBy': '$updatedBy',
-          'seller': 1,
-          'customer': 1,
-          'liabilityInsurer': 1,
-          'cargoInsurer': 1,
-          'physicalDamageInsurer': 1,
-          'wcGlUmbInsurer': 1,
-        }
-      },
-      { "$unwind": "$customer" },
-      {
-        "$lookup": {
-          "from": "customers", // <-- collection to join
-          "localField": "customer",
-          "foreignField": "_id",
-          "as": "customer"
-        }
-      },
-      { "$unwind": "$customer" },
-      { "$unwind": "$seller" },
-      {
-        "$lookup": {
-          "from": "users", // <-- collection to join
-          "localField": "seller",
-          "foreignField": "_id",
-          "as": "seller"
-        }
-      },
-      { "$unwind": "$seller" },
-      {
-        "$match": { "seller.email": user.email },
-      },
+        { "$unwind": "$liabilityInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "liabilityInsurer",
+            "foreignField": "_id",
+            "as": "liabilityInsurer"
+          }
+        },
+        { "$unwind": "$liabilityInsurer" },
 
-      { "$unwind": "$liabilityInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "liabilityInsurer",
-          "foreignField": "_id",
-          "as": "liabilityInsurer"
-        }
-      },
-      { "$unwind": "$liabilityInsurer" },
+        { "$unwind": "$cargoInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "cargoInsurer",
+            "foreignField": "_id",
+            "as": "cargoInsurer"
+          }
+        },
+        { "$unwind": "$cargoInsurer" },
 
-      { "$unwind": "$cargoInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "cargoInsurer",
-          "foreignField": "_id",
-          "as": "cargoInsurer"
-        }
-      },
-      { "$unwind": "$cargoInsurer" },
+        { "$unwind": "$physicalDamageInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "physicalDamageInsurer",
+            "foreignField": "_id",
+            "as": "physicalDamageInsurer"
+          }
+        },
+        { "$unwind": "$physicalDamageInsurer" },
 
-      { "$unwind": "$physicalDamageInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "physicalDamageInsurer",
-          "foreignField": "_id",
-          "as": "physicalDamageInsurer"
-        }
-      },
-      { "$unwind": "$physicalDamageInsurer" },
+        { "$unwind": "$wcGlUmbInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "wcGlUmbInsurer",
+            "foreignField": "_id",
+            "as": "wcGlUmbInsurer"
+          }
+        },
+        { "$unwind": "$wcGlUmbInsurer" },
+      ]);
+    } else {
+      return this.saleModel.aggregate([
+        { "$match": { "soldAt": dateRangeExpression } },
+        {
+          $project: {
+            'soldAt': '$soldAt',
+            'liabilityCharge': '$liabilityCharge',
+            'cargoCharge': '$cargoCharge',
+            'physicalDamageCharge': '$physicalDamageCharge',
+            'wcGlUmbCharge': '$wcGlUmbCharge',
+            'fees': '$fees',
+            'permits': '$permits',
+            'tips': '$tips',
+            'chargesPaid': '$chargesPaid',
+            'totalCharge': '$totalCharge',
+            'sellerBonus': '$sellerBonus',
+            'amountReceivable': '$amountReceivable',
+            'createdBy': '$createdBy',
+            'updatedBy': '$updatedBy',
+            'seller': 1,
+            'customer': 1,
+            'liabilityInsurer': 1,
+            'cargoInsurer': 1,
+            'physicalDamageInsurer': 1,
+            'wcGlUmbInsurer': 1,
+          }
+        },
+        { "$unwind": "$customer" },
+        {
+          "$lookup": {
+            "from": "customers", // <-- collection to join
+            "localField": "customer",
+            "foreignField": "_id",
+            "as": "customer"
+          }
+        },
+        { "$unwind": "$customer" },
+        { "$unwind": "$seller" },
+        {
+          "$lookup": {
+            "from": "users", // <-- collection to join
+            "localField": "seller",
+            "foreignField": "_id",
+            "as": "seller"
+          }
+        },
+        { "$unwind": "$seller" },
 
-      { "$unwind": "$wcGlUmbInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "wcGlUmbInsurer",
-          "foreignField": "_id",
-          "as": "wcGlUmbInsurer"
-        }
-      },
-      { "$unwind": "$wcGlUmbInsurer" },
-    ]);
-  } else {
-    return this.saleModel.aggregate([
-      {
-        $project: {
-          'soldAt': '$soldAt',
-          'liabilityCharge': '$liabilityCharge',
-          'cargoCharge': '$cargoCharge',
-          'physicalDamageCharge': '$physicalDamageCharge',
-          'wcGlUmbCharge': '$wcGlUmbCharge',
-          'fees': '$fees',
-          'permits': '$permits',
-          'tips': '$tips',
-          'chargesPaid': '$chargesPaid',
-          'totalCharge': '$totalCharge',
-          'sellerBonus': '$sellerBonus',
-          'amountReceivable': '$amountReceivable',
-          'createdBy': '$createdBy',
-          'updatedBy': '$updatedBy',
-          'seller': 1,
-          'customer': 1,
-          'liabilityInsurer': 1,
-          'cargoInsurer': 1,
-          'physicalDamageInsurer': 1,
-          'wcGlUmbInsurer': 1,
-        }
-      },
-      { "$unwind": "$customer" },
-      {
-        "$lookup": {
-          "from": "customers", // <-- collection to join
-          "localField": "customer",
-          "foreignField": "_id",
-          "as": "customer"
-        }
-      },
-      { "$unwind": "$customer" },
-      { "$unwind": "$seller" },
-      {
-        "$lookup": {
-          "from": "users", // <-- collection to join
-          "localField": "seller",
-          "foreignField": "_id",
-          "as": "seller"
-        }
-      },
-      { "$unwind": "$seller" },
+        { "$unwind": "$liabilityInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "liabilityInsurer",
+            "foreignField": "_id",
+            "as": "liabilityInsurer"
+          }
+        },
+        { "$unwind": "$liabilityInsurer" },
 
-      { "$unwind": "$liabilityInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "liabilityInsurer",
-          "foreignField": "_id",
-          "as": "liabilityInsurer"
-        }
-      },
-      { "$unwind": "$liabilityInsurer" },
+        { "$unwind": "$cargoInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "cargoInsurer",
+            "foreignField": "_id",
+            "as": "cargoInsurer"
+          }
+        },
+        { "$unwind": "$cargoInsurer" },
 
-      { "$unwind": "$cargoInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "cargoInsurer",
-          "foreignField": "_id",
-          "as": "cargoInsurer"
-        }
-      },
-      { "$unwind": "$cargoInsurer" },
+        { "$unwind": "$physicalDamageInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "physicalDamageInsurer",
+            "foreignField": "_id",
+            "as": "physicalDamageInsurer"
+          }
+        },
+        { "$unwind": "$physicalDamageInsurer" },
 
-      { "$unwind": "$physicalDamageInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "physicalDamageInsurer",
-          "foreignField": "_id",
-          "as": "physicalDamageInsurer"
-        }
-      },
-      { "$unwind": "$physicalDamageInsurer" },
-
-      { "$unwind": "$wcGlUmbInsurer" },
-      {
-        "$lookup": {
-          "from": "insurer", // <-- collection to join
-          "localField": "wcGlUmbInsurer",
-          "foreignField": "_id",
-          "as": "wcGlUmbInsurer"
-        }
-      },
-      { "$unwind": "$wcGlUmbInsurer" },
-    ]);
-  }
+        { "$unwind": "$wcGlUmbInsurer" },
+        {
+          "$lookup": {
+            "from": "insurer", // <-- collection to join
+            "localField": "wcGlUmbInsurer",
+            "foreignField": "_id",
+            "as": "wcGlUmbInsurer"
+          }
+        },
+        { "$unwind": "$wcGlUmbInsurer" },
+      ]);
+    }
 
   }
 
