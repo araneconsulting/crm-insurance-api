@@ -23,18 +23,18 @@ type UserModel = Model<User>;
 
 const UserSchema = new Schema<any>(
   {
-    username: SchemaTypes.String,
+    username: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
     password: SchemaTypes.String,
-    email: SchemaTypes.String,
+    email: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
     firstName: { type: SchemaTypes.String, required: false },
     lastName: { type: SchemaTypes.String, required: false },
-    phone: { type: SchemaTypes.String, required: false },
-    location: { type: SchemaTypes.String, enum: ['MEXICO', 'USA'], required: true },
-    position: { type: SchemaTypes.String, enum: ['MANAGER', 'SALES_CONSULTANT', 'SALES_AGENT', 'OTHER','SYSTEM_ADMINISTRATOR'], required: true },
+    phone: { type : SchemaTypes.String , unique : true, required : false, dropDups: true },
+    location: { type: SchemaTypes.String, required: true },
+    position: { type: SchemaTypes.String, required: true },
     baseSalary: SchemaTypes.Number,
     saleBonusPercentage: SchemaTypes.Number,
     roles: [
-      { type: SchemaTypes.String, enum: ['ADMIN', 'USER'], required: false },
+      { type: SchemaTypes.String, required: false },
     ],
     createdAt: { type: SchemaTypes.Date, required: false },
     updatedAt: { type: SchemaTypes.Date, required: false },
