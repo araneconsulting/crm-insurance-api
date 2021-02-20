@@ -1,9 +1,9 @@
 import * as moment from 'moment';
 import { DateRange } from 'shared/enum/date-range.enum';
 
-export const DEFAULT_FORMAT: String = 'MM-DD-YYYY';
+export const DEFAULT_FORMAT = 'MM-DD-YYYY';
 
-export function dateRangeByName(rangeName?: String, format?: String): Array<string> {
+export function dateRangeByName(rangeName?: string, format?: string): any {
 
     switch (rangeName) {
 
@@ -32,75 +32,75 @@ export function dateRangeByName(rangeName?: String, format?: String): Array<stri
 
 }
 
-export function today(format: String): Array<string> {
-    return [
-        moment().startOf('day').format(format ? format : this.DEFAULT_FORMAT),
-        moment().startOf('day').format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function today(format: string): any {
+    return {
+        "start": moment().startOf('day').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().startOf('day').format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function yesterday(format: String): Array<string> {
-    return [
-        moment().startOf('day').subtract(1, 'day').format(format ? format : this.DEFAULT_FORMAT),
-        moment().startOf('day').subtract(1, 'day').format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function yesterday(format: string): any {
+    return {
+        "start": moment().startOf('day').subtract(1, 'day').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().startOf('day').subtract(1, 'day').format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function weekToDate(format: String): Array<string> {
-    return [
-        moment().startOf('week').format(format ? format : this.DEFAULT_FORMAT),
-        moment().format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function weekToDate(format: string): any {
+    return {
+        "start": moment().startOf('week').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function lastWeek(format: String): Array<string> {
-    return [
-        moment().startOf('week').subtract(1, 'week').format(format ? format : this.DEFAULT_FORMAT),
-        moment().endOf('week').subtract(1, 'week').endOf('week').format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function lastWeek(format: string): any {
+    return {
+        "start": moment().startOf('week').subtract(1, 'week').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().endOf('week').subtract(1, 'week').endOf('week').format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function monthToDate(format: String): Array<string> {
-    return [
-        moment().startOf('month').format(format ? format : this.DEFAULT_FORMAT),
-        moment().format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function monthToDate(format: string): any {
+    return {
+        "start": moment().startOf('month').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function lastMonth(format: String): Array<string> {
-    return [
-        moment().startOf('month').subtract(1, 'month').format(format ? format : this.DEFAULT_FORMAT),
-        moment().endOf('month').subtract(1, 'month').endOf('month').format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function lastMonth(format: string): any {
+    return {
+        "start": moment().startOf('month').subtract(1, 'month').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().endOf('month').subtract(1, 'month').endOf('month').format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function quarterToDate(format: String): Array<string> {
-    return [
-        moment().startOf('quarter').format(format ? format : this.DEFAULT_FORMAT),
-        moment().format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function quarterToDate(format: string): any {
+    return {
+        "start": moment().startOf('quarter').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
 
-export function lastQuarter(format: String): Array<string> {
-    return [
-        moment().startOf('quarter').subtract(1, 'quarter').format(format ? format : this.DEFAULT_FORMAT),
-        moment().endOf('quarter').subtract(1, 'quarter').endOf('quarter').format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function lastQuarter(format: string): any {
+    return {
+        "start": moment().startOf('quarter').subtract(1, 'quarter').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().endOf('quarter').subtract(1, 'quarter').endOf('quarter').format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function yearToDate(format: String): Array<string> {
-    return [
-        moment().startOf('year').format(format ? format : this.DEFAULT_FORMAT),
-        moment().format(format ? format : this.DEFAULT_FORMAT)
-    ];
+export function yearToDate(format: string): any {
+    return {
+        "start": moment().startOf('year').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().format(format ? format : this.DEFAULT_FORMAT)
+    };
 }
 
-export function lastYear(format: String): Array<string> {
-    return [
-        moment().startOf('year').subtract(1, 'year').format(format ? format : this.DEFAULT_FORMAT),
-        moment().endOf('year').subtract(1, 'year').endOf('year').format(format ? format : this.DEFAULT_FORMAT),
-    ];
+export function lastYear(format: string): any {
+    return {
+        "start": moment().startOf('year').subtract(1, 'year').format(format ? format : this.DEFAULT_FORMAT),
+        "end": moment().endOf('year').subtract(1, 'year').endOf('year').format(format ? format : this.DEFAULT_FORMAT),
+    };
 }
 
 export function printAllDateRanges() {

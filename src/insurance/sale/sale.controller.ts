@@ -44,9 +44,10 @@ export class SaleController {
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
     @Query('withInsurers', new DefaultValuePipe(false)) withInsurers?: boolean,
+    @Query('date_range') dateRange?: string,
   ){
     const user:Partial<User> = req.user;
-    return await this.saleService.findAll(user, skip, limit, withSeller, withCustomer, withInsurers);
+    return await this.saleService.findAll(user, skip, limit, withSeller, withCustomer, withInsurers, dateRange);
   }
 
   @Get(':id')

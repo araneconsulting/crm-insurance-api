@@ -27,6 +27,6 @@ const CustomerSchema = new Schema<any>(
 );
 
 const customerModelFn: (conn: Connection) => CustomerModel = (conn: Connection) =>
-  conn.model<Customer, CustomerModel>('Customer', CustomerSchema, 'customer');
+  conn.model<Customer, CustomerModel>('Customer', CustomerSchema, 'customers');
 
 export { Customer, CustomerSchema, customerModelFn }

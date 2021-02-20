@@ -28,25 +28,27 @@ export class SaleService {
     withSeller = false,
     withCustomer = false,
     withInsurers = false,
+    dateRange?: string
   ): Observable<Sale[]> {
 
-    const userId = user.id;
     const userRole = user.roles && user.roles[0] ? user.roles[0] : RoleType.USER;
 
-    console.log("user: " + user);
-    console.log("user id: " + userId);
-    console.log("user role: " + userRole);
+    const dates = DateFactory.dateRangeByName(dateRange);
 
-    let saleQuery = (userRole == RoleType.USER)
-      ? this.saleModel
-        .find(
-          {
+    const expression = {};
+    expression['soldAt'] = dateRange
+      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
+      : { $lte: new Date() };
 
-          }
-        )
-        .skip(skip)
-        .limit(limit)
-      : this.saleModel.find({}).skip(skip).limit(limit);
+
+    if (userRole == RoleType.USER) {
+      expression['seller'] = user.id;
+    }
+
+    const saleQuery = this.saleModel
+      .find(expression)
+      .skip(skip)
+      .limit(limit);
 
     if (withSeller) {
       saleQuery.populate({ path: "seller" });
@@ -62,6 +64,9 @@ export class SaleService {
       saleQuery.populate("physicalDamageInsurer");
       saleQuery.populate("wcGlUmbInsurer");
     }
+
+    saleQuery.sort({ soldAt: 'desc'});
+
     return from(saleQuery.exec());
   }
 

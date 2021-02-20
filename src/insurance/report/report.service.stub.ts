@@ -7,7 +7,7 @@ import { ReportService } from './report.service';
 // also see: https://www.typescriptlang.org/docs/handbook/utility-types.html#picktk
 export class ReportServiceStub implements Pick<ReportService, keyof ReportService> {
 
-  salesReport(): Observable<any[]> {
+  getSalesMetrics(): Observable<any[]> {
     return of();
   }
 
