@@ -82,7 +82,7 @@ export class UpdateSaleDto {
   chargesPaid: number;
 
   @IsOptional()
-  totalCharge: number;
+  downPayment: number;
   
   @IsOptional()
   sellerBonus: number;

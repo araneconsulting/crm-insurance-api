@@ -78,7 +78,7 @@ export class CreateSaleDto {
   chargesPaid: number;
 
   @IsOptional()
-  totalCharge: number;
+  downPayment: number;
   
   @IsOptional()
   sellerBonus: number;

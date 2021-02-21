@@ -62,7 +62,8 @@ export class ReportService {
         "localField": "seller",
         "foreignField": "_id",
         "as": "seller"
-      });
+      })
+      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
 
     if (location) {
       query.match(filterConditions);
@@ -75,6 +76,7 @@ export class ReportService {
         "foreignField": "_id",
         "as": "customer"
       })
+    query.unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
 
     query
       .group(
@@ -88,7 +90,7 @@ export class ReportService {
           "permits": { "$sum": "$permits" },
           "fees": { "$sum": "$fees" },
           "sellerBonus": { "$sum": "$sellerBonus" },
-          "totalCharge": { "$sum": "$totalCharge" },
+          "downPayment": { "$sum": "$downPayment" },
           "netProfit": { "$sum": "$netProfit" },
           "grossProfit": { "$sum": "$grossProfit" },
           "amountReceivable": { "$sum": "$amountReceivable" },
@@ -148,6 +150,7 @@ export class ReportService {
         "foreignField": "_id",
         "as": "seller"
       })
+      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
 
     if (location) {
       query.match(filterConditions);
@@ -161,6 +164,7 @@ export class ReportService {
         "foreignField": "_id",
         "as": "customer"
       })
+      .unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
 
       .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
@@ -169,6 +173,7 @@ export class ReportService {
         "foreignField": "_id",
         "as": "liabilityInsurer"
       })
+      .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
 
       .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
@@ -177,6 +182,7 @@ export class ReportService {
         "foreignField": "_id",
         "as": "cargoInsurer"
       })
+      .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
 
       .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
@@ -185,6 +191,7 @@ export class ReportService {
         "foreignField": "_id",
         "as": "physicalDamageInsurer"
       })
+      .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
 
       .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
@@ -193,32 +200,34 @@ export class ReportService {
         "foreignField": "_id",
         "as": "wcGlUmbInsurer"
       })
+      .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
 
+      .project(
+        {
+          'soldAt': '$soldAt',
+          'liabilityCharge': '$liabilityCharge',
+          'cargoCharge': '$cargoCharge',
+          'physicalDamageCharge': '$physicalDamageCharge',
+          'wcGlUmbCharge': '$wcGlUmbCharge',
+          'fees': '$fees',
+          'permits': '$permits',
+          'tips': '$tips',
+          'chargesPaid': '$chargesPaid',
+          'downPayment': '$downPayment',
+          'sellerBonus': '$sellerBonus',
+          'amountReceivable': '$amountReceivable',
+          'createdBy': '$createdBy',
+          'updatedBy': '$updatedBy',
+          'seller': 1,
+          'customer': 1,
+          'liabilityInsurer': 1,
+          'cargoInsurer': 1,
+          'physicalDamageInsurer': 1,
+          'wcGlUmbInsurer': 1,
+        }
+      )
+      .sort({soldAt:-1})
 
-    query.project(
-      {
-        'soldAt': '$soldAt',
-        'liabilityCharge': '$liabilityCharge',
-        'cargoCharge': '$cargoCharge',
-        'physicalDamageCharge': '$physicalDamageCharge',
-        'wcGlUmbCharge': '$wcGlUmbCharge',
-        'fees': '$fees',
-        'permits': '$permits',
-        'tips': '$tips',
-        'chargesPaid': '$chargesPaid',
-        'totalCharge': '$totalCharge',
-        'sellerBonus': '$sellerBonus',
-        'amountReceivable': '$amountReceivable',
-        'createdBy': '$createdBy',
-        'updatedBy': '$updatedBy',
-        'seller': 1,
-        'customer': 1,
-        'liabilityInsurer': 1,
-        'cargoInsurer': 1,
-        'physicalDamageInsurer': 1,
-        'wcGlUmbInsurer': 1,
-      }
-    )
 
     return query;
   }

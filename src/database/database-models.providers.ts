@@ -22,13 +22,13 @@ export const databaseModelsProviders = [
   {
     provide: INSURER_MODEL,
     useFactory: (connection: Connection) =>
-      connection.model<Insurer>('Insurer', InsurerSchema, 'insurer'),
+      connection.model<Insurer>('Insurer', InsurerSchema, 'insurers'),
     inject: [DATABASE_CONNECTION],
   },
   {
     provide: SALE_MODEL,
     useFactory: (connection: Connection) =>
-      connection.model<Sale>('Sale', SaleSchema, 'sale'),
+      connection.model<Sale>('Sale', SaleSchema, 'sales'),
     inject: [DATABASE_CONNECTION],
   },
   {

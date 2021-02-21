@@ -23,7 +23,7 @@ interface Sale extends Document<any> {
   readonly createdBy?: Partial<User>,
   readonly updatedBy?: Partial<User>,
 
-  readonly totalCharge: number,
+  readonly downPayment: number,
   readonly sellerBonus: number,
   readonly grossProfit: number,
   readonly netProfit: number,
@@ -49,7 +49,7 @@ const SaleSchema = new Schema<any>(
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
-    totalCharge: SchemaTypes.Number,
+    downPayment: SchemaTypes.Number,
     sellerBonus: SchemaTypes.Number,
     grossProfit: SchemaTypes.Number,
     netProfit: SchemaTypes.Number,
@@ -63,7 +63,6 @@ const SaleSchema = new Schema<any>(
 
 SaleSchema.pre('save', function () {
   this.set({
-    totalCharge: this.calculateTotalCharge(),
     sellerBonus: this.calculateSellerBonus(),
     grossProfit: this.calculateGrossProfit(),
     netProfit: this.calculateNetProfit(),
@@ -73,7 +72,6 @@ SaleSchema.pre('save', function () {
 
 SaleSchema.pre('updateOne', function () {
   this.set({
-    totalCharge: this.calculateTotalCharge(),
     sellerBonus: this.calculateSellerBonus(),
     grossProfit: this.calculateGrossProfit(),
     netProfit: this.calculateNetProfit(),
@@ -81,18 +79,18 @@ SaleSchema.pre('updateOne', function () {
   });
 });
 
-SaleSchema.methods.calculateTotalCharge = function () {
+SaleSchema.methods.calculateTotalPremium = function () {
   const total = this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits + this.tips;
   return Number(total.toFixed(2));
 };
 
 SaleSchema.methods.calculateAmountReceivable = function () {
-  const total = this.calculateTotalCharge() - this.chargesPaid;
+  const total = this.downPayment - this.chargesPaid;
   return Number(total.toFixed(2));
 };
 
 SaleSchema.methods.calculateSellerBonus = function () {
-  const bonus = (this.calculateTotalCharge() * CommissionPercentage.SALE
+  const bonus = (this.downPayment * CommissionPercentage.SALE
     + this.fees * CommissionPercentage.FEES
     + this.permits * CommissionPercentage.PERMITS
     + this.tips * CommissionPercentage.TIPS);
@@ -117,6 +115,12 @@ SaleSchema.methods.calculateGrossProfit = function () {
 SaleSchema.methods.calculateNetProfit = function () {
   return Number((this.calculateGrossProfit() - this.sellerBonus).toFixed(2));
 };
+
+SaleSchema.virtual('totalPremium').get(function() {
+  const total = this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits + this.tips;
+  return Number(total.toFixed(2));
+});
+
 
 const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
   conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');

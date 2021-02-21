@@ -16,13 +16,13 @@ export class UserDataInitializerService
   async onModuleInit(): Promise<void> {
     console.log('(UserModule) is initialized...');
 
-    /* 
+    /*
     await this.userModel.deleteMany({});
 
     const admin = {
       username: 'admin',
-      firstName: 'John',
-      lastName: 'Dowd',
+      firstName: 'System',
+      lastName: '',
       password: 'password',
       email: 'admin@araneconsulting.com',
       roles: [RoleType.ADMIN],
@@ -39,6 +39,7 @@ export class UserDataInitializerService
       data => console.log(data)
     ); 
     */
+    
   }
 
 }
