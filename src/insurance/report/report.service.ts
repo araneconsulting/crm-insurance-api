@@ -89,11 +89,14 @@ export class ReportService {
           "tips": { "$sum": "$tips" },
           "permits": { "$sum": "$permits" },
           "fees": { "$sum": "$fees" },
+          "chargesPaid": { "$sum": "$chargesPaid" },
           "sellerBonus": { "$sum": "$sellerBonus" },
           "downPayment": { "$sum": "$downPayment" },
           "netProfit": { "$sum": "$netProfit" },
           "grossProfit": { "$sum": "$grossProfit" },
           "amountReceivable": { "$sum": "$amountReceivable" },
+          'premium': { "$sum": { "$sum": ["$liabilityCharge", "$cargoCharge", "$physicalDamageCharge", "$wcGlUmbCharge"] } },
+
           "sales": { "$sum": 1 }
         }
       );
@@ -168,7 +171,7 @@ export class ReportService {
 
       .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
-        "from": "insurer",
+        "from": "insurers",
         "localField": "liabilityInsurer",
         "foreignField": "_id",
         "as": "liabilityInsurer"
@@ -177,7 +180,7 @@ export class ReportService {
 
       .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
-        "from": "insurer",
+        "from": "insurers",
         "localField": "cargoInsurer",
         "foreignField": "_id",
         "as": "cargoInsurer"
@@ -186,7 +189,7 @@ export class ReportService {
 
       .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
-        "from": "insurer",
+        "from": "insurers",
         "localField": "physicalDamageInsurer",
         "foreignField": "_id",
         "as": "physicalDamageInsurer"
@@ -195,7 +198,7 @@ export class ReportService {
 
       .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
       .lookup({
-        "from": "insurer",
+        "from": "insurers",
         "localField": "wcGlUmbInsurer",
         "foreignField": "_id",
         "as": "wcGlUmbInsurer"
@@ -214,8 +217,9 @@ export class ReportService {
           'tips': '$tips',
           'chargesPaid': '$chargesPaid',
           'downPayment': '$downPayment',
-          'sellerBonus': '$sellerBonus',
           'amountReceivable': '$amountReceivable',
+          'sellerBonus': '$sellerBonus',
+          'premium': { "$sum": ["$liabilityCharge", "$cargoCharge", "$physicalDamageCharge", "$wcGlUmbCharge"] },
           'createdBy': '$createdBy',
           'updatedBy': '$updatedBy',
           'seller': 1,
@@ -226,7 +230,7 @@ export class ReportService {
           'wcGlUmbInsurer': 1,
         }
       )
-      .sort({soldAt:-1})
+      .sort({ soldAt: -1 })
 
 
     return query;
