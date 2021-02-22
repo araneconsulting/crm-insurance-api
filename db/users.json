@@ -1,0 +1,384 @@
+[{
+  "_id": {
+    "$oid": "6031afe5d598e87402e0ef43"
+  },
+  "roles": [
+    "ADMIN"
+  ],
+  "username": "admin",
+  "firstName": "System",
+  "lastName": "Administrator",
+  "password": "$2b$12$W93Ea0PveRT7oe96zpqAc.YJBziBI3Gj8B8Qact9QY3xpyL.kkhMi",
+  "email": "admin@araneconsulting.com",
+  "location": "USA",
+  "position": "SYSTEM_ADMINISTRATOR",
+  "baseSalary": 800,
+  "saleBonusPercentage": 0.01,
+  "createdAt": {
+    "$date": "2021-02-21T00:57:09.997Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T00:57:09.997Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b0e9d598e87402e0ef44"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "sally.clinton",
+  "firstName": "Sally",
+  "lastName": "Clinton",
+  "email": "sally.clinton@vl17insagency.com",
+  "phone": "610-221-1252",
+  "position": "SALES_AGENT",
+  "baseSalary": 40,
+  "saleBonusPercentage": 0.09323853308386143,
+  "location": "USA",
+  "password": "$2b$12$9E.SEWj0vCYRv/vlKOBfcuT1pyiPAWtR7f.pJnTpkrq.jnk1ghh4C",
+  "createdAt": {
+    "$date": "2021-02-21T01:01:29.173Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:01:29.173Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b69bd598e87402e0ef46"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "sam.rock",
+  "firstName": "Sam",
+  "lastName": "Rock",
+  "email": "sam.rock@vl17insagency.com",
+  "phone": "826-628-1137",
+  "position": "SALES_AGENT",
+  "baseSalary": 80,
+  "saleBonusPercentage": 0.5029770847451569,
+  "location": "USA",
+  "password": "$2b$12$ZLFyY2mCbfUKy2i1GSoSGeLeOhQnLYycCTKvYYraZVj8cCDvLs.Ve",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:47.884Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:47.884Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b69cd598e87402e0ef47"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "sam.clinton",
+  "firstName": "Sam",
+  "lastName": "Clinton",
+  "email": "sam.clinton@vl17insagency.com",
+  "phone": "218-401-4309",
+  "position": "SALES_AGENT",
+  "baseSalary": 40,
+  "saleBonusPercentage": 0.9172771187875988,
+  "location": "USA",
+  "password": "$2b$12$nLDYhfdc3Qa4qo8N.4HpnOpXoDr0pB/mBdY2WUk3UB3b.ktiUPssK",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:48.813Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:48.813Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b69dd598e87402e0ef48"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "eddy.greed",
+  "firstName": "Eddy",
+  "lastName": "Greed",
+  "email": "eddy.greed@vl17insagency.com",
+  "phone": "347-543-8360",
+  "position": "SALES_AGENT",
+  "baseSalary": 10,
+  "saleBonusPercentage": 0.3276670124002836,
+  "location": "USA",
+  "password": "$2b$12$siGrCVgJXgH0WpfIEtp.re44Ikey/0qRvyXDgLb00WGvrUjmt.CNK",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:49.698Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:49.698Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b69ed598e87402e0ef49"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "eddy.nielsen",
+  "firstName": "Eddy",
+  "lastName": "Nielsen",
+  "email": "eddy.nielsen@vl17insagency.com",
+  "phone": "332-286-8269",
+  "position": "SALES_CONSULTANT",
+  "baseSalary": 100,
+  "saleBonusPercentage": 0.6797030560053483,
+  "location": "MEXICO",
+  "password": "$2b$12$zWYRgGJFLudyGxEp7mq5feDXZjaC1AsEkoJDew/gRDq0GrJUpOgLW",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:50.593Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:50.593Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b69fd598e87402e0ef4a"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "eddy.lumber",
+  "firstName": "Eddy",
+  "lastName": "Lumber",
+  "email": "eddy.lumber@vl17insagency.com",
+  "phone": "397-940-5353",
+  "position": "SALES_CONSULTANT",
+  "baseSalary": 30,
+  "saleBonusPercentage": 0.6734376970940228,
+  "location": "MEXICO",
+  "password": "$2b$12$8M7wn9fW2orAaLmf0vqW5uMU6iDsp.YzHc.SeJbvI62Cc3cnRuJqi",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:51.599Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:51.599Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b6a0d598e87402e0ef4b"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "mark.junior",
+  "firstName": "Mark",
+  "lastName": "Junior",
+  "email": "mark.junior@vl17insagency.com",
+  "phone": "993-402-5804",
+  "position": "SALES_AGENT",
+  "baseSalary": 90,
+  "saleBonusPercentage": 0.16736716855706435,
+  "location": "USA",
+  "password": "$2b$12$apYnDStsP7CeNtZFB/J4Auq2YwJP6udcAncwJ20UOohI9xdp/Wm3W",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:52.683Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:52.683Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b6a1d598e87402e0ef4c"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "mark.rock",
+  "firstName": "Mark",
+  "lastName": "Rock",
+  "email": "mark.rock@vl17insagency.com",
+  "phone": "434-448-8876",
+  "position": "SALES_AGENT",
+  "baseSalary": 80,
+  "saleBonusPercentage": 0.13638410448293103,
+  "location": "USA",
+  "password": "$2b$12$6aPOw87HBWNuXAmfwhdMQuVJk/XYMRuGwu1SpWg4OnL3/hVAYDPzG",
+  "createdAt": {
+    "$date": "2021-02-21T01:25:53.870Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:25:53.870Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b764d598e87402e0ef4d"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "lis.clinton",
+  "firstName": "Lis",
+  "lastName": "Clinton",
+  "email": "lis.clinton@vl17insagency.com",
+  "phone": "750-620-9341",
+  "position": "SALES_CONSULTANT",
+  "baseSalary": 40,
+  "saleBonusPercentage": 0.7402163879502852,
+  "location": "MEXICO",
+  "password": "$2b$12$Hj2OGuf4vb1LB.J2FTK6v.abqUV8yFXaZRdyw3guty9E/fQhcvWMy",
+  "createdAt": {
+    "$date": "2021-02-21T01:29:08.543Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:29:08.543Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b783d598e87402e0ef4e"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "mark.sailor",
+  "firstName": "Mark",
+  "lastName": "Sailor",
+  "email": "mark.sailor@vl17insagency.com",
+  "phone": "555-571-9111",
+  "position": "SALES_CONSULTANT",
+  "baseSalary": 70,
+  "saleBonusPercentage": 0.5065230693606781,
+  "location": "MEXICO",
+  "password": "$2b$12$5cSQJqXcs12eRnylJLMkfO4IEJ9ZmRprG7vgFXKiSgwysqOzZbwNS",
+  "createdAt": {
+    "$date": "2021-02-21T01:29:39.040Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:29:39.040Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b784d598e87402e0ef4f"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "mary.clinton",
+  "firstName": "Mary",
+  "lastName": "Clinton",
+  "email": "mary.clinton@vl17insagency.com",
+  "phone": "919-800-5393",
+  "position": "SALES_AGENT",
+  "baseSalary": 40,
+  "saleBonusPercentage": 0.21854623549956664,
+  "location": "USA",
+  "password": "$2b$12$zMOzkY2NgEYQDbYwBHc2M.PBvtwUXJoj/CrKHelRSS8XohPWx1stW",
+  "createdAt": {
+    "$date": "2021-02-21T01:29:40.298Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:29:40.298Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b785d598e87402e0ef50"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "john.sailor",
+  "firstName": "John",
+  "lastName": "Sailor",
+  "email": "john.sailor@vl17insagency.com",
+  "phone": "455-280-1309",
+  "position": "SALES_AGENT",
+  "baseSalary": 70,
+  "saleBonusPercentage": 0.7216160327566188,
+  "location": "USA",
+  "password": "$2b$12$UQnybUQwLkcjKPt0FG32zeaIOebZFeAn8OBl5CVF8DEKKnb0SZsp.",
+  "createdAt": {
+    "$date": "2021-02-21T01:29:41.170Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:29:41.170Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b786d598e87402e0ef51"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "sally.greed",
+  "firstName": "Sally",
+  "lastName": "Greed",
+  "email": "sally.greed@vl17insagency.com",
+  "phone": "601-620-0782",
+  "position": "SALES_CONSULTANT",
+  "baseSalary": 10,
+  "saleBonusPercentage": 0.4290671174014138,
+  "location": "MEXICO",
+  "password": "$2b$12$pSHPkz/ApfzA8rD4sbWZBuaMfmrtrvnMmOx.d.VmMLZxcznhRRnwO",
+  "createdAt": {
+    "$date": "2021-02-21T01:29:42.076Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:29:42.076Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b787d598e87402e0ef52"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "mary.lumber",
+  "firstName": "Mary",
+  "lastName": "Lumber",
+  "email": "mary.lumber@vl17insagency.com",
+  "phone": "258-498-6064",
+  "position": "SALES_AGENT",
+  "baseSalary": 30,
+  "saleBonusPercentage": 0.5604457979517901,
+  "location": "USA",
+  "password": "$2b$12$keMyoT1SX.29K7/MibK3L.xJcQki/QmQgGccc24LsOuH6kqBV.yfK",
+  "createdAt": {
+    "$date": "2021-02-21T01:29:43.351Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:29:43.351Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6031b80ed598e87402e0ef53"
+  },
+  "roles": [
+    "USER"
+  ],
+  "username": "fred.sailor",
+  "firstName": "Fred",
+  "lastName": "Sailor",
+  "email": "fred.sailor@vl17insagency.com",
+  "phone": "361-732-9220",
+  "position": "SALES_AGENT",
+  "baseSalary": 70,
+  "saleBonusPercentage": 0.7787385570266785,
+  "location": "USA",
+  "password": "$2b$12$liE4/kRKQTpLH.iGG9dl5OamtoqBbocg2jUUmBkUlrsUyHVg5Fidy",
+  "createdAt": {
+    "$date": "2021-02-21T01:31:58.500Z"
+  },
+  "updatedAt": {
+    "$date": "2021-02-21T01:31:58.500Z"
+  },
+  "__v": 0
+}]
