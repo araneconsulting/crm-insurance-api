@@ -18,10 +18,13 @@ export class ReportService {
 
   async getSalesMetrics(user: Partial<User>, dateRange?: string, filterField?: string, filterValue?: string, metricsLayout: string = MetricsLayout.FULL): Promise<any> {
 
-    const filterConditions = {};
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
     let location: string = null;
+
+    const filterConditions = {
+      "soldAt": this.getDateMatchExpression(dateRange)
+    };
 
     switch (filterField) {
       case 'seller':
@@ -47,13 +50,12 @@ export class ReportService {
     }
 
     const id = this.getIdByMetricsLayout(metricsLayout);
-    filterConditions["soldAt"] = this.getDateMatchExpression(dateRange).soldAt;
 
     const query = this.saleModel.aggregate();
 
-    if (seller || customer) {
+    if ((!seller && !customer && !location) || (seller || customer)) {
       query.match(filterConditions);
-    }
+    } 
 
     query
       .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
@@ -108,11 +110,15 @@ export class ReportService {
 
   async getAllSales(user: Partial<User>, dateRange?: string, filterField?: string, filterValue?: string): Promise<any> {
 
-
-    const filterConditions = {};
+    const filterConditions = {
+      "soldAt": this.getDateMatchExpression(dateRange)
+    };
+    
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
     let location: string = null;
+
+
 
     switch (filterField) {
       case 'seller':
@@ -137,13 +143,13 @@ export class ReportService {
         break;
     }
 
-    filterConditions["soldAt"] = this.getDateMatchExpression(dateRange).soldAt;
+    
 
     const query = this.saleModel.aggregate();
 
-    if (seller || customer) {
+    if ((!seller && !customer && !location) || (seller || customer)) {
       query.match(filterConditions);
-    }
+    } 
 
     query
       .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
@@ -267,13 +273,11 @@ export class ReportService {
     //Set filtering conditions
     const dates = DateFactory.dateRangeByName(dateRange);
 
-    const expression = dateRange
+    return dateRange
       ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
       : { $lte: new Date() };
 
-    return {
-      "soldAt": expression
-    }
+    
   }
 }
 
