@@ -3,17 +3,14 @@ import {
   Controller,
   DefaultValuePipe,
   Delete,
-  ExecutionContext,
   Get,
   HttpCode,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   Query,
-  Redirect,
   Req,
-  Res,
+  Response,
   Scope,
   UseGuards
 } from '@nestjs/common';
@@ -37,17 +34,16 @@ export class SaleController {
   @Get('')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async getAllSales(
-    @Req() req: Request,
-    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
-    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
-    @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
-    @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
-    @Query('withInsurers', new DefaultValuePipe(false)) withInsurers?: boolean,
-    @Query('date_range') dateRange?: string,
-  ){
-    const user:Partial<User> = req.user;
-    return await this.saleService.findAll(user, skip, limit, withSeller, withCustomer, withInsurers, dateRange);
+  @HasRoles(RoleType.USER, RoleType.ADMIN)
+  async getAllSales(@Req() req: Request,
+    @Response() res,
+    @Query('date_range') dateRange?: string
+  ): Promise<any> {
+
+    const user: Partial<User> = req.user;
+
+    console.log(dateRange);
+    return res.json(await this.saleService.getAllSales(user, dateRange));
   }
 
   @Get(':id')
@@ -58,7 +54,7 @@ export class SaleController {
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
     @Query('withInsurers', new DefaultValuePipe(false)) withInsurers?: boolean,
-    ): Observable<Sale> {
+  ): Observable<Sale> {
     return this.saleService.findById(id, withSeller, withCustomer, withInsurers);
   }
 
@@ -81,7 +77,7 @@ export class SaleController {
     @Req() req,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() sale: UpdateSaleDto,
-    
+
   ): Observable<Sale> {
     return from(this.saleService.update(id, sale, req.user));
   }

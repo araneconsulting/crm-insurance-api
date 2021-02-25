@@ -2,23 +2,125 @@ import { ExecutionContext, Inject, Injectable, NotFoundException, Scope } from '
 import { REQUEST } from '@nestjs/core';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Model, Mongoose, SchemaTypes } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { RoleType } from 'shared/enum/role-type.enum';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
-import { SALE_MODEL, USER_MODEL } from '../../database/database.constants';
+import { CUSTOMER_MODEL, SALE_MODEL, USER_MODEL } from '../../database/database.constants';
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
 import * as DateFactory from 'shared/util/date-factory';
+import { Customer } from 'database/customer.model';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
     @Inject(USER_MODEL) private userModel: Model<User>,
+    @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
+
+  async getAllSales(user: Partial<User>, dateRange?: string): Promise<any> {
+
+    const filterConditions = {
+      "soldAt": this.getDateMatchExpression(dateRange)
+    };
+
+    const query = this.saleModel.aggregate();
+
+    query.match(filterConditions);
+
+    console.log(filterConditions);
+
+    query
+      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
+      .lookup({
+        "from": "users",
+        "localField": "seller",
+        "foreignField": "_id",
+        "as": "seller"
+      })
+      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
+
+    query
+      .unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
+      .lookup({
+        "from": "customers",
+        "localField": "customer",
+        "foreignField": "_id",
+        "as": "customer"
+      })
+      .unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
+
+      .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
+      .lookup({
+        "from": "insurers",
+        "localField": "liabilityInsurer",
+        "foreignField": "_id",
+        "as": "liabilityInsurer"
+      })
+      .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
+
+      .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
+      .lookup({
+        "from": "insurers",
+        "localField": "cargoInsurer",
+        "foreignField": "_id",
+        "as": "cargoInsurer"
+      })
+      .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
+
+      .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
+      .lookup({
+        "from": "insurers",
+        "localField": "physicalDamageInsurer",
+        "foreignField": "_id",
+        "as": "physicalDamageInsurer"
+      })
+      .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
+
+      .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
+      .lookup({
+        "from": "insurers",
+        "localField": "wcGlUmbInsurer",
+        "foreignField": "_id",
+        "as": "wcGlUmbInsurer"
+      })
+      .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
+
+      .project(
+        {
+          'soldAt': '$soldAt',
+          'liabilityCharge': { "$round": ['$liabilityCharge', 2]},
+          'cargoCharge': { "$round": ['$cargoCharge', 2]},
+          'physicalDamageCharge':  { "$round": ['$physicalDamageCharge', 2]},
+          'wcGlUmbCharge':  { "$round": ['$wcGlUmbCharge', 2]},
+          'fees':  { "$round": ['$fees', 2]},
+          'permits':  { "$round": ['$permits', 2]},
+          'tips':  { "$round": ['$tips', 2]},
+          'chargesPaid':  { "$round": ['$chargesPaid', 2]},
+          'downPayment':  { "$round": ['$downPayment', 2]},
+          'amountReceivable':  { "$round": ['$amountReceivable', 2]},
+          'sellerBonus': '$sellerBonus',
+          'premium': { "$round":{ "$sum": ["$liabilityCharge", "$cargoCharge", "$physicalDamageCharge", "$wcGlUmbCharge"] }},
+          'sellerName': { "$concat":["$seller.firstName", " ", "$seller.lastName"]},
+          'createdBy': '$createdBy',
+          'updatedBy': '$updatedBy',
+          'seller': 1,
+          'customer': 1,
+          'liabilityInsurer': 1,
+          'cargoInsurer': 1,
+          'physicalDamageInsurer': 1,
+          'wcGlUmbInsurer': 1,
+        }
+      )
+      .sort({ soldAt: -1 })
+
+
+    return query;
+  }
 
   findAll(
     user: Partial<User>,
@@ -164,5 +266,15 @@ export class SaleService {
 
   deleteAll(): Observable<any> {
     return from(this.saleModel.deleteMany({}).exec());
+  }
+
+  getDateMatchExpression(dateRange: string): any {
+
+    //Set filtering conditions
+    const dates = DateFactory.dateRangeByName(dateRange);
+
+    return dateRange
+      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
+      : { $lte: new Date() };    
   }
 }

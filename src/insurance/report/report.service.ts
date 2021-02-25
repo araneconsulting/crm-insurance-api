@@ -242,6 +242,16 @@ export class ReportService {
     return query;
   }
 
+  getDateMatchExpression(dateRange: string): any {
+
+    //Set filtering conditions
+    const dates = DateFactory.dateRangeByName(dateRange);
+
+    return dateRange
+      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
+      : { $lte: new Date() };    
+  }
+
 
   getIdByMetricsLayout(layout: string): any {
     switch (layout) {
@@ -268,17 +278,7 @@ export class ReportService {
     return null;
   }
 
-  getDateMatchExpression(dateRange: string): any {
 
-    //Set filtering conditions
-    const dates = DateFactory.dateRangeByName(dateRange);
-
-    return dateRange
-      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
-      : { $lte: new Date() };
-
-    
-  }
 }
 
 
