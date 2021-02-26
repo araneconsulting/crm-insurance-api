@@ -37,13 +37,13 @@ export class SaleController {
   @HasRoles(RoleType.USER, RoleType.ADMIN)
   async getAllSales(@Req() req: Request,
     @Response() res,
-    @Query('date_range') dateRange?: string
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
   ): Promise<any> {
 
     const user: Partial<User> = req.user;
 
-    console.log(dateRange);
-    return res.json(await this.saleService.getAllSales(user, dateRange));
+    return res.json(await this.saleService.getAllSales(user, startDate, endDate));
   }
 
   @Get(':id')

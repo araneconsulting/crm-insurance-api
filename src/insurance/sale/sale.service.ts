@@ -22,17 +22,14 @@ export class SaleService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) { }
 
-  async getAllSales(user: Partial<User>, dateRange?: string): Promise<any> {
+  async getAllSales(user: Partial<User>, startDate?: string, endDate?: string): Promise<any> {
 
     const filterConditions = {
-      "soldAt": this.getDateMatchExpression(dateRange)
+      "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
     };
 
     const query = this.saleModel.aggregate();
-
     query.match(filterConditions);
-
-    console.log(filterConditions);
 
     query
       .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
@@ -268,13 +265,23 @@ export class SaleService {
     return from(this.saleModel.deleteMany({}).exec());
   }
 
-  getDateMatchExpression(dateRange: string): any {
+  getDateMatchExpressionByRange(dateRange: string): any {
 
     //Set filtering conditions
     const dates = DateFactory.dateRangeByName(dateRange);
 
     return dateRange
-      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
-      : { $lte: new Date() };    
+      ? { $gte: new Date(dates.start).setHours(0,0,0), $lte: new Date(dates.end).setHours(11,59,59) }
+      : { $lte: new Date().setHours(11,59,59) };    
+  }
+
+  getDateMatchExpressionByDates(startDate?: string, endDate?:string): any {
+    if (startDate && endDate){
+      return { $gte: new Date(startDate).setHours(0,0,0), $lte: new Date(endDate).setHours(11,59,59) }
+    } else if (startDate){
+      return { $gte: new Date(startDate).setHours(0,0,0)}
+    } else if (endDate){
+      return { $lte: new Date(endDate).setHours(11,59,59)}
+    } else return { $lte: new Date() };    
   }
 }

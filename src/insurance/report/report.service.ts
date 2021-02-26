@@ -23,7 +23,7 @@ export class ReportService {
     let location: string = null;
 
     const filterConditions = {
-      "soldAt": this.getDateMatchExpression(dateRange)
+      "soldAt": this.getDateMatchExpressionByRange(dateRange)
     };
 
     switch (filterField) {
@@ -111,7 +111,7 @@ export class ReportService {
   async getAllSales(user: Partial<User>, dateRange?: string, filterField?: string, filterValue?: string): Promise<any> {
 
     const filterConditions = {
-      "soldAt": this.getDateMatchExpression(dateRange)
+      "soldAt": this.getDateMatchExpressionByRange(dateRange)
     };
     
     let seller: Partial<User> = null;
@@ -242,7 +242,7 @@ export class ReportService {
     return query;
   }
 
-  getDateMatchExpression(dateRange: string): any {
+  getDateMatchExpressionByRange(dateRange: string): any {
 
     //Set filtering conditions
     const dates = DateFactory.dateRangeByName(dateRange);
