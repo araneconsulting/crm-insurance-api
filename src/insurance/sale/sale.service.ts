@@ -28,6 +28,8 @@ export class SaleService {
       "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
     };
 
+    console.log(filterConditions.soldAt)
+
     const query = this.saleModel.aggregate();
     query.match(filterConditions);
 
@@ -271,17 +273,17 @@ export class SaleService {
     const dates = DateFactory.dateRangeByName(dateRange);
 
     return dateRange
-      ? { $gte: new Date(dates.start).setHours(0,0,0), $lte: new Date(dates.end).setHours(11,59,59) }
-      : { $lte: new Date().setHours(11,59,59) };    
+      ? { $gte: new Date(dates.start+'T00:00:00.000Z'), $lte: new Date(dates.end+'T23:59:59.999Z') }
+      : { $lte: new Date() };    
   }
 
   getDateMatchExpressionByDates(startDate?: string, endDate?:string): any {
     if (startDate && endDate){
-      return { $gte: new Date(startDate).setHours(0,0,0), $lte: new Date(endDate).setHours(11,59,59) }
+      return { $gte: new Date(startDate+'T00:00:00.000Z'), $lte: new Date(endDate+'T23:59:59.999Z') }
     } else if (startDate){
-      return { $gte: new Date(startDate).setHours(0,0,0)}
+      return { $gte: new Date(startDate+'T00:00:00.000Z')}
     } else if (endDate){
-      return { $lte: new Date(endDate).setHours(11,59,59)}
+      return { $lte: new Date(endDate+'T23:59:59.999Z')}
     } else return { $lte: new Date() };    
   }
 }

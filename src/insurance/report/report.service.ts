@@ -118,8 +118,6 @@ export class ReportService {
     let customer: Partial<Customer> = null;
     let location: string = null;
 
-
-
     switch (filterField) {
       case 'seller':
         seller = await this.userModel.findById(filterValue).exec();
