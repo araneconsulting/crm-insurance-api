@@ -28,8 +28,6 @@ export class SaleService {
       "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
     };
 
-    console.log(filterConditions.soldAt)
-
     const query = this.saleModel.aggregate();
     query.match(filterConditions);
 

@@ -16,14 +16,14 @@ export class ReportService {
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
   ) { }
 
-  async getSalesMetrics(user: Partial<User>, dateRange?: string, filterField?: string, filterValue?: string, metricsLayout: string = MetricsLayout.FULL): Promise<any> {
+  async getSalesMetrics(user: Partial<User>, startDate?: string, endDate?: string, filterField?: string, filterValue?: string, metricsLayout: string = MetricsLayout.FULL): Promise<any> {
 
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
     let location: string = null;
 
     const filterConditions = {
-      "soldAt": this.getDateMatchExpressionByRange(dateRange)
+      "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
     };
 
     switch (filterField) {
@@ -103,15 +103,13 @@ export class ReportService {
         }
       );
 
-    console.log(query);
-
     return query;
   }
 
-  async getAllSales(user: Partial<User>, dateRange?: string, filterField?: string, filterValue?: string): Promise<any> {
+  async getAllSales(user: Partial<User>, startDate?: string, endDate?: string, filterField?: string, filterValue?: string): Promise<any> {
 
     const filterConditions = {
-      "soldAt": this.getDateMatchExpressionByRange(dateRange)
+      "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
     };
     
     let seller: Partial<User> = null;
@@ -246,8 +244,18 @@ export class ReportService {
     const dates = DateFactory.dateRangeByName(dateRange);
 
     return dateRange
-      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
+      ? { $gte: new Date(dates.start+'T00:00:00.000Z'), $lte: new Date(dates.end+'T23:59:59.999Z') }
       : { $lte: new Date() };    
+  }
+
+  getDateMatchExpressionByDates(startDate?: string, endDate?:string): any {
+    if (startDate && endDate){
+      return { $gte: new Date(startDate+'T00:00:00.000Z'), $lte: new Date(endDate+'T23:59:59.999Z') }
+    } else if (startDate){
+      return { $gte: new Date(startDate+'T00:00:00.000Z')}
+    } else if (endDate){
+      return { $lte: new Date(endDate+'T23:59:59.999Z')}
+    } else return { $lte: new Date() };    
   }
 
 

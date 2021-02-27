@@ -42,9 +42,6 @@ export class SaleController {
   ): Promise<any> {
 
     const user: Partial<User> = req.user;
-
-    console.log(startDate, endDate);
-
     return res.json(await this.saleService.getAllSales(user, startDate, endDate));
   }
 

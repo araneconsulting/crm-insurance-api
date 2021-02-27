@@ -27,7 +27,8 @@ export class ReportController {
   async getSalesReport(
     @Req() req: Request,
     @Response() res,
-    @Query('date_range') dateRange?: string,
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
     @Query('filter_field') filterField?: string,
     @Query('filter_value') filterValue?: string,
     @Query('metrics_layout') metricsLayout?:string
@@ -36,8 +37,8 @@ export class ReportController {
     const user: Partial<User> = req.user;
 
     const response = {
-      "metrics": await this.reportService.getSalesMetrics(user, dateRange, filterField?filterField.toLowerCase():null, filterValue?filterValue.toUpperCase():null, metricsLayout),
-      "sales": await this.reportService.getAllSales(user, dateRange, filterField?filterField.toLowerCase():null, filterValue?filterValue.toUpperCase():null),
+      "metrics": await this.reportService.getSalesMetrics(user, startDate, endDate, filterField?filterField.toLowerCase():null, filterValue?filterValue.toUpperCase():null, metricsLayout),
+      "sales": await this.reportService.getAllSales(user, startDate, endDate, filterField?filterField.toLowerCase():null, filterValue?filterValue.toUpperCase():null),
     }
     return res.json(response);
   }
