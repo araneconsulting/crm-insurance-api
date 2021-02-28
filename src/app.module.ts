@@ -11,6 +11,7 @@ import { LoggerModule } from './logger/logger.module';
 import { InsurerModule } from 'insurance/insurer/insurer.module';
 import { SaleModule } from 'insurance/sale/sale.module';
 import { ReportModule } from 'insurance/report/report.module';
+import { DashboardModule } from 'insurance/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ReportModule } from 'insurance/report/report.module';
     DatabaseModule,
     CustomerModule,
     InsurerModule,
+    DashboardModule,
     AuthModule,
     UserModule,
     SendgridModule,
