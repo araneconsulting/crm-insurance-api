@@ -82,17 +82,5 @@ export class UpdateSaleDto {
   chargesPaid: number;
 
   @IsOptional()
-  downPayment: number;
-  
-  @IsOptional()
-  sellerBonus: number;
-
-  @IsOptional()
-  grossProfit: number;
-
-  @IsOptional()
-  netProfit: number;
-
-  @IsOptional()
-  amountReceivable: number;
+  premium: number;
 }

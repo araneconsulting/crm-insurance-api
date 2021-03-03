@@ -35,7 +35,11 @@ describe('JwtStrategy', () => {
         upn: "test",
         sub: 'testid',
         email: "test@example.com",
-        roles: [RoleType.USER]
+        roles: [RoleType.SELLER],
+        firstName: 'John',
+        lastName: 'Doe',
+        position: 'Sales Agent',
+        phone: '1234567890'
       });
       expect(user.username).toEqual('test');
       expect(user.id).toEqual('testid');

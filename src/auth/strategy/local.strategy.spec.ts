@@ -36,7 +36,7 @@ describe('LocalStrategy', () => {
             username: 'test',
             id: '_id',
             email: 'liuver@example.com',
-            roles: [RoleType.USER],
+            roles: [RoleType.SELLER],
           });
         });
       const user = await strategy.validate('test', 'pass');

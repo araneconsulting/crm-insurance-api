@@ -53,7 +53,7 @@ export class CustomerController {
   @Post('')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   createCustomer(
     @Body() customer: CreateCustomerDto
   ): Observable<Customer> {
@@ -63,7 +63,7 @@ export class CustomerController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   updateCustomer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() customer: UpdateCustomerDto,
@@ -75,6 +75,7 @@ export class CustomerController {
   @Delete(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   @HasRoles(RoleType.ADMIN)
   deleteCustomerById(
     @Param('id', ParseObjectIdPipe) id: string

@@ -22,12 +22,9 @@ interface Sale extends Document<any> {
   readonly chargesPaid: number,
   readonly createdBy?: Partial<User>,
   readonly updatedBy?: Partial<User>,
-
-  readonly downPayment: number,
-  readonly sellerBonus: number,
-  readonly grossProfit: number,
-  readonly netProfit: number,
+  readonly premium: number,
   readonly amountReceivable: number,
+  readonly totalCharge: number,
 }
 
 type SaleModel = Model<Sale>;
@@ -49,11 +46,9 @@ const SaleSchema = new Schema<any>(
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
-    downPayment: SchemaTypes.Number,
-    sellerBonus: SchemaTypes.Number,
-    grossProfit: SchemaTypes.Number,
-    netProfit: SchemaTypes.Number,
+    premium: { type: SchemaTypes.Number, required: false },
     amountReceivable: { type: SchemaTypes.Number, required: false },
+    totalCharge: { type: SchemaTypes.Number, required: false },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
@@ -63,62 +58,16 @@ const SaleSchema = new Schema<any>(
 
 SaleSchema.pre('save', function () {
   this.set({
-    sellerBonus: this.calculateSellerBonus(),
-    grossProfit: this.calculateGrossProfit(),
-    netProfit: this.calculateNetProfit(),
-    amountReceivable: this.calculateAmountReceivable(),
+    totalCharge: Number((this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits).toFixed(2)),
+    amountReceivable: Number((this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits - this.chargesPaid).toFixed(2))
   });
 });
 
 SaleSchema.pre('updateOne', function () {
   this.set({
-    sellerBonus: this.calculateSellerBonus(),
-    grossProfit: this.calculateGrossProfit(),
-    netProfit: this.calculateNetProfit(),
-    amountReceivable: this.calculateAmountReceivable(),
+    totalCharge: Number((this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits).toFixed(2)),
+    amountReceivable: Number((this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits - this.chargesPaid).toFixed(2))
   });
-});
-
-SaleSchema.methods.calculateTotalPremium = function () {
-  const total = this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits + this.tips;
-  return Number(total.toFixed(2));
-};
-
-SaleSchema.methods.calculateAmountReceivable = function () {
-  const total = this.downPayment - this.chargesPaid;
-  return Number(total.toFixed(2));
-};
-
-SaleSchema.methods.calculateSellerBonus = function () {
-  const bonus = (this.downPayment * CommissionPercentage.SALE
-    + this.fees * CommissionPercentage.FEES
-    + this.permits * CommissionPercentage.PERMITS
-    + this.tips * CommissionPercentage.TIPS);
-  return Number(bonus.toFixed(2));
-};
-
-SaleSchema.methods.calculateGrossProfit = function () {
-  const liabilityCommission = this.liabilityInsurer != null ? this.liabilityInsurer.liabilityCommission : CommissionPercentage.INSURER_DEFAULT;
-  const cargoCommission = this.cargoInsurer != null ? this.cargoInsurer.cargoCommission : CommissionPercentage.INSURER_DEFAULT;
-  const physicalDamageCommission = this.physicalDamageInsurer != null ? this.physicalDamageInsurer.physicalDamageCommission : CommissionPercentage.INSURER_DEFAULT;
-  const wcGlUmbCommission = this.wcGlUmbInsurer != null ? this.wcGlUmbInsurer.wcGlUmbCommission : CommissionPercentage.INSURER_DEFAULT;
-
-  const profit = this.liabilityCharge * liabilityCommission
-    + this.cargoCharge * cargoCommission
-    + this.physicalDamageCharge * physicalDamageCommission
-    + this.wcGlUmbCharge * wcGlUmbCommission
-    + this.fees + this.permits + this.tips;
-
-  return Number(profit.toFixed(2));
-};
-
-SaleSchema.methods.calculateNetProfit = function () {
-  return Number((this.calculateGrossProfit() - this.sellerBonus).toFixed(2));
-};
-
-SaleSchema.virtual('totalPremium').get(function() {
-  const total = this.liabilityCharge + this.physicalDamageCharge + this.cargoCharge + this.wcGlUmbCharge + this.fees + this.permits + this.tips;
-  return Number(total.toFixed(2));
 });
 
 

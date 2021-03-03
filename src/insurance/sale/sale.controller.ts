@@ -34,7 +34,6 @@ export class SaleController {
   @Get('')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
   async getAllSales(@Req() req: Request,
     @Response() res,
     @Query('start_date') startDate?: string,
@@ -60,7 +59,7 @@ export class SaleController {
   @Post('')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   createSale(
     @Req() req,
     @Body() sale: CreateSaleDto
@@ -71,7 +70,7 @@ export class SaleController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   updateSale(
     @Req() req,
     @Param('id', ParseObjectIdPipe) id: string,
@@ -84,7 +83,7 @@ export class SaleController {
   @Delete(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   deleteSaleById(
     @Param('id', ParseObjectIdPipe) id: string
   ): Observable<Sale> {

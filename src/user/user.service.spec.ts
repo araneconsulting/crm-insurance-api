@@ -50,9 +50,8 @@ describe('UserService', () => {
       lastName: 'Duran',
       password: 'mysecret',
       location: 'MEXICO',
-      position: 'SALES_AGENT',
+      position: 'SELLER',
       baseSalary: 400,
-      saleBonusPercentage: 0.01,
     }
 
     const msg = {
@@ -83,7 +82,7 @@ describe('UserService', () => {
       .mockImplementation((data: any) => { return of(pipeMock) });
 
     const result = await service.register(sampleData).toPromise();
-    expect(saveSpy).toBeCalledWith({ ...sampleData, roles: [RoleType.USER] });
+    expect(saveSpy).toBeCalledWith({ ...sampleData, roles: [RoleType.SELLER] });
     expect(result._id).toBeDefined();
     //expect(sendSpy).toBeCalledWith(msg);
     //expect(pipeSpy).toBeCalled();

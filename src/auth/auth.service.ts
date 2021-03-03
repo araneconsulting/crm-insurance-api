@@ -52,6 +52,10 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       roles: user.roles,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      position: user.position,
+      phone: user.phone,
     };
     return from(this.jwtService.signAsync(payload)).pipe(
       map((access_token) => {

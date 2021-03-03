@@ -91,18 +91,13 @@ export class ReportService {
           "tips": { "$sum": "$tips" },
           "permits": { "$sum": "$permits" },
           "fees": { "$sum": "$fees" },
+          "premium": { "$sum": "$premium" },
           "chargesPaid": { "$sum": "$chargesPaid" },
-          "sellerBonus": { "$sum": "$sellerBonus" },
-          "downPayment": { "$sum": "$downPayment" },
-          "netProfit": { "$sum": "$netProfit" },
-          "grossProfit": { "$sum": "$grossProfit" },
           "amountReceivable": { "$sum": "$amountReceivable" },
-          'premium': { "$sum": { "$sum": ["$liabilityCharge", "$cargoCharge", "$physicalDamageCharge", "$wcGlUmbCharge"] } },
-
+          'totalCharge': { "$sum": "$totalCharge" },
           "sales": { "$sum": 1 }
         }
       );
-
     return query;
   }
 
@@ -218,10 +213,9 @@ export class ReportService {
           'permits': '$permits',
           'tips': '$tips',
           'chargesPaid': '$chargesPaid',
-          'downPayment': '$downPayment',
+          'premium': '$premium',
           'amountReceivable': '$amountReceivable',
-          'sellerBonus': '$sellerBonus',
-          'premium': { "$sum": ["$liabilityCharge", "$cargoCharge", "$physicalDamageCharge", "$wcGlUmbCharge"] },
+          'totalCharge':'$totalCharge',
           'createdBy': '$createdBy',
           'updatedBy': '$updatedBy',
           'seller': 1,

@@ -1,5 +1,4 @@
 import { LocationType } from 'shared/enum/location-type.enum';
-import { PositionType } from 'shared/enum/position-type.enum';
 import { RoleType } from '../shared/enum/role-type.enum';
 
 export class UserDto {
@@ -15,7 +14,6 @@ export class UserDto {
 
   //Employee fields (this will be moved to a child class later)
   readonly location?: LocationType;
-  readonly position?: PositionType;
+  readonly position?: string;
   readonly baseSalary?: number;
-  readonly saleBonusPercentage?: number;
 }

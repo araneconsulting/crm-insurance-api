@@ -19,6 +19,7 @@ import { HasRoles } from 'auth/guard/has-roles.decorator';
 import { User } from 'database/user.model';
 import { Request } from 'express';
 import { randomBytes } from 'crypto';
+import { colorSchemes } from 'shared/const/color-schemes';
 
 @Controller({ path: 'dashboards', scope: Scope.REQUEST })
 export class DashboardController {
@@ -27,7 +28,6 @@ export class DashboardController {
   @Get('sales/bar')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
   async getSalesBarChart(
     @Req() req: Request,
     @Response() res,
@@ -41,7 +41,7 @@ export class DashboardController {
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
-    const aggregations = await this.dashboardService.getSalesBy(
+    const aggregations = await this.dashboardService.getSaleDatasets(
       dataCriteria,
       groupingCriteria,
       aggregation,
@@ -72,54 +72,7 @@ export class DashboardController {
         datasets: [
           {
             data: salesValues,
-            backgroundColor: [
-              '#ffbeb2',
-              '#feb4a6',
-              '#fdab9b',
-              '#fca290',
-              '#fb9984',
-              '#fa8f79',
-              '#f9856e',
-              '#f77b66',
-              '#f5715d',
-              '#f36754',
-              '#f05c4d',
-              '#ec5049',
-              '#e74545',
-              '#e13b42',
-              '#da323f',
-              '#d3293d',
-              '#ca223c',
-              '#c11a3b',
-              '#b8163a',
-              '#ae123a',
-              '#f77b66',
-              '#f5715d',
-              '#f36754',
-              '#f05c4d',
-              '#ec5049',
-              '#e74545',
-              '#e13b42',
-              '#da323f',
-              '#d3293d',
-              '#ca223c',
-              '#c11a3b',
-              '#b8163a',
-              '#ae123a',
-              '#f77b66',
-              '#f5715d',
-              '#f36754',
-              '#f05c4d',
-              '#ec5049',
-              '#e74545',
-              '#e13b42',
-              '#da323f',
-              '#d3293d',
-              '#ca223c',
-              '#c11a3b',
-              '#b8163a',
-              '#ae123a',
-            ],
+            backgroundColor: colorSchemes.contrast.red.slice(0,salesValues.length)
           },
         ],
         labels: salesLabels,
@@ -133,7 +86,6 @@ export class DashboardController {
   @Post('sales/batch')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
   async getSalesCharts(
     @Req() req: Request,
     @Response() res,
@@ -152,7 +104,7 @@ export class DashboardController {
             case 'bar':
             case 'line':
             case 'doughnut':
-              const aggregations = await this.dashboardService.getSalesBy(
+              const aggregations = await this.dashboardService.getSaleDatasets(
                 config.queryParams.dataCriteria,
                 config.queryParams.groupingCriteria,
                 config.queryParams.aggregation,
@@ -177,6 +129,8 @@ export class DashboardController {
                 (aggregation) => aggregation._id.label,
               );
 
+              console.log(colorSchemes.contrast.red.slice(0,salesValues.length))
+
               const filled = config.type != 'line';
               const legend = config.type === 'doughnut';
 
@@ -187,7 +141,7 @@ export class DashboardController {
                   datasets: [
                     {
                       data: salesValues,
-                      backgroundColor: this.colorSchemes().red50,
+                      backgroundColor: colorSchemes.contrast.red.slice(0,salesValues.length),
                       fill: filled,
                     },
                   ],
@@ -216,108 +170,5 @@ export class DashboardController {
     } else {
       throw new BadRequestException('Invalid Request');
     }
-  }
-
-  colorSchemes(): any {
-    return {
-      red50: [
-        '#ffbeb2',
-        '#fdab9b',
-        '#fb9984',
-        '#f9856e',
-        '#f5715d',
-        '#f05c4d',
-        '#e74545',
-        '#da323f',
-        '#ca223c',
-        '#b8163a',
-        '#ae123a',
-        '#f77b66',
-        '#f5715d',
-        '#f36754',
-        '#f05c4d',
-        '#ec5049',
-        '#e74545',
-        '#e13b42',
-        '#da323f',
-        '#d3293d',
-        '#ca223c',
-        '#c11a3b',
-        '#b8163a',
-        '#ae123a',
-        '#f77b66',
-        '#f5715d',
-        '#f36754',
-        '#f05c4d',
-        '#ec5049',
-        '#e74545',
-        '#e13b42',
-        '#da323f',
-        '#d3293d',
-        '#ca223c',
-        '#c11a3b',
-        '#b8163a',
-        '#ae123a',
-      ],
-      constrast: [
-        '#1ba3c6',
-        '#2cb5c0',
-        '#30bcad',
-        '#21B087',
-        '#33a65c',
-        '#57a337',
-        '#a2b627',
-        '#d5bb21',
-        '#f8b620',
-        '#f89217',
-        '#f06719',
-        '#e03426',
-        '#f64971',
-        '#fc719e',
-        '#eb73b3',
-        '#ce69be',
-        '#a26dc2',
-        '#7873c0',
-        '#4f7cba',
-        '#1ba3c6',
-        '#2cb5c0',
-        '#30bcad',
-        '#21B087',
-        '#33a65c',
-        '#57a337',
-        '#a2b627',
-        '#d5bb21',
-        '#f8b620',
-        '#f89217',
-        '#f06719',
-        '#e03426',
-        '#f64971',
-        '#fc719e',
-        '#eb73b3',
-        '#ce69be',
-        '#a26dc2',
-        '#7873c0',
-        '#4f7cba',
-        '#1ba3c6',
-        '#2cb5c0',
-        '#30bcad',
-        '#21B087',
-        '#33a65c',
-        '#57a337',
-        '#a2b627',
-        '#d5bb21',
-        '#f8b620',
-        '#f89217',
-        '#f06719',
-        '#e03426',
-        '#f64971',
-        '#fc719e',
-        '#eb73b3',
-        '#ce69be',
-        '#a26dc2',
-        '#7873c0',
-        '#4f7cba',
-      ],
-    };
   }
 }

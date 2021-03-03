@@ -1,9 +1,11 @@
 import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
+import { HasRoles } from 'auth/guard/has-roles.decorator';
 import { JwtAuthGuard } from 'auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'auth/guard/roles.guard';
 import { User } from 'database/user.model';
 import { Observable } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
+import { RoleType } from 'shared/enum/role-type.enum';
 import { ParseObjectIdPipe } from '../shared/pipe/parse-object-id.pipe';
 import { RegisterDto } from './register.dto';
 import { UpdateUserDto } from './update-user.dto';
@@ -35,6 +37,7 @@ export class UserController {
   @Post()
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN)
   createUser(
     @Body() registerDto: RegisterDto): Observable<User> {
     const username = registerDto.username;
@@ -63,6 +66,7 @@ export class UserController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN)
   updateUser(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto): Observable<Partial<User>> {
@@ -80,6 +84,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN)
   deleteUser(
     @Param('id', ParseObjectIdPipe) id: string): Observable<User> {
       return this.userService.findById(id).pipe(

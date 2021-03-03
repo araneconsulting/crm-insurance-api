@@ -78,17 +78,6 @@ export class CreateSaleDto {
   chargesPaid: number;
 
   @IsOptional()
-  downPayment: number;
-  
-  @IsOptional()
-  sellerBonus: number;
+  premium: number;
 
-  @IsOptional()
-  grossProfit: number;
-
-  @IsOptional()
-  netProfit: number;
-
-  @IsOptional()
-  amountReceivable: number;
 }

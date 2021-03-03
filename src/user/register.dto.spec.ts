@@ -1,3 +1,4 @@
+import { LocationType } from 'shared/enum/location-type.enum';
 import { RegisterDto } from './register.dto';
 
 describe('RegisterDto', () => {
@@ -13,10 +14,9 @@ describe('RegisterDto', () => {
       firstName: 'Liuver',
       lastName: 'Duran',
       email: 'liuver@gmail.com',
-      location: 'MEXICO',
-      position: "SALES_AGENT",
+      location: LocationType.MEXICO,
+      position: "SELLER",
       baseSalary: 400,
-      saleBonusPercentage: 0.01,
     };
 
     expect(dto).toEqual(
@@ -27,9 +27,8 @@ describe('RegisterDto', () => {
         lastName: 'Duran',
         email: 'liuver@gmail.com',
         location: 'MEXICO',
-        position: 'SALES_AGENT',
+        position: 'SELLER',
         baseSalary: 400,
-        saleBonusPercentage: 0.01,
       }
     );
 

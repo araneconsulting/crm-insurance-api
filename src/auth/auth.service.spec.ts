@@ -50,7 +50,7 @@ describe('AuthService', () => {
             username,
             password: 'password',
             email: 'liuver@example.com',
-            roles: [RoleType.USER],
+            roles: [RoleType.SELLER],
             comparePassword: (password: string) => of(true)
           } as User);
         });
@@ -60,7 +60,7 @@ describe('AuthService', () => {
           expect(data.username).toBe('test');
           // expect(data.password).toBeUndefined();
           expect(data.email).toBe('liuver@example.com');
-          expect(data.roles).toEqual([RoleType.USER]);
+          expect(data.roles).toEqual([RoleType.SELLER]);
 
           //verify
           expect(userService.findByUsername).toBeCalledTimes(1);
@@ -77,7 +77,7 @@ describe('AuthService', () => {
             username,
             password: 'password',
             email: 'liuver@example.com',
-            roles: [RoleType.USER],
+            roles: [RoleType.SELLER],
             comparePassword: (password: string) => of(false)
           } as User);
         });
@@ -116,7 +116,11 @@ describe('AuthService', () => {
           username: 'test',
           id: '_id',
           email: 'liuver@example.com',
-          roles: [RoleType.USER],
+          roles: [RoleType.SELLER],
+          firstName: 'John',
+          lastName: 'Doe',
+          position: 'Sales Agent',
+          phone: '1234567890'
         })
         .subscribe({
           next: (data) => {
@@ -126,7 +130,7 @@ describe('AuthService', () => {
               upn: 'test',
               sub: '_id',
               email: 'liuver@example.com',
-              roles: [RoleType.USER],
+              roles: [RoleType.SELLER],
             });
           },
         });

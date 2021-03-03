@@ -146,7 +146,7 @@ const UserSchema = new Schema(
     firstName: { type: SchemaTypes.String, required: false },
     lastName: { type: SchemaTypes.String, required: false },
     roles: [
-      { type: SchemaTypes.String, enum: ['ADMIN', 'USER'], required: false },
+      { type: SchemaTypes.String, enum: ['ADMIN', 'OWNER','LEGAL','MANAGER','SELLER','ENDORSEMENTS','CERTIFICATES','TRAINEE'], required: false },
     ],
     //   createdAt: { type: SchemaTypes.Date, required: false },
     //   updatedAt: { type: SchemaTypes.Date, required: false },
@@ -165,7 +165,13 @@ export const userModelFn = (conn: Connection) =>
 //database/role-type.enum.ts
 export enum RoleType {
   ADMIN = 'ADMIN',
-  USER = 'USER',
+  LEGAL = 'LEGAL',
+  MANAGER = 'MANAGER',
+  SELLER = 'SELLER',
+  CERTIFICATES = 'CERTIFICATES',
+  ENDORSEMENTS = 'ENDORSEMENTS',
+  TRAINEE = 'TRAINEE',
+  OWNER = 'OWNER',
 }
 
 //database/database.providers.ts
@@ -333,7 +339,7 @@ export class PostController {
     
   @Post('')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
+  @HasRoles(RoleType.SELLER, RoleType.ADMIN)
   createPost(@Body() post: CreatePostDto): Observable<BlogPost> {
     //...
   }

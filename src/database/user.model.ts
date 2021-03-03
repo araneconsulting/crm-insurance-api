@@ -2,7 +2,6 @@ import { compare, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from "rxjs";
 import { LocationType } from 'shared/enum/location-type.enum';
-import { PositionType } from 'shared/enum/position-type.enum';
 import { RoleType } from '../shared/enum/role-type.enum';
 interface User extends Document<any> {
   comparePassword(password: string): Observable<boolean>;
@@ -14,9 +13,8 @@ interface User extends Document<any> {
   readonly phone: string;
   readonly roles: RoleType[];
   readonly location: LocationType;
-  readonly position: PositionType;
+  readonly position: string;
   readonly baseSalary: number;
-  readonly saleBonusPercentage: number;
 }
 
 type UserModel = Model<User>;
@@ -32,7 +30,6 @@ const UserSchema = new Schema<any>(
     location: { type: SchemaTypes.String, required: true },
     position: { type: SchemaTypes.String, required: true },
     baseSalary: SchemaTypes.Number,
-    saleBonusPercentage: SchemaTypes.Number,
     roles: [
       { type: SchemaTypes.String, required: false },
     ],

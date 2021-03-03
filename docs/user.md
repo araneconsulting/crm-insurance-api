@@ -80,7 +80,7 @@ export class UserService {
 
     const created = this.userModel.create({
       ...data,
-      roles: [RoleType.USER]
+      roles: [RoleType.SELLER]
     });
 
     return from(created);
@@ -331,7 +331,7 @@ describe('preSaveHook', () => {
 });
 ```
 
-Explore other tests for `comparePasswordMethod` etc in the [user.mdoel.sepc.ts](https://github.com/liuver/nestjs-sample/blob/master/src/database/user.mdoel.spec.ts).
+Explore other tests for `comparePasswordMethod` etc in the [user.model.sepc.ts](https://github.com/liuver/nestjs-sample/blob/master/src/database/user.mdoel.spec.ts).
 
 Now run the application, have a look at the log in the console about the user initialization, as you see the password stored in the MongoDB is hashed.
 
@@ -339,7 +339,7 @@ Now run the application, have a look at the log in the console about the user in
 (UserModule) is initialized...
 [
   {
-    roles: [ 'USER' ],
+    roles: [ 'SELLER' ],
     _id: 5f477055fb9a2b3fa4cb1c21,
     username: 'liuver',
     password: '$2b$12$/spjKM3Vdf5vRJE9u2cHaulIAWzKMbNVSyHjMp9E9PifbSEHTQrJy',

@@ -29,7 +29,6 @@ export class UserDataInitializerService
       location: 'USA',
       position: 'SYSTEM_ADMINISTRATOR',
       baseSalary: 800,
-      saleBonusPercentage: 0.01,
     };
     await Promise.all(
       [

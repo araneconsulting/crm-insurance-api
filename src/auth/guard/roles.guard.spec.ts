@@ -51,12 +51,12 @@ describe('RolesGuard', () => {
   it('should return true if the `HasRoles` decorator is set', async () => {
     jest
       .spyOn(reflector, 'get')
-      .mockImplementation((a: any, b: any) => [RoleType.USER]);
+      .mockImplementation((a: any, b: any) => [RoleType.SELLER]);
     const context = createMock<ExecutionContext>({
       getHandler: jest.fn(),
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue({
-          user: { roles: [RoleType.USER] },
+          user: { roles: [RoleType.SELLER] },
         } as AuthenticatedRequest),
       }),
     });
@@ -69,7 +69,7 @@ describe('RolesGuard', () => {
   it('should return false if the `HasRoles` decorator is set but role is not allowed', async () => {
     jest.spyOn(reflector, 'get').mockReturnValue([RoleType.ADMIN]);
     const request = {
-      user: { roles: [RoleType.USER] },
+      user: { roles: [RoleType.SELLER] },
     } as AuthenticatedRequest;
     const context = createMock<ExecutionContext>();
     const httpArgsHost = createMock<HttpArgumentsHost>({
@@ -117,7 +117,7 @@ describe('RolesGuard(ts-mockito)', () => {
 
     const arguHost = mock<HttpArgumentsHost>();
     when(arguHost.getRequest()).thenReturn({
-      user: { roles: [RoleType.USER] },
+      user: { roles: [RoleType.SELLER] },
     } as any);
 
     when(context.switchToHttp()).thenReturn(instance(arguHost));
@@ -125,7 +125,7 @@ describe('RolesGuard(ts-mockito)', () => {
 
     when(
       reflecter.get<RoleType[]>(HAS_ROLES_KEY, contextInstacne.getHandler()),
-    ).thenReturn([RoleType.USER] as RoleType[]);
+    ).thenReturn([RoleType.SELLER] as RoleType[]);
 
     const result = await guard.canActivate(contextInstacne);
     console.log(result);
@@ -143,7 +143,7 @@ describe('RolesGuard(ts-mockito)', () => {
     // logged in as USER
     const arguHost = mock<HttpArgumentsHost>();
     when(arguHost.getRequest()).thenReturn({
-      user: { roles: [RoleType.USER] },
+      user: { roles: [RoleType.SELLER] },
     } as any);
 
     when(context.switchToHttp()).thenReturn(instance(arguHost));
@@ -198,13 +198,13 @@ describe('RoelsGuard(jest-mock-extended)', () => {
 
     const arguHost = jestMock<HttpArgumentsHost>();
     arguHost.getRequest.mockReturnValue({
-      user: { roles: [RoleType.USER] },
+      user: { roles: [RoleType.SELLER] },
     } as any);
 
     context.switchToHttp.mockReturnValue(arguHost);
 
     reflecter.get
-      .mockReturnValue([RoleType.USER])
+      .mockReturnValue([RoleType.SELLER])
       .calledWith(HAS_ROLES_KEY, context.getHandler());
 
     const result = await guard.canActivate(context);
@@ -220,7 +220,7 @@ describe('RoelsGuard(jest-mock-extended)', () => {
 
     const arguHost = jestMock<HttpArgumentsHost>();
     arguHost.getRequest.mockReturnValue({
-      user: { roles: [RoleType.USER] },
+      user: { roles: [RoleType.SELLER] },
     } as any);
 
     context.switchToHttp.mockReturnValue(arguHost);

@@ -23,7 +23,6 @@ export class ReportController {
   @Get('/sales')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.USER, RoleType.ADMIN)
   async getSalesReport(
     @Req() req: Request,
     @Response() res,

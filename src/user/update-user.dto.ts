@@ -1,6 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional, MaxLength, MinLength } from "class-validator";
 import { LocationType } from "shared/enum/location-type.enum";
-import { PositionType } from "shared/enum/position-type.enum";
 
 export class UpdateUserDto {
 
@@ -39,13 +38,10 @@ export class UpdateUserDto {
 
     @IsOptional()
     @IsNotEmpty()
-    readonly position: PositionType;
+    readonly position: string;
 
     @IsOptional()
     @IsNotEmpty()
     readonly baseSalary: number;
     
-    @IsOptional()
-    @IsNotEmpty()
-    readonly saleBonusPercentage: number;
 }

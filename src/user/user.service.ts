@@ -47,7 +47,7 @@ export class UserService {
     //   ...data,
     //   verified: false,
     //   verifyCode: randomCode,
-    //   roles: [RoleType.USER]
+    //   roles: [RoleType.SELLER]
     // });
 
     //  Sendgrid can manage email templates, use an existing template is more reasonable.
@@ -67,7 +67,7 @@ export class UserService {
 
     const created = this.userModel.create({
       ...data,
-      //roles: [RoleType.USER]
+      //roles: [RoleType.SELLER]
     });
 
     return from(created);
