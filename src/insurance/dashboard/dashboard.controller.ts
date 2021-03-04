@@ -129,8 +129,6 @@ export class DashboardController {
                 (aggregation) => aggregation._id.label,
               );
 
-              console.log(colorSchemes.contrast.red.slice(0,salesValues.length))
-
               const filled = config.type != 'line';
               const legend = config.type === 'doughnut';
 
@@ -153,8 +151,6 @@ export class DashboardController {
                   },
                 },
               };
-
-              console.log(response);
 
               return response;
 
