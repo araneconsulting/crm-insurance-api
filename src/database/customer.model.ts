@@ -5,9 +5,9 @@ interface Customer extends Document<any> {
   readonly isCompany: boolean,
   readonly name: string,
   readonly email: string,
-  readonly phone: string
-  readonly createdBy?: Partial<User>;
-  readonly updatedBy?: Partial<User>;
+  readonly phone: string,
+  readonly createdBy?: Partial<User>,
+  readonly updatedBy?: Partial<User>
 }
 
 type CustomerModel = Model<Customer>;

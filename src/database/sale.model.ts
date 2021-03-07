@@ -5,6 +5,7 @@ import { Insurer } from './insurer.model';
 import { User } from './user.model';
 
 interface Sale extends Document<any> {
+  readonly type: string, //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
   readonly soldAt: string,
   readonly customer: Partial<Customer>,
   readonly seller: Partial<User>,
@@ -31,6 +32,7 @@ type SaleModel = Model<Sale>;
 
 const SaleSchema = new Schema<any>(
   {
+    type: SchemaTypes.String,
     soldAt: SchemaTypes.Date,
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },

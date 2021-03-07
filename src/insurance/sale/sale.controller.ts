@@ -26,10 +26,18 @@ import { SaleService } from './sale.service';
 import { UpdateSaleDto } from './update-sale.dto';
 import { Request } from 'express';
 import { User } from 'database/user.model';
+import { UserCatalog } from 'shared/const/catalog/user';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
+
+export const ROLES = {
+  MANAGER : UserCatalog.roles.filter
+}
+
 export class SaleController {
   constructor(private saleService: SaleService) { }
+
+
 
   @Get('')
   @HttpCode(200)
@@ -61,7 +69,7 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   createSale(
-    @Req() req,
+    @Req() req : Request,
     @Body() sale: CreateSaleDto
   ): Observable<Sale> {
     return from(this.saleService.save(sale, req.user));
@@ -72,7 +80,7 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   updateSale(
-    @Req() req,
+    @Req() req : Request,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() sale: UpdateSaleDto,
 

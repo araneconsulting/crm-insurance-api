@@ -29,7 +29,7 @@ describe('Sale Controller', () => {
     });
 
     it('GET on /sales should return all sales', async () => {
-      const sales = await controller.getAllSales().toPromise();
+      const sales = await controller.getAllSales(null,null).toPromise();
       expect(sales.length).toBe(3);
     });
 
@@ -39,97 +39,6 @@ describe('Sale Controller', () => {
         done();
       });
     });
-
- /*    it('POST on /sales should save sale', async () => {
-      const sale: CreateSaleDto = {
-      soldAt: "01-30-2020",
-      customer: {_id: 'dummyId',},
-      seller: {_id: 'dummyId',},
-      liabilityInsurer: {_id: 'dummyId',},
-      liabilityCharge: 1040.50,
-      cargoInsurer: {_id: 'dummyId',},
-      cargoCharge: 240.40,
-      physicalDamageInsurer: {_id: 'dummyId',},
-      physicalDamageCharge: 400.00,
-      wcGlUmbInsurer: {_id: 'dummyId',},
-      wcGlUmbCharge: 540.00,
-      fees: 230,
-      permits: 120,
-      tips: 20,
-      chargesPaid: 1400.00
-      };
-      const saved = await controller
-        .createSale(
-          sale,
-          createMock<Response>({
-            location: jest.fn().mockReturnValue({
-              status: jest.fn().mockReturnValue({
-                send: jest.fn().mockReturnValue({
-                  headers: { location: '/sales/sale_id' },
-                  status: 201,
-                }),
-              }),
-            }),
-          }),
-        )
-        .toPromise();
-      // console.log(saved);
-      expect(saved.status).toBe(201);
-    });
-
-    it('PUT on /sales/:id should update the existing sale', (done) => {
-      const sale: UpdateSaleDto = {
-      soldAt: "01-30-2020",
-      customer: {_id: 'dummyId',},
-      seller: {_id: 'dummyId',},
-      liabilityInsurer: {_id: 'dummyId',},
-      liabilityCharge: 1040.50,
-      cargoInsurer: {_id: 'dummyId',},
-      cargoCharge: 240.40,
-      physicalDamageInsurer: {_id: 'dummyId',},
-      physicalDamageCharge: 400.00,
-      wcGlUmbInsurer: {_id: 'dummyId',},
-      wcGlUmbCharge: 540.00,
-      fees: 230,
-      permits: 120,
-      tips: 20,
-      chargesPaid: 1400.00
-      };
-      controller
-        .updateSale(
-          '1',
-          sale,
-          createMock<Response>({
-            status: jest.fn().mockReturnValue({
-              send: jest.fn().mockReturnValue({
-                status: 204,
-              }),
-            }),
-          }),
-        )
-        .subscribe((data) => {
-          expect(data.status).toBe(204);
-          done();
-        });
-    });
-
-    it('DELETE on /sales/:id should delete sale', (done) => {
-      controller
-        .deleteSaleById(
-          '1',
-          createMock<Response>({
-            status: jest.fn().mockReturnValue({
-              send: jest.fn().mockReturnValue({
-                status: 204,
-              }),
-            }),
-          }),
-        )
-        .subscribe((data) => {
-          expect(data).toBeTruthy();
-          done();
-        });
-    }); */
   });
 
   describe('Replace SaleService in provider(useValue: fake object)', () => {
@@ -159,7 +68,7 @@ describe('Sale Controller', () => {
     });
 
     it('should get all sales(useValue: fake object)', async () => {
-      const result = await controller.getAllSales().toPromise();
+      const result = await controller.getAllSales(null,null).toPromise();
       expect(result[0]._id).toEqual('testid');
     });
   });

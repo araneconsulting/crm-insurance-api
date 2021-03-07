@@ -10,14 +10,3 @@ import { SaleService } from './sale.service';
   providers: [SaleService, SaleDataInitializerService],
 })
 export class SaleModule{}
-//  implements NestModule {
-//   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-//     consumer
-//       .apply(AuthenticationMiddleware)
-//       .forRoutes(
-//         { method: RequestMethod.POST, path: '/sales' },
-//         { method: RequestMethod.PUT, path: '/sales/:id' },
-//         { method: RequestMethod.DELETE, path: '/sales/:id' },
-//       );
-//   }
-// }

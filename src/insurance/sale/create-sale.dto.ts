@@ -1,8 +1,13 @@
-import { IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
 import { User } from 'database/user.model';
 export class CreateSaleDto {
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  type: string;
 
   @IsOptional()
   @IsDateString()
