@@ -10,7 +10,7 @@ import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 import { Model, Types } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
-import { mergeMap, throwIfEmpty } from 'rxjs/operators';
+import { filter, mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { RoleType } from 'shared/enum/role-type.enum';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import {
@@ -37,10 +37,15 @@ export class SaleService {
     user: Partial<User>,
     startDate?: string,
     endDate?: string,
+    type?: string,
   ): Promise<any> {
     const filterConditions = {
       soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
     };
+
+    if (type){
+      filterConditions['type'] = type;
+    }
 
     const query = this.saleModel.aggregate();
     query.match(filterConditions);
@@ -108,6 +113,7 @@ export class SaleService {
       .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
 
       .project({
+        type: '$type',
         soldAt: '$soldAt',
         liabilityCharge: { $round: ['$liabilityCharge', 2] },
         cargoCharge: { $round: ['$cargoCharge', 2] },

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
-export const DEFAULT_COMMISSION: number = -1;
+export const DEFAULT_COMMISSION = -1;
 export class CreateInsurerDto {
 
   @IsNotEmpty()

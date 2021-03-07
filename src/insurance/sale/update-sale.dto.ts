@@ -3,9 +3,13 @@ import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
 import { User } from 'database/user.model';
 
-export const DEFAULT_COMMISSION: number = 0.1;
+export const DEFAULT_COMMISSION = 0.1;
 
 export class UpdateSaleDto {
+
+  @IsOptional()
+  @IsNotEmpty()
+  type: string;
 
   @IsOptional()
   @IsDateString()

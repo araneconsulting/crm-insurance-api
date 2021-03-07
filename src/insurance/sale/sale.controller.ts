@@ -29,11 +29,6 @@ import { User } from 'database/user.model';
 import { UserCatalog } from 'shared/const/catalog/user';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
-
-export const ROLES = {
-  MANAGER : UserCatalog.roles.filter
-}
-
 export class SaleController {
   constructor(private saleService: SaleService) { }
 
@@ -46,10 +41,11 @@ export class SaleController {
     @Response() res,
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
+    @Query('type') type?: string,
   ): Promise<any> {
 
     const user: Partial<User> = req.user;
-    return res.json(await this.saleService.getAllSales(user, startDate, endDate));
+    return res.json(await this.saleService.getAllSales(user, startDate, endDate, type));
   }
 
   @Get(':id')
