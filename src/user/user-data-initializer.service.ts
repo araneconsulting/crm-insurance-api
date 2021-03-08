@@ -15,29 +15,6 @@ export class UserDataInitializerService
 
   async onModuleInit(): Promise<void> {
     console.log('(UserModule) is initialized...');
-
-    /*
-    await this.userModel.deleteMany({});
-
-    const admin = {
-      username: 'admin',
-      firstName: 'System',
-      lastName: '',
-      password: 'password',
-      email: 'admin@araneconsulting.com',
-      roles: [RoleType.ADMIN],
-      location: 'USA',
-      position: 'SYSTEM_ADMINISTRATOR',
-      baseSalary: 800,
-    };
-    await Promise.all(
-      [
-        this.userModel.create(admin)
-      ]
-    ).then(
-      data => console.log(data)
-    ); 
-    */
     
   }
 

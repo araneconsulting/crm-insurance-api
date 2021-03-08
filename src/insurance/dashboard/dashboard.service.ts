@@ -105,32 +105,32 @@ export class DashboardService {
 
   getModifiersByGroupingCriteria(groupingCriteria: string): any {
     switch (groupingCriteria) {
-      case GroupingCriteria.BY_SELLER:
+      case GroupingCriteria.SELLER:
         return {
           groupId: {
             id: '$seller._id',
             label: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
           },
         };
-      case GroupingCriteria.BY_LOCATION:
+      case GroupingCriteria.LOCATION:
         return {
           groupId: {
             label: '$seller.location',
           },
         };
-      case GroupingCriteria.BY_YEAR:
+      case GroupingCriteria.YEAR:
         return {
           groupId: {
             label: { $year: '$soldAt' },
           },
         };
-      case GroupingCriteria.BY_MONTH:
+      case GroupingCriteria.MONTH:
         return {
           groupId: {
             label: { $month: '$soldAt' },
           },
         };
-      case GroupingCriteria.BY_DAY:
+      case GroupingCriteria.DAY:
         return {
           groupId: {
             label: { $dayOfMonth: '$soldAt' },

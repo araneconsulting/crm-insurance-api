@@ -1,12 +1,28 @@
-import { ConflictException, Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { Customer } from 'database/customer.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 import { Model, Types } from 'mongoose';
-import { SALE_MODEL, USER_MODEL, CUSTOMER_MODEL } from '../../database/database.constants';
+import {
+  SALE_MODEL,
+  USER_MODEL,
+  CUSTOMER_MODEL,
+} from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-factory';
-import { MetricsLayout } from 'shared/enum/metrics-layout.enum';
-
+import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
+import { ADMIN_ROLES, COMPANY, METRICS } from 'shared/const/project-constants';
+import * as moment from 'moment';
+import { UserCatalog } from 'shared/const/catalog/user';
+import { EMPTY, from, of } from 'rxjs';
+import { mergeMap, throwIfEmpty } from 'rxjs/operators';
+import { ReportCatalog } from 'shared/const/catalog/report';
+import { bonusByRole } from './salary-functions';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -14,99 +30,109 @@ export class ReportService {
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
-  ) { }
+  ) {}
 
-  async getSalesMetrics(user: Partial<User>, startDate?: string, endDate?: string, filterField?: string, filterValue?: string, metricsLayout: string = MetricsLayout.FULL): Promise<any> {
-
+  async getSalesMetrics(
+    user: Partial<User>,
+    startDate?: string,
+    endDate?: string,
+    filterField?: string,
+    filterValue?: string,
+    groupBy?: string,
+    groupByFields?: string[],
+    fields: string[] = METRICS.sales.returnedFields,
+    withCount = false,
+  ): Promise<any> {
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
     let location: string = null;
 
     const filterConditions = {
-      "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
+      soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
     };
 
     switch (filterField) {
       case 'seller':
         seller = await this.userModel.findById(filterValue).exec();
         if (!seller) {
-          throw new NotFoundException(`Seller: ${filterValue} not found`)
+          throw new NotFoundException(`Seller: ${filterValue} not found`);
         }
-        filterConditions["seller"] = Types.ObjectId(seller.id);
+        filterConditions['seller'] = Types.ObjectId(seller.id);
         break;
 
       case 'customer':
         customer = await this.customerModel.findById(filterValue).exec();
         if (!customer) {
-          throw new NotFoundException(`Customer: ${filterValue} not found`)
+          throw new NotFoundException(`Customer: ${filterValue} not found`);
         }
-        filterConditions["customer"] = Types.ObjectId(customer.id);
+        filterConditions['customer'] = Types.ObjectId(customer.id);
         break;
 
       case 'location':
         location = filterValue;
-        filterConditions["seller.location"] = location;
+        filterConditions['seller.location'] = location;
         break;
     }
 
-    const id = this.getIdByMetricsLayout(metricsLayout);
+    const id = this.GetGroupingId(groupBy, groupByFields);
 
     const query = this.saleModel.aggregate();
 
-    if ((!seller && !customer && !location) || (seller || customer)) {
+    if ((!seller && !customer && !location) || seller || customer) {
       query.match(filterConditions);
-    } 
+    }
 
     query
-      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
       .lookup({
-        "from": "users",
-        "localField": "seller",
-        "foreignField": "_id",
-        "as": "seller"
+        from: 'users',
+        localField: 'seller',
+        foreignField: '_id',
+        as: 'seller',
       })
-      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
 
     if (location) {
       query.match(filterConditions);
     }
 
-    query.unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
-      .lookup({
-        "from": "customers",
-        "localField": "customer",
-        "foreignField": "_id",
-        "as": "customer"
-      })
-    query.unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
-
     query
-      .group(
-        {
-          "_id": id,
-          "liabilityCharge": { "$sum": "$liabilityCharge" },
-          "cargoCharge": { "$sum": "$cargoCharge" },
-          "physicalDamageCharge": { "$sum": "$physicalDamageCharge" },
-          "wcGlUmbCharge": { "$sum": "$wcGlUmbCharge" },
-          "tips": { "$sum": "$tips" },
-          "permits": { "$sum": "$permits" },
-          "fees": { "$sum": "$fees" },
-          "premium": { "$sum": "$premium" },
-          "chargesPaid": { "$sum": "$chargesPaid" },
-          "amountReceivable": { "$sum": "$amountReceivable" },
-          'totalCharge': { "$sum": "$totalCharge" },
-          "sales": { "$sum": 1 }
-        }
-      );
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'customers',
+        localField: 'customer',
+        foreignField: '_id',
+        as: 'customer',
+      });
+    query.unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
+
+    const groupExpression = {};
+    fields.map(
+      (field) =>
+        (groupExpression[''.concat(field)] = { $sum: '$'.concat(field) }),
+    );
+
+    groupExpression['_id'] = id;
+    if (withCount) {
+      groupExpression['count'] = { $sum: 1 };
+    }
+
+    query.group(groupExpression);
+
     return query;
   }
 
-  async getAllSales(user: Partial<User>, startDate?: string, endDate?: string, filterField?: string, filterValue?: string): Promise<any> {
-
+  async getAllSales(
+    user: Partial<User>,
+    startDate?: string,
+    endDate?: string,
+    filterField?: string,
+    filterValue?: string,
+  ): Promise<any> {
     const filterConditions = {
-      "soldAt": this.getDateMatchExpressionByDates(startDate, endDate)
+      soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
     };
-    
+
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
     let location: string = null;
@@ -115,170 +141,249 @@ export class ReportService {
       case 'seller':
         seller = await this.userModel.findById(filterValue).exec();
         if (!seller) {
-          throw new NotFoundException(`Seller: ${filterValue} not found`)
+          throw new NotFoundException(`Seller: ${filterValue} not found`);
         }
-        filterConditions["seller"] = Types.ObjectId(seller.id);
+        filterConditions['seller'] = Types.ObjectId(seller.id);
         break;
 
       case 'customer':
         customer = await this.customerModel.findById(filterValue).exec();
         if (!customer) {
-          throw new NotFoundException(`Customer: ${filterValue} not found`)
+          throw new NotFoundException(`Customer: ${filterValue} not found`);
         }
-        filterConditions["customer"] = Types.ObjectId(customer.id);
+        filterConditions['customer'] = Types.ObjectId(customer.id);
         break;
 
       case 'location':
         location = filterValue;
-        filterConditions["seller.location"] = location;
+        filterConditions['seller.location'] = location;
         break;
     }
 
-    
-
     const query = this.saleModel.aggregate();
 
-    if ((!seller && !customer && !location) || (seller || customer)) {
+    if ((!seller && !customer && !location) || seller || customer) {
       query.match(filterConditions);
-    } 
+    }
 
     query
-      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
       .lookup({
-        "from": "users",
-        "localField": "seller",
-        "foreignField": "_id",
-        "as": "seller"
+        from: 'users',
+        localField: 'seller',
+        foreignField: '_id',
+        as: 'seller',
       })
-      .unwind({ "path": "$seller", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
 
     if (location) {
       query.match(filterConditions);
     }
 
     query
-      .unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
       .lookup({
-        "from": "customers",
-        "localField": "customer",
-        "foreignField": "_id",
-        "as": "customer"
+        from: 'customers',
+        localField: 'customer',
+        foreignField: '_id',
+        as: 'customer',
       })
-      .unwind({ "path": "$customer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
 
-      .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
       .lookup({
-        "from": "insurers",
-        "localField": "liabilityInsurer",
-        "foreignField": "_id",
-        "as": "liabilityInsurer"
+        from: 'insurers',
+        localField: 'liabilityInsurer',
+        foreignField: '_id',
+        as: 'liabilityInsurer',
       })
-      .unwind({ "path": "$liabilityInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
 
-      .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
       .lookup({
-        "from": "insurers",
-        "localField": "cargoInsurer",
-        "foreignField": "_id",
-        "as": "cargoInsurer"
+        from: 'insurers',
+        localField: 'cargoInsurer',
+        foreignField: '_id',
+        as: 'cargoInsurer',
       })
-      .unwind({ "path": "$cargoInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
 
-      .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({
+        path: '$physicalDamageInsurer',
+        preserveNullAndEmptyArrays: true,
+      })
       .lookup({
-        "from": "insurers",
-        "localField": "physicalDamageInsurer",
-        "foreignField": "_id",
-        "as": "physicalDamageInsurer"
+        from: 'insurers',
+        localField: 'physicalDamageInsurer',
+        foreignField: '_id',
+        as: 'physicalDamageInsurer',
       })
-      .unwind({ "path": "$physicalDamageInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({
+        path: '$physicalDamageInsurer',
+        preserveNullAndEmptyArrays: true,
+      })
 
-      .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
       .lookup({
-        "from": "insurers",
-        "localField": "wcGlUmbInsurer",
-        "foreignField": "_id",
-        "as": "wcGlUmbInsurer"
+        from: 'insurers',
+        localField: 'wcGlUmbInsurer',
+        foreignField: '_id',
+        as: 'wcGlUmbInsurer',
       })
-      .unwind({ "path": "$wcGlUmbInsurer", "preserveNullAndEmptyArrays": true })
+      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
 
-      .project(
-        {
-          'soldAt': '$soldAt',
-          'liabilityCharge': '$liabilityCharge',
-          'cargoCharge': '$cargoCharge',
-          'physicalDamageCharge': '$physicalDamageCharge',
-          'wcGlUmbCharge': '$wcGlUmbCharge',
-          'fees': '$fees',
-          'permits': '$permits',
-          'tips': '$tips',
-          'chargesPaid': '$chargesPaid',
-          'premium': '$premium',
-          'amountReceivable': '$amountReceivable',
-          'totalCharge':'$totalCharge',
-          'createdBy': '$createdBy',
-          'updatedBy': '$updatedBy',
-          'seller': 1,
-          'customer': 1,
-          'liabilityInsurer': 1,
-          'cargoInsurer': 1,
-          'physicalDamageInsurer': 1,
-          'wcGlUmbInsurer': 1,
-        }
-      )
-      .sort({ soldAt: -1 })
-
+      .project({
+        soldAt: '$soldAt',
+        liabilityCharge: '$liabilityCharge',
+        cargoCharge: '$cargoCharge',
+        physicalDamageCharge: '$physicalDamageCharge',
+        wcGlUmbCharge: '$wcGlUmbCharge',
+        fees: '$fees',
+        permits: '$permits',
+        tips: '$tips',
+        chargesPaid: '$chargesPaid',
+        premium: '$premium',
+        amountReceivable: '$amountReceivable',
+        totalCharge: '$totalCharge',
+        createdBy: '$createdBy',
+        updatedBy: '$updatedBy',
+        seller: 1,
+        customer: 1,
+        liabilityInsurer: 1,
+        cargoInsurer: 1,
+        physicalDamageInsurer: 1,
+        wcGlUmbInsurer: 1,
+      })
+      .sort({ soldAt: -1 });
 
     return query;
   }
 
   getDateMatchExpressionByRange(dateRange: string): any {
-
     //Set filtering conditions
     const dates = DateFactory.dateRangeByName(dateRange);
 
     return dateRange
-      ? { $gte: new Date(dates.start+'T00:00:00.000Z'), $lte: new Date(dates.end+'T23:59:59.999Z') }
-      : { $lte: new Date() };    
+      ? {
+          $gte: new Date(dates.start + 'T00:00:00.000Z'),
+          $lte: new Date(dates.end + 'T23:59:59.999Z'),
+        }
+      : { $lte: new Date() };
   }
 
-  getDateMatchExpressionByDates(startDate?: string, endDate?:string): any {
-    if (startDate && endDate){
-      return { $gte: new Date(startDate+'T00:00:00.000Z'), $lte: new Date(endDate+'T23:59:59.999Z') }
-    } else if (startDate){
-      return { $gte: new Date(startDate+'T00:00:00.000Z')}
-    } else if (endDate){
-      return { $lte: new Date(endDate+'T23:59:59.999Z')}
-    } else return { $lte: new Date() };    
+  getDateMatchExpressionByDates(startDate?: string, endDate?: string): any {
+
+    if (startDate && endDate) {
+      return {
+        $gte: new Date(moment(startDate).startOf('day').toISOString()),
+        $lte: new Date(moment(endDate).endOf('day').toISOString()),
+      };
+    } else if (startDate) {
+      return { $gte: new Date(moment(startDate).startOf('day').toISOString()) };
+    } else if (endDate) {
+      return { $lte: new Date(moment(endDate).endOf('day').toISOString()) };
+    } else
+      return { $lte: new Date(moment(endDate).endOf('day').toISOString()) };
   }
 
+  GetGroupingId(groupingCriteria: string, fields?: string[]): any {
+    let idExpression = null;
 
-  getIdByMetricsLayout(layout: string): any {
-    switch (layout) {
-      case MetricsLayout.BY_SELLER:
-        return {
-          "id": "$seller._id",
-          "firstName": "$seller.firstName",
-          "lastName": "$seller.lastName",
-          "location": "$seller.location"
+    switch (groupingCriteria) {
+      case GroupingCriteria.SELLER:
+        idExpression = {
+          id: '$seller._id',
+          firstName: '$seller.firstName',
+          lastName: '$seller.lastName',
+          location: '$seller.location',
+          roles: '$seller.roles',
         };
+
+        fields.map(
+          (field) =>
+            (idExpression[''.concat(field.trim())] = '$seller.'.concat(
+              field.trim(),
+            )),
+        );
         break;
-      case MetricsLayout.BY_CUSTOMER:
-        return {
-          "id": "$customer._id",
-          "name": "$customer.name",
-          "isCompany": "$customer.isCompany"
+
+      case GroupingCriteria.CUSTOMER:
+        idExpression = {
+          id: '$customer._id',
+          name: '$customer.name',
+          isCompany: '$customer.isCompany',
         };
+
+        fields.map(
+          (field) =>
+            (idExpression[''.concat(field.trim())] = '$customer.'.concat(
+              field.trim(),
+            )),
+        );
         break;
-      case MetricsLayout.BY_LOCATION:
-        return {
-          "location": "$seller.location"
+
+      case GroupingCriteria.LOCATION:
+        idExpression = {
+          location: '$seller.location',
         };
     }
-    return null;
+    return idExpression;
   }
 
+  async getSalaryReport(
+    user: Partial<User>,
+    month: number,
+    year: number,
+    seller?: string,
+  ): Promise<any> {
+    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
+      .subtract(1, 'month')
+      .toISOString();
+    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
+      .subtract(1, 'day')
+      .toISOString();
 
+    let employeeMetrics = await this.getSalesMetrics(
+      user,
+      startDate,
+      endDate,
+      seller ? 'seller' : null,
+      seller ? seller : null,
+      'SELLER',
+      ['baseSalary'],
+      ['totalCharge', 'tips'],
+      true,
+    );
+
+    employeeMetrics = employeeMetrics.map((metric) => {
+      const result = metric._id;
+      result['totalCharge'] = metric.totalCharge;
+      result['tips'] = metric.tips;
+
+      return result;
+    });
+
+    const officeTotalSales =
+      employeeMetrics && employeeMetrics.length
+        ? employeeMetrics.reduce(
+            (accumulator, item) => accumulator + item.totalCharge,
+            0,
+          )
+        : 0;
+
+    employeeMetrics = employeeMetrics.map((employeeInfo) => {
+      employeeInfo['bonus'] = bonusByRole(
+        employeeInfo.roles[0],        
+        employeeInfo.location,
+        employeeInfo.totalCharge,
+        employeeMetrics.length,
+        officeTotalSales,
+      );
+      employeeInfo['total'] = Math.round(employeeInfo.baseSalary + employeeInfo['bonus']+ employeeInfo.tips);
+
+      return employeeInfo;
+    });
+    
+    return employeeMetrics;
+  }
 }
-
-

@@ -26,7 +26,7 @@ describe('RegisterDto', () => {
         firstName: 'Liuver',
         lastName: 'Duran',
         email: 'liuver@gmail.com',
-        location: 'MEXICO',
+        location: LocationType.MEXICO,
         position: 'SELLER',
         baseSalary: 400,
       }

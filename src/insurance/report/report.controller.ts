@@ -6,7 +6,7 @@ import {
   Req,
   Response,
   Scope,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
@@ -18,7 +18,7 @@ import { Request } from 'express';
 
 @Controller({ path: 'reports', scope: Scope.REQUEST })
 export class ReportController {
-  constructor(private reportService: ReportService  ) { }
+  constructor(private reportService: ReportService) {}
 
   @Get('/sales')
   @HttpCode(200)
@@ -30,15 +30,68 @@ export class ReportController {
     @Query('end_date') endDate?: string,
     @Query('filter_field') filterField?: string,
     @Query('filter_value') filterValue?: string,
-    @Query('metrics_layout') metricsLayout?:string
+    @Query('group_by') groupBy?: string,
+    @Query('group_by_fields') groupByFields?: string,
+    @Query('fields') fields?: string,
+    @Query('with_count') withCount?: boolean,
+    @Query('with_sales') withSales?: boolean,
+  ): Promise<any> {
+    console.log(withCount, withCount);
+
+    const user: Partial<User> = req.user;
+
+    const fieldsArray = fields ? fields.replace(/\s/g, '').split(',') : [];
+    const groupByFieldsArray = groupByFields ? groupByFields.replace(/\s/g, '').split(',') : [];
+
+    const response = {
+      metrics: await this.reportService.getSalesMetrics(
+        user,
+        startDate,
+        endDate,
+        filterField ? filterField.toLowerCase() : null,
+        filterValue ? filterValue.toUpperCase() : null,
+        groupBy,
+        groupByFieldsArray,
+        fieldsArray,
+        withCount,
+      ),
+    };
+
+    if (withSales===true) {
+      response['sales'] = await this.reportService.getAllSales(
+        user,
+        startDate,
+        endDate,
+        filterField ? filterField.toLowerCase() : null,
+        filterValue ? filterValue.toUpperCase() : null,
+      );
+    }
+
+    return res.json(response);
+  }
+
+  @Get('/salaries')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getSalaryReport(
+    @Req() req: Request,
+    @Response() res,
+    @Query('month') month: number,
+    @Query('year') year: number,
+    @Query('seller') seller?: string,
   ): Promise<any> {
 
     const user: Partial<User> = req.user;
 
     const response = {
-      "metrics": await this.reportService.getSalesMetrics(user, startDate, endDate, filterField?filterField.toLowerCase():null, filterValue?filterValue.toUpperCase():null, metricsLayout),
-      "sales": await this.reportService.getAllSales(user, startDate, endDate, filterField?filterField.toLowerCase():null, filterValue?filterValue.toUpperCase():null),
-    }
+      salaries: await this.reportService.getSalaryReport(
+        user,
+        month, 
+        year, 
+        seller
+      ),
+    };
+
     return res.json(response);
   }
 }

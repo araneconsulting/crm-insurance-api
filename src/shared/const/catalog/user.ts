@@ -4,13 +4,13 @@ export const UserCatalog = {
       id: 'ADMIN',
       name: 'System Administrator',
       description: '',
-      groups: 'ADMIN',
+      groups: ['ADMIN'],
     },
     {
       id: 'CERTIFICATES',
       name: 'Certificates Assistant',
       description: '',
-      groups: 'EMPLOYEE',
+      groups: ['EMPLOYEE'],
     },
     {
       id: 'ENDORSEMENTS',

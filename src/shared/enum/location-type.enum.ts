@@ -1,4 +1,4 @@
 export enum LocationType {
-  MEXICO = 'MEXICO',
-  USA = 'USA',
+  MEXICO = 'MEXICO-I',
+  USA = 'USA-I',
 }

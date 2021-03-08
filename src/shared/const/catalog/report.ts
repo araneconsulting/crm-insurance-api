@@ -5,15 +5,15 @@ export const ReportCatalog = {
       name: 'All values',
     },
     {
-      id: 'BY_SELLER',
+      id: 'SELLER',
       name: 'By Seller',
     },
     {
-      id: 'BY_CUSTOMER',
+      id: 'CUSTOMER',
       name: 'By Customer',
     },
     {
-      id: 'BY_LOCATION',
+      id: 'LOCATION',
       name: 'By Location',
     },
   ],

@@ -1,7 +1,7 @@
 export enum GroupingCriteria {  
-  BY_YEAR = 'year',
-  BY_MONTH = 'month',
-  BY_DAY = 'day',
-  BY_LOCATION = 'location',
-  BY_SELLER = 'seller',
+  YEAR = 'year',
+  MONTH = 'month',
+  DAY = 'day',
+  LOCATION = 'location',
+  SELLER = 'seller',
 }

@@ -1,6 +1,7 @@
 import { compare, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from "rxjs";
+import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
 import { LocationType } from 'shared/enum/location-type.enum';
 import { RoleType } from '../shared/enum/role-type.enum';
 interface User extends Document<any> {
@@ -15,6 +16,7 @@ interface User extends Document<any> {
   readonly location: LocationType;
   readonly position: string;
   readonly baseSalary: number;
+  readonly startedAt: string,
 }
 
 type UserModel = Model<User>;
@@ -30,6 +32,7 @@ const UserSchema = new Schema<any>(
     location: { type: SchemaTypes.String, required: true },
     position: { type: SchemaTypes.String, required: true },
     baseSalary: SchemaTypes.Number,
+    startedAt: SchemaTypes.Date,
     roles: [
       { type: SchemaTypes.String, required: false },
     ],
@@ -66,11 +69,23 @@ function comparePasswordMethod(password: string): Observable<boolean> {
 
 UserSchema.methods.comparePassword = comparePasswordMethod;
 
-function nameGetHook() {
+function nameGetHook() : string {
   return `${this.firstName} ${this.lastName}`;
 }
 
 UserSchema.virtual('name').get(nameGetHook);
+
+function isAdminGetHook() : boolean{
+  return ADMIN_ROLES.includes(this.roles[0]);
+}
+
+UserSchema.virtual('isAdmin').get(isAdminGetHook);
+
+function isSellerGetHook() : boolean{
+  return SELLER_ROLES.includes(this.roles[0]);
+}
+
+UserSchema.virtual('isSeller').get(isSellerGetHook);
 
 UserSchema.virtual('sales', {
   ref: 'Sale',
@@ -81,4 +96,4 @@ UserSchema.virtual('sales', {
 const userModelFn: (conn: Connection) => UserModel = (conn: Connection) =>
   conn.model<User, UserModel>('User', UserSchema, 'users');
 
-export { User, UserModel, UserSchema, preSaveHook, nameGetHook, comparePasswordMethod, userModelFn };
+export { User, UserModel, UserSchema, preSaveHook, nameGetHook, isAdminGetHook, isSellerGetHook, comparePasswordMethod, userModelFn };
