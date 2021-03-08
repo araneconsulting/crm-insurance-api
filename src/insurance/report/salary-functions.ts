@@ -27,7 +27,7 @@ export function bonusByRole(
           break;
 
         case RoleType.LEGAL:
-          if (officeEmployees >= 20) bonus += 8000;
+          if (officeEmployees >= 20) bonus += 400;
 
           if (
             officeTotalSales >
@@ -41,16 +41,16 @@ export function bonusByRole(
             employeeTotalSales > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
             employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
-            bonus += bonus * 0.005;
+            bonus += employeeTotalSales * 0.005;
 
           if (
             employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
             employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
-            bonus += bonus * 0.01 + 50;
+            bonus += employeeTotalSales * 0.01 + 50;
 
           if (employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
-            bonus += bonus * 0.01 + 100;
+            bonus += employeeTotalSales * 0.01 + 100;
 
           if (
             officeTotalSales >
@@ -64,21 +64,21 @@ export function bonusByRole(
             employeeTotalSales > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
             employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
-            bonus += bonus * 0.005;
+            bonus += employeeTotalSales * 0.005;
 
           if (
             employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
             employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
-            bonus += bonus * 0.01 + 50;
+            bonus += employeeTotalSales * 0.01 + 50;
 
           if (employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
-            bonus += bonus * 0.01 + 100;
+            bonus += employeeTotalSales * 0.01 + 100;
           break;
 
         case RoleType.TRAINEE:
           if (employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE)
-            bonus += bonus * 0.01 + 50;
+            bonus += employeeTotalSales * 0.01 + 50;
           break;
 
         case RoleType.OWNER:
