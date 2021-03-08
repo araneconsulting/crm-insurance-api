@@ -272,7 +272,6 @@ export class ReportService {
   }
 
   getDateMatchExpressionByDates(startDate?: string, endDate?: string): any {
-
     if (startDate && endDate) {
       return {
         $gte: new Date(moment(startDate).startOf('day').toISOString()),
@@ -347,10 +346,10 @@ export class ReportService {
       user,
       startDate,
       endDate,
-      seller ? 'seller' : null,
-      seller ? seller : null,
+      null,
+      null,
       'SELLER',
-      ['baseSalary'],
+      [],
       ['totalCharge', 'tips'],
       true,
     );
@@ -371,19 +370,55 @@ export class ReportService {
           )
         : 0;
 
-    employeeMetrics = employeeMetrics.map((employeeInfo) => {
+    let allUsers = [];
+
+    if (seller) {
+      try{
+      const user: any = await this.userModel.findOne({ _id: seller }).exec();
+      const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+
+      const result = {
+        ...user._doc,
+        totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+        tips: userMetrics ? userMetrics.tips : 0,
+      };
+
+      allUsers.push(result);
+
+      } catch (e){
+        throw new NotFoundException('User not found');
+      }
+      
+    } else {
+      const users: any[] = await this.userModel.find({}).exec();
+      allUsers = users.map((user) => {
+        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+
+        const result = {
+          ...user._doc,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          tips: userMetrics ? userMetrics.tips : 0,
+        };
+
+        return result;
+      });
+    }
+
+    const payroll = allUsers.map((employeeInfo) => {
       employeeInfo['bonus'] = bonusByRole(
-        employeeInfo.roles[0],        
+        employeeInfo.roles[0],
         employeeInfo.location,
         employeeInfo.totalCharge,
         employeeMetrics.length,
         officeTotalSales,
       );
-      employeeInfo['total'] = Math.round(employeeInfo.baseSalary + employeeInfo['bonus']+ employeeInfo.tips);
+      employeeInfo['total'] = Math.round(
+        employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips,
+      );
 
       return employeeInfo;
     });
-    
-    return employeeMetrics;
+
+    return payroll;
   }
 }
