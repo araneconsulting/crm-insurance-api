@@ -1,5 +1,4 @@
 import { Connection, Document, Model, Mongoose, Schema, SchemaType, SchemaTypes } from 'mongoose';
-import { CommissionPercentage } from 'shared/enum/commission-percentage.enum';
 import { Customer } from './customer.model';
 import { Insurer } from './insurer.model';
 import { User } from './user.model';

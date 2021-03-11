@@ -1,5 +1,4 @@
 import {
-  ExecutionContext,
   Inject,
   Injectable,
   NotFoundException,
@@ -10,41 +9,39 @@ import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 import { Model, Types } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
-import { filter, mergeMap, throwIfEmpty } from 'rxjs/operators';
-import { RoleType } from 'shared/enum/role-type.enum';
+import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
-import {
-  CUSTOMER_MODEL,
-  SALE_MODEL,
-  USER_MODEL,
-} from '../../database/database.constants';
+import { CUSTOMER_MODEL, SALE_MODEL,USER_MODEL,} from '../../database/database.constants';
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
-import * as DateFactory from 'shared/util/date-factory';
+import * as DateFactory from 'shared/util/date-functions';
 import { Customer } from 'database/customer.model';
-import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
+import { isAdmin, isSeller } from 'shared/util/user-functions';
+import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
-    @Inject(USER_MODEL) private userModel: Model<User>,
-    @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
-  async getAllSales(
+  async findAll(
     user: Partial<User>,
     startDate?: string,
     endDate?: string,
     type?: string,
   ): Promise<any> {
     const filterConditions = {
-      soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
+      soldAt: getDateMatchExpressionByDates(startDate, endDate),
     };
 
-    if (type){
+    if (type) {
       filterConditions['type'] = type;
+    }
+
+    if (!isAdmin(user)) {
+      filterConditions['seller'] = Types.ObjectId(user.id);
     }
 
     const query = this.saleModel.aggregate();
@@ -141,52 +138,6 @@ export class SaleService {
     return query;
   }
 
-  findAll(
-    user: Partial<User>,
-    //keyword?: string,
-    skip = 0,
-    limit = 0,
-    withSeller = false,
-    withCustomer = false,
-    withInsurers = false,
-    dateRange?: string,
-  ): Observable<Sale[]> {
-    const userRole =
-      user.roles && user.roles[0] ? user.roles[0] : RoleType.SELLER;
-
-    const dates = DateFactory.dateRangeByName(dateRange);
-
-    const expression = {};
-    expression['soldAt'] = dateRange
-      ? { $gte: new Date(dates.start), $lte: new Date(dates.end) }
-      : { $lte: new Date() };
-
-    if (userRole == RoleType.SELLER) {
-      expression['seller'] = user.id;
-    }
-
-    const saleQuery = this.saleModel.find(expression).skip(skip).limit(limit);
-
-    if (withSeller) {
-      saleQuery.populate({ path: 'seller' });
-    }
-
-    if (withCustomer) {
-      saleQuery.populate('customer');
-    }
-
-    if (withInsurers) {
-      saleQuery.populate('liabilityInsurer');
-      saleQuery.populate('cargoInsurer');
-      saleQuery.populate('physicalDamageInsurer');
-      saleQuery.populate('wcGlUmbInsurer');
-    }
-
-    saleQuery.sort({ soldAt: 'desc' });
-
-    return from(saleQuery.exec());
-  }
-
   findById(
     id: string,
     withSeller = false,
@@ -217,10 +168,7 @@ export class SaleService {
   }
 
   save(data: CreateSaleDto, user: Partial<User>): Observable<Sale> {
-    if (
-      (ADMIN_ROLES.includes(user.roles[0]) && !data.seller) ||
-      SELLER_ROLES.includes(user.roles[0])
-    ) {
+    if ((isAdmin(user) && !data.seller) || isSeller(user)) {
       data.seller = user.id;
     }
 
@@ -236,32 +184,31 @@ export class SaleService {
     data: UpdateSaleDto,
     user: Partial<User>,
   ): Observable<Sale> {
-    if (
-      (ADMIN_ROLES.includes(user.roles[0]) && !data.seller) ||
-      SELLER_ROLES.includes(user.roles[0])
-    ) {
-      data.seller = user.id;
+    if ((isAdmin(user) && !data.seller) || isSeller(user)) {
+      {
+        data.seller = user.id;
+      }
+
+      return from(
+        this.saleModel
+          .findOneAndUpdate({ _id: id }, { ...data }, { new: true })
+          .exec(),
+      ).pipe(
+        mergeMap((p) => (p ? of(p) : EMPTY)),
+        throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
+      );
+
+      // const filter = { _id: id };
+      // const update = { ...data, updatedBy: { _id: this.req.user.id } };
+      // return from(this.saleModel.findOne(filter).exec()).pipe(
+      //   mergeMap((sale) => (sale ? of(sale) : EMPTY)),
+      //   throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
+      //   switchMap((p, i) => {
+      //     return from(this.saleModel.updateOne(filter, update).exec());
+      //   }),
+      //   map((res) => res.nModified),
+      // );
     }
-
-    return from(
-      this.saleModel
-        .findOneAndUpdate({ _id: id }, { ...data }, { new: true })
-        .exec(),
-    ).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-    );
-
-    // const filter = { _id: id };
-    // const update = { ...data, updatedBy: { _id: this.req.user.id } };
-    // return from(this.saleModel.findOne(filter).exec()).pipe(
-    //   mergeMap((sale) => (sale ? of(sale) : EMPTY)),
-    //   throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-    //   switchMap((p, i) => {
-    //     return from(this.saleModel.updateOne(filter, update).exec());
-    //   }),
-    //   map((res) => res.nModified),
-    // );
   }
 
   deleteById(id: string): Observable<Sale> {

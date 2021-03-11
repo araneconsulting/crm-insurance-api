@@ -37,7 +37,7 @@ export class SaleController {
   @Get('')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async getAllSales(@Req() req: Request,
+  async findAll(@Req() req: Request,
     @Response() res,
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
@@ -45,7 +45,7 @@ export class SaleController {
   ): Promise<any> {
 
     const user: Partial<User> = req.user;
-    return res.json(await this.saleService.getAllSales(user, startDate, endDate, type));
+    return res.json(await this.saleService.findAll(user, startDate, endDate, type));
   }
 
   @Get(':id')

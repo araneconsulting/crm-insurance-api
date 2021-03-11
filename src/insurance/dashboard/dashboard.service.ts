@@ -1,23 +1,15 @@
 import {
-  ConflictException,
   Inject,
   Injectable,
-  NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { Customer } from 'database/customer.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
+import { getModifiersByGroupingCriteria, getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import {
   SALE_MODEL,
-  USER_MODEL,
-  CUSTOMER_MODEL,
 } from '../../database/database.constants';
-import * as DateFactory from 'shared/util/date-factory';
-import { GroupingCriteria } from 'shared/enum/grouping-criteria';
-
-import * as ProjectConstants from 'shared/const/project-constants';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DashboardService {
@@ -33,7 +25,7 @@ export class DashboardService {
     location?: string,
   ): Promise<any> {
     const filterConditions = {
-      soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
+      soldAt: getDateMatchExpressionByDates(startDate, endDate),
     };
 
     if (location) {
@@ -42,7 +34,7 @@ export class DashboardService {
 
     const query = this.saleModel.aggregate();
 
-    const modifiers = this.getModifiersByGroupingCriteria(groupingCriteria);
+    const modifiers = getModifiersByGroupingCriteria(groupingCriteria);
 
     query
       .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
@@ -88,54 +80,5 @@ export class DashboardService {
     query.group(groupExpression);
 
     return query;
-  }
-
-  getDateMatchExpressionByDates(startDate?: string, endDate?: string): any {
-    if (startDate && endDate) {
-      return {
-        $gte: new Date(startDate + ProjectConstants.startOfDayTime),
-        $lte: new Date(endDate + ProjectConstants.endOfDayTime),
-      };
-    } else if (startDate) {
-      return { $gte: new Date(startDate + ProjectConstants.startOfDayTime) };
-    } else if (endDate) {
-      return { $lte: new Date(endDate + ProjectConstants.endOfDayTime) };
-    } else return { $lte: new Date() };
-  }
-
-  getModifiersByGroupingCriteria(groupingCriteria: string): any {
-    switch (groupingCriteria) {
-      case GroupingCriteria.SELLER:
-        return {
-          groupId: {
-            id: '$seller._id',
-            label: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
-          },
-        };
-      case GroupingCriteria.LOCATION:
-        return {
-          groupId: {
-            label: '$seller.location',
-          },
-        };
-      case GroupingCriteria.YEAR:
-        return {
-          groupId: {
-            label: { $year: '$soldAt' },
-          },
-        };
-      case GroupingCriteria.MONTH:
-        return {
-          groupId: {
-            label: { $month: '$soldAt' },
-          },
-        };
-      case GroupingCriteria.DAY:
-        return {
-          groupId: {
-            label: { $dayOfMonth: '$soldAt' },
-          },
-        };
-    }
   }
 }

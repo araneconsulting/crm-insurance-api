@@ -1,10 +1,4 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  Scope,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { Customer } from 'database/customer.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
@@ -14,15 +8,13 @@ import {
   USER_MODEL,
   CUSTOMER_MODEL,
 } from '../../database/database.constants';
-import * as DateFactory from 'shared/util/date-factory';
+import * as DateFactory from 'shared/util/date-functions';
 import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
-import { ADMIN_ROLES, COMPANY, METRICS } from 'shared/const/project-constants';
+import { COMPANY, METRICS } from 'shared/const/project-constants';
 import * as moment from 'moment';
-import { UserCatalog } from 'shared/const/catalog/user';
-import { EMPTY, from, of } from 'rxjs';
-import { mergeMap, throwIfEmpty } from 'rxjs/operators';
-import { ReportCatalog } from 'shared/const/catalog/report';
-import { bonusByRole } from './salary-functions';
+import { bonusByRole } from '../../shared/util/salary-functions';
+import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
+import { getPrimaryRole } from 'shared/util/user-functions';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -48,7 +40,7 @@ export class ReportService {
     let location: string = null;
 
     const filterConditions = {
-      soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
+      soldAt: getDateMatchExpressionByDates(startDate, endDate),
     };
 
     switch (filterField) {
@@ -130,7 +122,7 @@ export class ReportService {
     filterValue?: string,
   ): Promise<any> {
     const filterConditions = {
-      soldAt: this.getDateMatchExpressionByDates(startDate, endDate),
+      soldAt: getDateMatchExpressionByDates(startDate, endDate),
     };
 
     let seller: Partial<User> = null;
@@ -247,12 +239,26 @@ export class ReportService {
         totalCharge: '$totalCharge',
         createdBy: '$createdBy',
         updatedBy: '$updatedBy',
-        seller: 1,
-        customer: 1,
-        liabilityInsurer: 1,
-        cargoInsurer: 1,
-        physicalDamageInsurer: 1,
-        wcGlUmbInsurer: 1,
+        sellerName: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
+        customerName: '$customer.name',
+        insurerNames: {
+          $concat: [
+            { $ifNull: ['$liabilityInsurer.name', ''] },
+            '/',
+            { $ifNull: ['$cargoInsurer.name', ''] },
+            '/',
+            { $ifNull: ['$physicalDamageInsurer.name', ''] },
+            '/',
+            { $ifNull: ['$wcGlUmbInsurer.name', ''] },
+          ],
+        },
+        locationName: '$seller.location',
+        //seller: 1,
+        //customer: 1,
+        //liabilityInsurer: 1,
+        //cargoInsurer: 1,
+        //physicalDamageInsurer: 1,
+        //wcGlUmbInsurer: 1,
       })
       .sort({ soldAt: -1 });
 
@@ -269,20 +275,6 @@ export class ReportService {
           $lte: new Date(dates.end + 'T23:59:59.999Z'),
         }
       : { $lte: new Date() };
-  }
-
-  getDateMatchExpressionByDates(startDate?: string, endDate?: string): any {
-    if (startDate && endDate) {
-      return {
-        $gte: new Date(moment(startDate).startOf('day').toISOString()),
-        $lte: new Date(moment(endDate).endOf('day').toISOString()),
-      };
-    } else if (startDate) {
-      return { $gte: new Date(moment(startDate).startOf('day').toISOString()) };
-    } else if (endDate) {
-      return { $lte: new Date(moment(endDate).endOf('day').toISOString()) };
-    } else
-      return { $lte: new Date(moment(endDate).endOf('day').toISOString()) };
   }
 
   GetGroupingId(groupingCriteria: string, fields?: string[]): any {
@@ -373,22 +365,20 @@ export class ReportService {
     let allUsers = [];
 
     if (seller) {
-      try{
-      const user: any = await this.userModel.findOne({ _id: seller }).exec();
-      const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+      try {
+        const user: any = await this.userModel.findOne({ _id: seller }).exec();
+        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
-      const result = {
-        ...user._doc,
-        totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-        tips: userMetrics ? userMetrics.tips : 0,
-      };
+        const result = {
+          ...user._doc,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          tips: userMetrics ? userMetrics.tips : 0,
+        };
 
-      allUsers.push(result);
-
-      } catch (e){
+        allUsers.push(result);
+      } catch (e) {
         throw new NotFoundException('User not found');
       }
-      
     } else {
       const users: any[] = await this.userModel.find({}).exec();
       allUsers = users.map((user) => {
@@ -406,7 +396,7 @@ export class ReportService {
 
     const payroll = allUsers.map((employeeInfo) => {
       employeeInfo['bonus'] = bonusByRole(
-        employeeInfo.roles[0],
+        getPrimaryRole(employeeInfo),
         employeeInfo.location,
         employeeInfo.totalCharge,
         employeeMetrics.length,
