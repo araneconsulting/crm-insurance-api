@@ -65,6 +65,7 @@ export class ReportController {
     };
 
     if (includeSales) {
+      console.log('sales included');
       response['sales'] = await this.reportService.getAllSales(
         user,
         startDate,
