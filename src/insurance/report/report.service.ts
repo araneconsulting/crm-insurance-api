@@ -284,8 +284,7 @@ export class ReportService {
       case GroupingCriteria.SELLER:
         idExpression = {
           id: '$seller._id',
-          firstName: '$seller.firstName',
-          lastName: '$seller.lastName',
+          sellerName: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
           location: '$seller.location',
           roles: '$seller.roles',
         };
