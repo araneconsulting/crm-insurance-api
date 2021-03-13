@@ -284,9 +284,8 @@ export class ReportService {
       case GroupingCriteria.SELLER:
         idExpression = {
           id: '$seller._id',
-          sellerName: {
-            $concat: ['$seller.firstName', ' ', '$seller.lastName'],
-          },
+          firstName: '$seller.firstName',
+          lastName: '$seller.lastName',
           location: '$seller.location',
           roles: '$seller.roles',
         };
@@ -349,9 +348,9 @@ export class ReportService {
 
     employeeMetrics = employeeMetrics.map((metric) => {
       const result = metric._id;
-      result['totalCharge'] = metric.totalCharge;
+      result['totalCharge'] = Math.round(metric.totalCharge*100)/100;
       result['tips'] = metric.tips;
-      result['sellerName'] = metric.sellerName;
+
       return result;
     });
 
@@ -368,7 +367,7 @@ export class ReportService {
     if (seller) {
       try {
         const user: any = await this.userModel.findOne({ _id: seller }).exec();
-        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+        const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
 
         const result = {
           ...user._doc,
@@ -383,20 +382,18 @@ export class ReportService {
       }
     } else {
       const users: any[] = await this.userModel.find({}).exec();
-      allUsers = users
-        .filter((user) => !isAdmin(user))
-        .map((user) => {
-          const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
+      allUsers = users.map((user) => {
+        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
-          const result = {
-            ...user._doc,
-            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-            tips: userMetrics ? userMetrics.tips : 0,
-            sellerName: user.firstName + ' ' + user.lastName,
-          };
+        const result = {
+          ...user._doc,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          tips: userMetrics ? userMetrics.tips : 0,
+          sellerName: user.firstName + ' ' + user.lastName,
+        };
 
-          return result;
-        });
+        return result;
+      });
     }
 
     const payroll = allUsers.map((employeeInfo) => {
@@ -407,13 +404,9 @@ export class ReportService {
         employeeMetrics.length,
         officeTotalSales,
       );
-      employeeInfo['total'] =
-        Math.round(
-          (employeeInfo.baseSalary +
-            employeeInfo['bonus'] +
-            employeeInfo.tips) *
-            100,
-        ) / 100;
+      employeeInfo['total'] = Math.round(
+        employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips,
+      );
 
       return employeeInfo;
     });
