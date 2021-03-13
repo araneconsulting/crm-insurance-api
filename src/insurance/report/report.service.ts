@@ -284,7 +284,9 @@ export class ReportService {
       case GroupingCriteria.SELLER:
         idExpression = {
           id: '$seller._id',
-          sellerName: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
+          sellerName: {
+            $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+          },
           location: '$seller.location',
           roles: '$seller.roles',
         };
@@ -349,7 +351,7 @@ export class ReportService {
       const result = metric._id;
       result['totalCharge'] = metric.totalCharge;
       result['tips'] = metric.tips;
-
+      result['sellerName'] = metric.sellerName;
       return result;
     });
 
@@ -372,6 +374,7 @@ export class ReportService {
           ...user._doc,
           totalCharge: userMetrics ? userMetrics.totalCharge : 0,
           tips: userMetrics ? userMetrics.tips : 0,
+          sellerName: user.firstName + ' ' + user.lastName,
         };
 
         allUsers.push(result);
@@ -381,18 +384,19 @@ export class ReportService {
     } else {
       const users: any[] = await this.userModel.find({}).exec();
       allUsers = users
-      .filter((user) => !isAdmin(user))
-      .map((user) => {
-        const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
+        .filter((user) => !isAdmin(user))
+        .map((user) => {
+          const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
 
-        const result = {
-          ...user._doc,
-          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-          tips: userMetrics ? userMetrics.tips : 0,
-        };
+          const result = {
+            ...user._doc,
+            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+            tips: userMetrics ? userMetrics.tips : 0,
+            sellerName: user.firstName + ' ' + user.lastName,
+          };
 
-        return result;
-      });
+          return result;
+        });
     }
 
     const payroll = allUsers.map((employeeInfo) => {
@@ -403,9 +407,13 @@ export class ReportService {
         employeeMetrics.length,
         officeTotalSales,
       );
-      employeeInfo['total'] = Math.round(
-        (employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips)*100,
-      )/100;
+      employeeInfo['total'] =
+        Math.round(
+          (employeeInfo.baseSalary +
+            employeeInfo['bonus'] +
+            employeeInfo.tips) *
+            100,
+        ) / 100;
 
       return employeeInfo;
     });
