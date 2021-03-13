@@ -382,7 +382,7 @@ export class ReportService {
       }
     } else {
       const users: any[] = await this.userModel.find({}).exec();
-      allUsers = users.map((user) => {
+      allUsers = users.filter((user)=>!isAdmin(user)).map((user) => {
         const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
         const result = {
@@ -405,8 +405,8 @@ export class ReportService {
         officeTotalSales,
       );
       employeeInfo['total'] = Math.round(
-        employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips,
-      );
+        (employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips)*100,
+      )/100;
 
       return employeeInfo;
     });

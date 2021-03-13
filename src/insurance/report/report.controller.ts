@@ -37,13 +37,6 @@ export class ReportController {
     @Query('with_count') withCount?:boolean,
     @Query('with_sales') withSales?:boolean,
   ): Promise<any> {
-    
-    console.log(withCount, withSales);
-
-    const includeCount = Boolean(withCount);
-    const includeSales = Boolean(withSales);
-
-    console.log(includeCount, includeSales);
 
     const user: Partial<User> = req.user;
 
@@ -60,12 +53,11 @@ export class ReportController {
         groupBy,
         groupByFieldsArray,
         fieldsArray,
-        includeCount,
+        Boolean(withCount),
       ),
     };
 
-    if (includeSales) {
-      console.log('sales included');
+    if (Boolean(withSales)) {
       response['sales'] = await this.reportService.getAllSales(
         user,
         startDate,
