@@ -10,11 +10,11 @@ import {
 } from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-functions';
 import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
-import { COMPANY, METRICS } from 'shared/const/project-constants';
+import { ADMIN_ROLES, COMPANY, METRICS } from 'shared/const/project-constants';
 import * as moment from 'moment';
 import { bonusByRole } from '../../shared/util/salary-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
-import { getPrimaryRole } from 'shared/util/user-functions';
+import { getPrimaryRole, isAdmin } from 'shared/util/user-functions';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -381,8 +381,10 @@ export class ReportService {
       }
     } else {
       const users: any[] = await this.userModel.find({}).exec();
-      allUsers = users.map((user) => {
-        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+      allUsers = users
+      .filter((user) => !isAdmin(user))
+      .map((user) => {
+        const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
 
         const result = {
           ...user._doc,
@@ -403,8 +405,8 @@ export class ReportService {
         officeTotalSales,
       );
       employeeInfo['total'] = Math.round(
-        employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips,
-      );
+        (employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips)*100,
+      )/100;
 
       return employeeInfo;
     });
