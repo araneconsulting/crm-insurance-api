@@ -25,7 +25,7 @@ export class RegisterDto {
     readonly lastName: string;
 
     //Employee fields (this will be moved to a child class later)
-    readonly location: LocationType;
+    readonly location: string;
     readonly position: string;
     readonly baseSalary?: number;
 }

@@ -34,7 +34,7 @@ export class UpdateUserDto {
     //Employee fields (this will be moved to a child class later)
     @IsOptional()
     @IsNotEmpty()
-    readonly location: LocationType;
+    readonly location: string;
 
     @IsOptional()
     @IsNotEmpty()

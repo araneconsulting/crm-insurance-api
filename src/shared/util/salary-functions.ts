@@ -1,5 +1,6 @@
 import { LocationType } from 'shared/enum/location-type.enum';
 import { RoleType } from 'shared/enum/role-type.enum';
+import { roundAmount } from './math-functions';
 
 const MONTHLY_SALES_TARGET_BY_EMPLOYEE = 50000;
 
@@ -14,7 +15,7 @@ export function bonusByRole(
   let bonus = 0;
 
   switch (location) {
-    case LocationType.MEXICO:
+    case "MEXICO-I":
       switch (role) {
         case RoleType.CERTIFICATES:
           bonus += employeeTotalSales * 0.01;
@@ -87,10 +88,9 @@ export function bonusByRole(
       }
 
       break;
-    case LocationType.USA:
+    case "USA-I":
       break;
   }
 
-  
-  return Math.round(bonus * 100) / 100;
+  return roundAmount(bonus);
 }

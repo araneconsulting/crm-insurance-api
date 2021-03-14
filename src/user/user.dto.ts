@@ -13,7 +13,7 @@ export class UserDto {
   readonly updatedAt?: Date;
 
   //Employee fields (this will be moved to a child class later)
-  readonly location?: LocationType;
+  readonly location?: string;
   readonly position?: string;
   readonly baseSalary?: number;
 }

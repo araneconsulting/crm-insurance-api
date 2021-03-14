@@ -41,7 +41,6 @@ export class InsurerService {
   }
 
   save(data: CreateInsurerDto): Observable<Insurer> {
-    //console.log('req.user:'+JSON.stringify(this.req.user));
     const createInsurer = this.insurerModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },

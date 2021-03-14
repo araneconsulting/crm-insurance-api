@@ -43,7 +43,6 @@ export class SaleController {
     @Query('end_date') endDate?: string,
     @Query('type') type?: string,
   ): Promise<any> {
-
     const user: Partial<User> = req.user;
     return res.json(await this.saleService.findAll(user, startDate, endDate, type));
   }
@@ -66,9 +65,9 @@ export class SaleController {
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   createSale(
     @Req() req : Request,
-    @Body() sale: CreateSaleDto
-  ): Observable<Sale> {
-    return from(this.saleService.save(sale, req.user));
+    @Body() sale: any
+  ): Promise<Sale> {
+    return this.saleService.save(sale, req.user);
   }
 
   @Put(':id')

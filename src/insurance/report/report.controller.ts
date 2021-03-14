@@ -84,7 +84,32 @@ export class ReportController {
     const user: Partial<User> = req.user;
 
     const response = {
-      salaries: await this.reportService.getSalaryReport(
+      data: await this.reportService.getSalaryReport(
+        user,
+        month, 
+        year, 
+        seller
+      ),
+    };
+
+    return res.json(response);
+  }
+
+  @Get('/profits')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getProfitsReport(
+    @Req() req: Request,
+    @Response() res,
+    @Query('month') month: number,
+    @Query('year') year: number,
+    @Query('seller') seller?: string,
+  ): Promise<any> {
+
+    const user: Partial<User> = req.user;
+
+    const response = {
+      data: await this.reportService.getProfitsReport(
         user,
         month, 
         year, 

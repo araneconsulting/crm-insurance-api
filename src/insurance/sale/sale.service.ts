@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -11,18 +12,27 @@ import { Model, Types } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
-import { CUSTOMER_MODEL, SALE_MODEL,USER_MODEL,} from '../../database/database.constants';
+import {
+  CUSTOMER_MODEL,
+  INSURER_MODEL,
+  SALE_MODEL,
+  USER_MODEL,
+} from '../../database/database.constants';
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
 import { Customer } from 'database/customer.model';
 import { isAdmin, isSeller } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
+import { Insurer } from 'database/insurer.model';
+import { roundAmount } from 'shared/util/math-functions';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
+    @Inject(INSURER_MODEL) private insurerModel: Model<Insurer>,
+    @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
@@ -113,9 +123,13 @@ export class SaleService {
         type: '$type',
         soldAt: '$soldAt',
         liabilityCharge: { $round: ['$liabilityCharge', 2] },
+        liabilityProfit: { $round: ['$liabilityProfit', 2] },
         cargoCharge: { $round: ['$cargoCharge', 2] },
+        cargoProfit: { $round: ['$cargoProfit', 2] },
         physicalDamageCharge: { $round: ['$physicalDamageCharge', 2] },
+        physicalDamageProfit: { $round: ['$physicalDamageProfit', 2] },
         wcGlUmbCharge: { $round: ['$wcGlUmbCharge', 2] },
+        wcGlUmbProfit: { $round: ['$wcGlUmbProfit', 2] },
         fees: { $round: ['$fees', 2] },
         permits: { $round: ['$permits', 2] },
         tips: { $round: ['$tips', 2] },
@@ -124,6 +138,7 @@ export class SaleService {
         amountReceivable: { $round: ['$amountReceivable', 2] },
         totalCharge: { $round: ['$totalCharge', 2] },
         sellerName: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
+        location: '$location',
         createdBy: '$createdBy',
         updatedBy: '$updatedBy',
         seller: 1,
@@ -167,16 +182,63 @@ export class SaleService {
     );
   }
 
-  save(data: CreateSaleDto, user: Partial<User>): Observable<Sale> {
+  async save(data: CreateSaleDto, user: Partial<User>): Promise<Sale> {
     if ((isAdmin(user) && !data.seller) || isSeller(user)) {
       data.seller = user.id;
+      data['location'] = user.location;
+    } else {
+      //TEMPORARY SOLUTION
+      //TODO: Set location for admin user creating sale for other sellers
+      // which implies: find seller from users model, get location and set it to the sale
+
+      const seller = await this.userModel.findOne({ _id: data.seller });
+      if (!seller) {
+        throw new ConflictException('Seller not found');
+      }
+      data['location'] = seller.location;
     }
 
-    const createSale = this.saleModel.create({
+    const insurers = await this.insurerModel.find({}).exec();
+
+    if (data.liabilityInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === data.liabilityInsurer,
+      );
+      data['liabilityProfit'] = insurer
+        ? roundAmount(insurer.liabilityCommission * data.liabilityCharge)
+        : 0;
+    }
+
+    if (data.cargoInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === data.cargoInsurer,
+      );
+      data['cargoProfit'] = insurer
+        ? roundAmount(insurer.cargoCommission * data.cargoCharge)
+        : 0;
+    }
+
+    if (data.physicalDamageInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === data.physicalDamageInsurer,
+      );
+      data['physicalDamageProfit'] = insurer
+        ? roundAmount(insurer.physicalDamageCommission * data.physicalDamageCharge)
+        : 0;
+    }
+
+    if (data.wcGlUmbInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === data.wcGlUmbInsurer,
+      );
+      data['wcGlUmbProfit'] = insurer
+        ? roundAmount(insurer.wcGlUmbCommission * data.wcGlUmbCharge)
+        : 0;
+    }
+
+    return this.saleModel.create({
       ...data,
     });
-
-    return from(createSale);
   }
 
   update(

@@ -14,7 +14,7 @@ describe('RegisterDto', () => {
       firstName: 'Liuver',
       lastName: 'Duran',
       email: 'liuver@gmail.com',
-      location: LocationType.MEXICO,
+      location: "MEXICO-I",
       position: "SELLER",
       baseSalary: 400,
     };
@@ -26,7 +26,7 @@ describe('RegisterDto', () => {
         firstName: 'Liuver',
         lastName: 'Duran',
         email: 'liuver@gmail.com',
-        location: LocationType.MEXICO,
+        location: "MEXICO-I",
         position: 'SELLER',
         baseSalary: 400,
       }

@@ -29,7 +29,7 @@ export class DashboardService {
     };
 
     if (location) {
-      filterConditions['seller.location'] = location;
+      filterConditions['location'] = location;
     }
 
     const query = this.saleModel.aggregate();

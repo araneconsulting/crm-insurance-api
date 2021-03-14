@@ -36,7 +36,7 @@ export function getModifiersByGroupingCriteria(groupingCriteria: string): any {
     case GroupingCriteria.LOCATION:
       return {
         groupId: {
-          label: '$seller.location',
+          label: '$location',
         },
       };
     case GroupingCriteria.YEAR:

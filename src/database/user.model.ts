@@ -13,7 +13,7 @@ interface User extends Document<any> {
   readonly lastName: string;
   readonly phone: string;
   readonly roles: RoleType[];
-  readonly location: LocationType;
+  readonly location: string;
   readonly position: string;
   readonly baseSalary: number;
   readonly startedAt: string,

@@ -15,6 +15,7 @@ import * as moment from 'moment';
 import { bonusByRole } from '../../shared/util/salary-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { getPrimaryRole, isAdmin } from 'shared/util/user-functions';
+import { roundAmount } from 'shared/util/math-functions';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -62,7 +63,7 @@ export class ReportService {
 
       case 'location':
         location = filterValue;
-        filterConditions['seller.location'] = location;
+        filterConditions['location'] = location;
         break;
     }
 
@@ -148,7 +149,7 @@ export class ReportService {
 
       case 'location':
         location = filterValue;
-        filterConditions['seller.location'] = location;
+        filterConditions['location'] = location;
         break;
     }
 
@@ -226,10 +227,15 @@ export class ReportService {
 
       .project({
         soldAt: '$soldAt',
+        location: '$location',
         liabilityCharge: '$liabilityCharge',
+        liabilityProfit: '$liabilityProfit',
         cargoCharge: '$cargoCharge',
+        cargoProfit: '$cargoProfit',
         physicalDamageCharge: '$physicalDamageCharge',
+        physicalDamageProfit: '$physicalDamageProfit',
         wcGlUmbCharge: '$wcGlUmbCharge',
+        wcGlUmbProfit: '$wcGlUmbProfit',
         fees: '$fees',
         permits: '$permits',
         tips: '$tips',
@@ -252,7 +258,6 @@ export class ReportService {
             { $ifNull: ['$wcGlUmbInsurer.name', ''] },
           ],
         },
-        locationName: '$seller.location',
         //seller: 1,
         //customer: 1,
         //liabilityInsurer: 1,
@@ -286,7 +291,7 @@ export class ReportService {
           id: '$seller._id',
           firstName: '$seller.firstName',
           lastName: '$seller.lastName',
-          location: '$seller.location',
+          location: '$location',
           roles: '$seller.roles',
         };
 
@@ -315,7 +320,7 @@ export class ReportService {
 
       case GroupingCriteria.LOCATION:
         idExpression = {
-          location: '$seller.location',
+          location: '$location',
         };
     }
     return idExpression;
@@ -347,8 +352,9 @@ export class ReportService {
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
+      //metric._id contains groupingId object from aggregator
       const result = metric._id;
-      result['totalCharge'] = Math.round(metric.totalCharge*100)/100;
+      result['totalCharge'] = roundAmount(metric.totalCharge);
       result['tips'] = metric.tips;
 
       return result;
@@ -382,18 +388,20 @@ export class ReportService {
       }
     } else {
       const users: any[] = await this.userModel.find({}).exec();
-      allUsers = users.filter((user)=>!isAdmin(user)).map((user) => {
-        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+      allUsers = users
+        .filter((user) => !isAdmin(user))
+        .map((user) => {
+          const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
-        const result = {
-          ...user._doc,
-          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-          tips: userMetrics ? userMetrics.tips : 0,
-          sellerName: user.firstName + ' ' + user.lastName,
-        };
+          const result = {
+            ...user._doc,
+            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+            tips: userMetrics ? userMetrics.tips : 0,
+            sellerName: user.firstName + ' ' + user.lastName,
+          };
 
-        return result;
-      });
+          return result;
+        });
     }
 
     const payroll = allUsers.map((employeeInfo) => {
@@ -404,13 +412,122 @@ export class ReportService {
         employeeMetrics.length,
         officeTotalSales,
       );
-      employeeInfo['total'] = Math.round(
-        (employeeInfo.baseSalary + employeeInfo['bonus'] + employeeInfo.tips)*100,
-      )/100;
+      employeeInfo['total'] = roundAmount(
+        employeeInfo.baseSalary + employeeInfo.bonus + employeeInfo.tips,
+      );
 
       return employeeInfo;
     });
 
     return payroll;
+  }
+
+  async getProfitsReport(
+    user: Partial<User>,
+    month: number,
+    year: number,
+    seller?: string,
+  ): Promise<any> {
+    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
+      .subtract(1, 'month')
+      .toISOString();
+    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
+      .subtract(1, 'day')
+      .toISOString();
+
+    let employeeMetrics = await this.getSalesMetrics(
+      user,
+      startDate,
+      endDate,
+      null,
+      null,
+      'SELLER',
+      [],
+      [
+        'totalCharge',
+        'tips',
+        'liabilityProfit',
+        'cargoProfit',
+        'physicalDamageProfit',
+        'wcGlUmbProfit',
+      ],
+      true,
+    );
+
+    employeeMetrics = employeeMetrics.map((metric) => {
+      const result = metric._id;
+      result['totalCharge'] = roundAmount(metric.totalCharge);
+      result['tips'] = roundAmount(metric.tips);
+      result['liabilityProfit'] = roundAmount(metric.liabilityProfit);
+      result['cargoProfit'] = roundAmount(metric.cargoProfit);
+      result['physicalDamageProfit'] = roundAmount(metric.physicalDamageProfit);
+      result['wcGlUmbProfit'] = roundAmount(metric.wcGlUmbProfit);
+
+      return result;
+    });
+
+    const officeTotalSales =
+      employeeMetrics && employeeMetrics.length
+        ? employeeMetrics.reduce(
+            (accumulator, item) => accumulator + item.totalCharge,
+            0,
+          )
+        : 0;
+
+    let users = [];
+
+    if (seller) {
+      try {
+        const user: any = await this.userModel.findOne({ _id: seller }).exec();
+        users.push(user);
+      } catch (e) {
+        throw new NotFoundException('User not found');
+      }
+    } else {
+      users = await this.userModel.find({}).exec();
+    }
+
+    const profitsReport = users
+      .filter((user) => !isAdmin(user))
+      .map((user) => {
+        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+
+        const result = {
+          ...user._doc,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          tips: userMetrics ? userMetrics.tips : 0,
+          sellerName: user.firstName + ' ' + user.lastName,
+          liabilityProfit: userMetrics ? userMetrics.liabilityProfit : 0,
+          cargoProfit: userMetrics ? userMetrics.cargoProfit : 0,
+          physicalDamageProfit: userMetrics
+            ? userMetrics.physicalDamageProfit
+            : 0,
+          wcGlUmbProfit: userMetrics ? userMetrics.wcGlUmbProfit : 0,
+        };
+
+        result['bonus'] = bonusByRole(
+          getPrimaryRole(user),
+          user.location,
+          result.totalCharge,
+          employeeMetrics.length,
+          officeTotalSales,
+        );
+        result['totalSalary'] = roundAmount(
+          result.bonus + result.tips + user.baseSalary,
+        );
+        result['totalSaleGrossProfit'] = roundAmount(
+          result.liabilityProfit +
+            result.cargoProfit +
+            result.physicalDamageProfit +
+            result.wcGlUmbProfit,
+        );
+        result['totalSaleNetProfit'] = roundAmount(
+          result.totalSaleGrossProfit - result.baseSalary - result.bonus,
+        );
+
+        return result;
+      });
+
+    return profitsReport;
   }
 }

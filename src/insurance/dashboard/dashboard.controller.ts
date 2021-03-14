@@ -20,6 +20,7 @@ import { User } from 'database/user.model';
 import { Request } from 'express';
 import { randomBytes } from 'crypto';
 import { colorSchemes } from 'shared/const/color-schemes';
+import { roundAmount } from 'shared/util/math-functions';
 
 @Controller({ path: 'dashboards', scope: Scope.REQUEST })
 export class DashboardController {
@@ -60,7 +61,7 @@ export class DashboardController {
     });
 
     const salesValues = aggregations.map((aggregation) =>
-      Math.round(aggregation.data),
+      roundAmount(aggregation.data),
     );
     const salesLabels = aggregations.map(
       (aggregation) => aggregation._id.label,
@@ -123,7 +124,7 @@ export class DashboardController {
               });
 
               const salesValues = aggregations.map((aggregation) =>
-                Math.round(aggregation.data),
+                roundAmount(aggregation.data),
               );
               const salesLabels = aggregations.map(
                 (aggregation) => aggregation._id.label,

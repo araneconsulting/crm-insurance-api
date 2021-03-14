@@ -34,6 +34,11 @@ export class CreateSaleDto {
 
   @IsOptional()
   @IsNotEmpty()
+  @IsNumber()
+  liabilityProfit: number;
+
+  @IsOptional()
+  @IsNotEmpty()
   @IsMongoId()
   cargoInsurer: Partial<Insurer>;
 
@@ -41,6 +46,11 @@ export class CreateSaleDto {
   @IsNumber()
   @IsNotEmpty()
   cargoCharge: number;
+  
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
+  cargoProfit: number;
 
   @IsOptional()
   @IsNotEmpty()
@@ -53,6 +63,11 @@ export class CreateSaleDto {
   physicalDamageCharge: number;
 
   @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
+  physicalDamageProfit: number;
+
+  @IsOptional()
   @IsNotEmpty()
   @IsMongoId()
   wcGlUmbInsurer: Partial<Insurer>;
@@ -61,6 +76,16 @@ export class CreateSaleDto {
   @IsNumber()
   @IsNotEmpty()
   wcGlUmbCharge: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
+  wcGlUmbProfit: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumber()
+  location: string;
 
   @IsOptional()
   @IsNumber()

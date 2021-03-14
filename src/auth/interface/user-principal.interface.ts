@@ -8,5 +8,6 @@ export interface UserPrincipal {
   readonly email: string;
   readonly roles: RoleType[];
   readonly position: string;
+  readonly location: string;
   readonly phone: string;
 }

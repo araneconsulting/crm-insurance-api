@@ -39,6 +39,7 @@ describe('JwtStrategy', () => {
         firstName: 'John',
         lastName: 'Doe',
         position: 'Sales Agent',
+        location: 'MEXICO-I',
         phone: '1234567890'
       });
       expect(user.username).toEqual('test');

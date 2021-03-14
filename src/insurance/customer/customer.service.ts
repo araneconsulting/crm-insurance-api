@@ -41,7 +41,6 @@ export class CustomerService {
   }
 
   save(data: CreateCustomerDto): Observable<Customer> {
-    //console.log('req.user:'+JSON.stringify(this.req.user));
     const createCustomer = this.customerModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },
