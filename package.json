@@ -34,7 +34,6 @@
     "class-validator": "^0.13.0",
     "moment": "^2.29.1",
     "mongoose": "^5.11.14",
-    "mongoose-delete": "^0.5.3",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
