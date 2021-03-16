@@ -16,7 +16,6 @@ import {
   UseGuards
 } from '@nestjs/common';
 import { Response } from 'express';
-import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RoleType } from '../../shared/enum/role-type.enum';
 import { HasRoles } from '../../auth/guard/has-roles.decorator';
@@ -39,14 +38,14 @@ export class CustomerController {
     @Query('q') keyword?: string,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
-  ): Observable<Customer[]> {
+  ): Promise<Customer[]> {
     return this.customerService.findAll(keyword, skip, limit);
   }
 
   @Get(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  getCustomerById(@Param('id', ParseObjectIdPipe) id: string): Observable<Customer> {
+  getCustomerById(@Param('id', ParseObjectIdPipe) id: string): Promise<Customer> {
     return this.customerService.findById(id);
   }
 
@@ -56,8 +55,8 @@ export class CustomerController {
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   createCustomer(
     @Body() customer: CreateCustomerDto
-  ): Observable<Customer> {
-    return from(this.customerService.save(customer));
+  ): Promise<Customer> {
+    return this.customerService.save(customer);
   }
 
   @Put(':id')
@@ -68,8 +67,8 @@ export class CustomerController {
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() customer: UpdateCustomerDto,
     
-  ): Observable<Customer> {
-    return from(this.customerService.update(id, customer));
+  ): Promise<Customer> {
+    return this.customerService.update(id, customer);
   }
 
   @Delete(':id')
@@ -79,7 +78,7 @@ export class CustomerController {
   @HasRoles(RoleType.ADMIN)
   deleteCustomerById(
     @Param('id', ParseObjectIdPipe) id: string
-  ): Observable<Customer> {
+  ): Promise<Customer> {
     return this.customerService.deleteById(id);
   }
 }

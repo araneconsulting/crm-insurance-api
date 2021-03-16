@@ -54,21 +54,18 @@ describe('CustomerService', () => {
     const customers = [
       {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
         name: 'FutureSoft',
         email: 'aliesky@example.com',
         phone: '832-555-5555',
       },
       {
         _id: '5ee49c3115a4e75254bb732f',
-        isCompany: true,
         name: 'World Records',
         email: 'ernesto@example.com',
         phone: '832-111-3333',
       },
       {
         _id: '5ee49c3115a4e75254bb7330',
-        isCompany: true,
         name: 'TED SuperStars',
         email: 'ernesto@example.com',
         phone: '832-222-8888',
@@ -114,7 +111,6 @@ describe('CustomerService', () => {
     it('if exists return one customer', (done) => {
       const found = {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
         name: 'FutureSoft',
         email: 'aliesky@example.com',
         phone: '832-555-5555',
@@ -153,7 +149,6 @@ describe('CustomerService', () => {
 
   it('should save customer', async () => {
     const toCreated = {
-      isCompany: true,
       name: 'TestSoft',
       email: 'test@example.com',
       phone: '832-111-1111',
@@ -181,7 +176,6 @@ describe('CustomerService', () => {
     it('perform update if customer exists', (done) => {
       const toUpdated = {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
         name: 'TestSoft',
         email: 'test@example.com',
         phone: '832-111-1111',
@@ -204,7 +198,6 @@ describe('CustomerService', () => {
     it('throw an NotFoundException if customer not exists', (done) => {
       const toUpdated = {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
         name: 'TestSoft',
         email: 'test@example.com',
         phone: '832-111-1111',
@@ -227,7 +220,6 @@ describe('CustomerService', () => {
     it('perform delete if customer exists', (done) => {
       const toDeleted = {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
         name: 'TestSoft',
         email: 'test@example.com',
         phone: '832-111-1111',

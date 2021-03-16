@@ -55,21 +55,19 @@ describe('InsurerService', () => {
     const insurers = [
       {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
+
         name: 'FutureSoft',
         email: 'aliesky@example.com',
         phone: '832-555-5555',
       },
       {
         _id: '5ee49c3115a4e75254bb732f',
-        isCompany: true,
         name: 'World Records',
         email: 'ernesto@example.com',
         phone: '832-111-3333',
       },
       {
         _id: '5ee49c3115a4e75254bb7330',
-        isCompany: true,
         name: 'TED SuperStars',
         email: 'ernesto@example.com',
         phone: '832-222-8888',
@@ -115,7 +113,6 @@ describe('InsurerService', () => {
     it('if exists return one insurer', (done) => {
       const found = {
         _id: '5ee49c3115a4e75254bb732e',
-        isCompany: true,
         name: 'FutureSoft',
         email: 'aliesky@example.com',
         phone: '832-555-5555',

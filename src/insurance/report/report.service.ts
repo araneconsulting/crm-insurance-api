@@ -307,7 +307,7 @@ export class ReportService {
         idExpression = {
           id: '$customer._id',
           name: '$customer.name',
-          isCompany: '$customer.isCompany',
+          company: '$customer.company',
         };
 
         fields.map(

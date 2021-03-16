@@ -42,7 +42,6 @@ describe('Insurer Controller', () => {
 
  /*    it('POST on /insurers should save insurer', async () => {
       const insurer: CreateInsurerDto = {
-        isCompany: true,
         name: 'TestSoft',
         email: 'test@example.com',
         phone: '832-111-1111',
