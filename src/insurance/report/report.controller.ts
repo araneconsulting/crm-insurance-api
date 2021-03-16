@@ -19,6 +19,7 @@ import { Request } from 'express';
 import { ApiQuery } from '@nestjs/swagger';
 import * as moment from 'moment';
 import { COMPANY } from 'shared/const/project-constants';
+import { isAdmin } from 'shared/util/user-functions';
 
 @Controller({ path: 'reports', scope: Scope.REQUEST })
 export class ReportController {
@@ -129,24 +130,34 @@ export class ReportController {
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
-    const userMetrics = await this.reportService.getUserPerformanceReport(
+    if (isAdmin(user) && !seller) {
+      return res.json({ data: {} });
+    }
+
+    const userPerformanceReport = await this.reportService.getUserPerformanceReport(
       user,
       month,
       year,
-      seller,
+      user.id,
     );
 
-    if (!userMetrics[0]) {
-      throw new NotFoundException('User monthly performance metrics are not available');
+   const userMetrics = userPerformanceReport[0];
+
+    if (!userMetrics) {
+      throw new NotFoundException(
+        'User monthly performance metrics are not available',
+      );
     }
 
-    const baseDate = moment().year(year).month(month-1).date(COMPANY.payrollDay);
+    const baseDate = moment()
+      .year(year)
+      .month(month - 1)
+      .date(COMPANY.payrollDay);
 
     const startDate = baseDate.format('MMM D');
     const endDate = baseDate.add(1, 'month').subtract(1, 'day').format('MMM D');
     //const dateRangeTitle = startDate + ' - ' + endDate + ', '+ baseDate.format('YYYY');
     const dateRangeTitle = startDate + ' to today';
-
 
     const metrics = [
       {
@@ -154,16 +165,17 @@ export class ReportController {
         subtitle: '',
         label: 'Sales Total',
         valuePrefix: '$',
-        value: userMetrics[0].totalCharge,
+        value: userMetrics.totalCharge,
         valueSuffix: '',
-        description: 'Sum of all my sales achieved since last month\'s 21st to this day.',
+        description:
+          "Sum of all my sales achieved since last month's 21st to this day.",
       },
       {
         title: dateRangeTitle,
         subtitle: '',
         label: 'Accumulated Salary',
         valuePrefix: '$',
-        value: userMetrics[0].totalSalary,
+        value: userMetrics.totalSalary,
         valueSuffix: '',
         description:
           'Salary is the sum of your base salary plus bonus and tips minus discounts.',
@@ -173,7 +185,7 @@ export class ReportController {
         subtitle: '',
         label: 'Accumulated Bonus',
         valuePrefix: '$',
-        value: userMetrics[0].bonus,
+        value: userMetrics.bonus,
         valueSuffix: '',
         description:
           'Bonus calculation is impacted by different variables like: accumulated sales, base salary, tips, discounts, among others.',
@@ -181,20 +193,20 @@ export class ReportController {
     ];
 
     let message = '';
-    if (userMetrics[0].totalCharge > 100000) {
+    if (userMetrics.totalCharge > 100000) {
       message =
         'Come on ' +
-        userMetrics[0].firstName +
+        userMetrics.firstName +
         ', can you tell me how you got these numbers? You are the best, did you know?';
-    } else if (userMetrics[0].totalCharge > 50000) {
+    } else if (userMetrics.totalCharge > 50000) {
       message =
         'Hey! ' +
-        userMetrics[0].firstName +
+        userMetrics.firstName +
         ', it seems that you are having a month with very good performance. Keep up the good guy!';
-    } else if (userMetrics[0].totalCharge > 25000) {
+    } else if (userMetrics.totalCharge > 25000) {
       message =
         'Psst... ' +
-        userMetrics[0].firstName +
+        userMetrics.firstName +
         ', it seems you come with a good momentum. I am sure you will get very far this month!';
     } else {
       message =
