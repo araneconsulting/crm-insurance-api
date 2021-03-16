@@ -154,10 +154,10 @@ describe('InsurerService', () => {
       name: 'Triple-Sured LLC',
       email: '3sured@example.com',
       phone: '832-888-5335',
-      liabilityCommission: 0.1,
-      cargoCommission: 0.1,
-      physicalDamageCommission: 0.08,
-      wcGlUmbCommission: 0.1
+      liabilityCommission: 10,
+      cargoCommission: 10,
+      physicalDamageCommission: 8,
+      wcGlUmbCommission: 10
     };
 
     const toReturned = {
@@ -182,10 +182,10 @@ describe('InsurerService', () => {
         name: 'Triple-Sured LLC',
         email: '3sured@example.com',
         phone: '832-888-5335',
-        liabilityCommission: 0.1,
-        cargoCommission: 0.1,
-        physicalDamageCommission: 0.08,
-        wcGlUmbCommission: 0.1
+        liabilityCommission: 10,
+        cargoCommission: 10,
+        physicalDamageCommission: 8,
+        wcGlUmbCommission: 10
       };
 
       jest.spyOn(model, 'findOneAndUpdate').mockReturnValue({
@@ -207,10 +207,10 @@ describe('InsurerService', () => {
       name: 'Triple-Sured LLC',
       email: '3sured@example.com',
       phone: '832-888-5335',
-      liabilityCommission: 0.1,
-      cargoCommission: 0.1,
-      physicalDamageCommission: 0.08,
-      wcGlUmbCommission: 0.1
+      liabilityCommission: 10,
+      cargoCommission: 10,
+      physicalDamageCommission: 8,
+      wcGlUmbCommission: 10
     };
       jest.spyOn(model, 'findOneAndUpdate').mockReturnValue({
         exec: jest.fn().mockResolvedValue(null) as any,
@@ -232,10 +232,10 @@ describe('InsurerService', () => {
         name: 'Triple-Sured LLC',
         email: '3sured@example.com',
         phone: '832-888-5335',
-        liabilityCommission: 0.1,
-        cargoCommission: 0.1,
-        physicalDamageCommission: 0.08,
-        wcGlUmbCommission: 0.1
+        liabilityCommission: 10,
+        cargoCommission: 10,
+        physicalDamageCommission: 8,
+        wcGlUmbCommission: 10
       };
       jest.spyOn(model, 'findOneAndDelete').mockReturnValue({
         exec: jest.fn().mockResolvedValueOnce(toDeleted),

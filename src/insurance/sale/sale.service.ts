@@ -205,7 +205,7 @@ export class SaleService {
         (insurer) => insurer.id === data.liabilityInsurer,
       );
       data['liabilityProfit'] = insurer
-        ? roundAmount(insurer.liabilityCommission * data.liabilityCharge)
+        ? roundAmount(insurer.liabilityCommission/100 * data.liabilityCharge)
         : 0;
     }
 
@@ -214,7 +214,7 @@ export class SaleService {
         (insurer) => insurer.id === data.cargoInsurer,
       );
       data['cargoProfit'] = insurer
-        ? roundAmount(insurer.cargoCommission * data.cargoCharge)
+        ? roundAmount(insurer.cargoCommission/100 * data.cargoCharge)
         : 0;
     }
 
@@ -223,7 +223,7 @@ export class SaleService {
         (insurer) => insurer.id === data.physicalDamageInsurer,
       );
       data['physicalDamageProfit'] = insurer
-        ? roundAmount(insurer.physicalDamageCommission * data.physicalDamageCharge)
+        ? roundAmount(insurer.physicalDamageCommission/100 * data.physicalDamageCharge)
         : 0;
     }
 
@@ -232,7 +232,7 @@ export class SaleService {
         (insurer) => insurer.id === data.wcGlUmbInsurer,
       );
       data['wcGlUmbProfit'] = insurer
-        ? roundAmount(insurer.wcGlUmbCommission * data.wcGlUmbCharge)
+        ? roundAmount(insurer.wcGlUmbCommission/100 * data.wcGlUmbCharge)
         : 0;
     }
 

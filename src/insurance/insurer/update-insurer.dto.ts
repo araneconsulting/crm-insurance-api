@@ -14,15 +14,11 @@ export class UpdateInsurerDto {
   @IsNotEmpty()
   readonly phone: string;
   @IsOptional()
-  @IsNumber()
   readonly liabilityCommission: number = DEFAULT_COMMISSION;
   @IsOptional()
-  @IsNumber()
   readonly cargoCommission: number = DEFAULT_COMMISSION;
   @IsOptional()
-  @IsNumber()
   readonly physicalDamageCommission: number = DEFAULT_COMMISSION;
   @IsOptional()
-  @IsNumber()
   readonly wcGlUmbCommission: number = DEFAULT_COMMISSION;
 }
