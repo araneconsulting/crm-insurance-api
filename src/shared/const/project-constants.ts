@@ -25,5 +25,5 @@ export const METRICS = {
 };
 
 export const COMPANY = {
-  payrollDay : 20
+  payrollDay : 21
 }

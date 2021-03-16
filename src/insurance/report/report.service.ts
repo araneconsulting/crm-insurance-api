@@ -530,4 +530,13 @@ export class ReportService {
 
     return profitsReport;
   }
+
+  async getUserPerformanceReport(
+    user: Partial<User>,
+    month: number,
+    year: number,
+    seller?: string,
+  ): Promise<any> {
+    return await this.getProfitsReport(user, month, year, seller);
+  }
 }
