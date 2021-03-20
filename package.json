@@ -1,9 +1,12 @@
 {
-  "name": "nestjs-sample",
+  "name": "arane-crm-vl17-be",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
+  "engines": {
+    "node": "14.16.0"
+  },
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -18,7 +21,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "postinstall": "npm run prestart:prod"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
@@ -27,13 +31,14 @@
     "@nestjs/jwt": "^7.0.0",
     "@nestjs/passport": "^7.1.0",
     "@nestjs/platform-express": "^7.0.0",
-    "@nestjs/swagger": "^4.7.12",
+    "@nestjs/swagger": "^4.8.0",
     "@sendgrid/mail": "^7.2.2",
     "bcrypt": "^5.0.0",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.13.0",
     "moment": "^2.29.1",
-    "mongoose": "^5.11.14",
+    "mongoose": "^5.12.1",
+    "npm": "^7.6.3",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
@@ -51,7 +56,7 @@
     "@types/bcrypt": "^3.0.0",
     "@types/express": "^4.17.3",
     "@types/jest": "26.0.20",
-    "@types/node": "^14.0.14",
+    "@types/node": "^14.14.35",
     "@types/passport-jwt": "^3.0.3",
     "@types/passport-local": "^1.0.33",
     "@types/supertest": "^2.0.10",
@@ -72,7 +77,7 @@
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.0.5",
-    "webpack": "^5.25.1",
+    "webpack": "^5.27.0",
     "webpack-node-externals": "^2.5.2"
   },
   "jest": {
