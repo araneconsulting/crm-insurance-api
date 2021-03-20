@@ -13,12 +13,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   //app.useLogger();
-  await app.listen(5000);
+  const port: number = parseInt(`${process.env.PORT}`) || 5000;
+  await app.listen(port);
 
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
   }
-
 }
 bootstrap();
