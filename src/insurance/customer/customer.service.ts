@@ -14,29 +14,33 @@ export class CustomerService {
   constructor(
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
-  ) { }
+  ) {}
 
   findAll(keyword?: string, skip = 0, limit = 0): Promise<Customer[]> {
     if (keyword && keyword) {
-      return 
-        this.customerModel
-          .find({
-            $or: [{ name: { $regex: '.*' + keyword + '.*' } },
-            { email: { $regex: '.*' + keyword + '.*' } }, ]
-          })
-          .skip(skip)
-          .limit(limit)
-          .exec();
+      return;
+      this.customerModel
+        .find({
+          $or: [
+            { name: { $regex: '.*' + keyword + '.*' } },
+            { email: { $regex: '.*' + keyword + '.*' } },
+          ],
+        })
+        .skip(skip)
+        .limit(limit)
+        .exec();
     } else {
       return this.customerModel.find({}).skip(skip).limit(limit).exec();
     }
   }
 
   findById(id: string): Promise<Customer> {
-    return from(this.customerModel.findOne({ _id: id }).exec()).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`customer:$id was not found`)),
-    ).toPromise();
+    return from(this.customerModel.findOne({ _id: id }).exec())
+      .pipe(
+        mergeMap((p) => (p ? of(p) : EMPTY)),
+        throwIfEmpty(() => new NotFoundException(`customer:$id was not found`)),
+      )
+      .toPromise();
   }
 
   save(data: CreateCustomerDto): Promise<Customer> {
@@ -55,17 +59,21 @@ export class CustomerService {
           { new: true },
         )
         .exec(),
-    ).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`customer:$id was not found`)),
-    ).toPromise();
+    )
+      .pipe(
+        mergeMap((p) => (p ? of(p) : EMPTY)),
+        throwIfEmpty(() => new NotFoundException(`customer:$id was not found`)),
+      )
+      .toPromise();
   }
 
   deleteById(id: string): Promise<Customer> {
-    return from(this.customerModel.findOneAndDelete({ _id: id }).exec()).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`customer:$id was not found`)),
-    ).toPromise();
+    return from(this.customerModel.findOneAndDelete({ _id: id }).exec())
+      .pipe(
+        mergeMap((p) => (p ? of(p) : EMPTY)),
+        throwIfEmpty(() => new NotFoundException(`customer:$id was not found`)),
+      )
+      .toPromise();
   }
 
   deleteAll(): Promise<any> {

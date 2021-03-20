@@ -225,7 +225,11 @@ export class ReportService {
       })
       .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
 
-      .project({
+      
+
+      
+      .append([
+        { $project: {
         soldAt: '$soldAt',
         location: '$location',
         liabilityCharge: '$liabilityCharge',
@@ -264,7 +268,8 @@ export class ReportService {
         //cargoInsurer: 1,
         //physicalDamageInsurer: 1,
         //wcGlUmbInsurer: 1,
-      })
+      }}
+    ])
       .sort({ soldAt: -1 });
 
     return query;
