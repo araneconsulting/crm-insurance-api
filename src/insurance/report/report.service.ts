@@ -14,8 +14,13 @@ import { ADMIN_ROLES, COMPANY, METRICS } from 'shared/const/project-constants';
 import * as moment from 'moment';
 import { bonusByRole } from '../../shared/util/salary-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
-import { getPrimaryRole, isAdmin } from 'shared/util/user-functions';
+import {
+  getPrimaryRole,
+  isAdmin,
+  isExecutive,
+} from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
+import { arrayContains, arrayMaxSize } from 'class-validator';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -225,51 +230,52 @@ export class ReportService {
       })
       .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
 
-      
-
-      
       .append([
-        { $project: {
-        soldAt: '$soldAt',
-        location: '$location',
-        liabilityCharge: '$liabilityCharge',
-        liabilityProfit: '$liabilityProfit',
-        cargoCharge: '$cargoCharge',
-        cargoProfit: '$cargoProfit',
-        physicalDamageCharge: '$physicalDamageCharge',
-        physicalDamageProfit: '$physicalDamageProfit',
-        wcGlUmbCharge: '$wcGlUmbCharge',
-        wcGlUmbProfit: '$wcGlUmbProfit',
-        fees: '$fees',
-        permits: '$permits',
-        tips: '$tips',
-        chargesPaid: '$chargesPaid',
-        premium: '$premium',
-        amountReceivable: '$amountReceivable',
-        totalCharge: '$totalCharge',
-        createdBy: '$createdBy',
-        updatedBy: '$updatedBy',
-        sellerName: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
-        customerName: '$customer.name',
-        insurerNames: {
-          $concat: [
-            { $ifNull: ['$liabilityInsurer.name', ''] },
-            '/',
-            { $ifNull: ['$cargoInsurer.name', ''] },
-            '/',
-            { $ifNull: ['$physicalDamageInsurer.name', ''] },
-            '/',
-            { $ifNull: ['$wcGlUmbInsurer.name', ''] },
-          ],
+        {
+          $project: {
+            soldAt: '$soldAt',
+            location: '$location',
+            liabilityCharge: '$liabilityCharge',
+            liabilityProfit: '$liabilityProfit',
+            cargoCharge: '$cargoCharge',
+            cargoProfit: '$cargoProfit',
+            physicalDamageCharge: '$physicalDamageCharge',
+            physicalDamageProfit: '$physicalDamageProfit',
+            wcGlUmbCharge: '$wcGlUmbCharge',
+            wcGlUmbProfit: '$wcGlUmbProfit',
+            fees: '$fees',
+            permits: '$permits',
+            tips: '$tips',
+            chargesPaid: '$chargesPaid',
+            premium: '$premium',
+            amountReceivable: '$amountReceivable',
+            totalCharge: '$totalCharge',
+            createdBy: '$createdBy',
+            updatedBy: '$updatedBy',
+            sellerName: {
+              $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+            },
+            customerName: '$customer.name',
+            insurerNames: {
+              $concat: [
+                { $ifNull: ['$liabilityInsurer.name', ''] },
+                '/',
+                { $ifNull: ['$cargoInsurer.name', ''] },
+                '/',
+                { $ifNull: ['$physicalDamageInsurer.name', ''] },
+                '/',
+                { $ifNull: ['$wcGlUmbInsurer.name', ''] },
+              ],
+            },
+            //seller: 1,
+            //customer: 1,
+            //liabilityInsurer: 1,
+            //cargoInsurer: 1,
+            //physicalDamageInsurer: 1,
+            //wcGlUmbInsurer: 1,
+          },
         },
-        //seller: 1,
-        //customer: 1,
-        //liabilityInsurer: 1,
-        //cargoInsurer: 1,
-        //physicalDamageInsurer: 1,
-        //wcGlUmbInsurer: 1,
-      }}
-    ])
+      ])
       .sort({ soldAt: -1 });
 
     return query;
@@ -336,6 +342,7 @@ export class ReportService {
     month: number,
     year: number,
     seller?: string,
+    location?: string,
   ): Promise<any> {
     const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'month')
@@ -409,7 +416,12 @@ export class ReportService {
         });
     }
 
-    const payroll = allUsers.map((employeeInfo) => {
+    const userFilteredByLocation =
+      isExecutive(user) && !isAdmin(user)
+        ? allUsers.filter((employee) => employee.location === user.location)
+        : allUsers;
+
+    const payroll = userFilteredByLocation.map((employeeInfo) => {
       employeeInfo['bonus'] = bonusByRole(
         getPrimaryRole(employeeInfo),
         employeeInfo.location,

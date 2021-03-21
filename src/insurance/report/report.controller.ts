@@ -1,5 +1,6 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   NotFoundException,
@@ -19,7 +20,7 @@ import { Request } from 'express';
 import { ApiQuery } from '@nestjs/swagger';
 import * as moment from 'moment';
 import { COMPANY } from 'shared/const/project-constants';
-import { isAdmin } from 'shared/util/user-functions';
+import { isAdmin, isExecutive } from 'shared/util/user-functions';
 
 @Controller({ path: 'reports', scope: Scope.REQUEST })
 export class ReportController {
@@ -84,11 +85,16 @@ export class ReportController {
     @Query('month') month: number,
     @Query('year') year: number,
     @Query('seller') seller?: string,
+    @Query('location') location?: string,
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
+    if (!isExecutive(user) && !isAdmin(user)){
+      throw new ForbiddenException('User is not allowed to get salary report.')
+    }
+
     const response = {
-      data: await this.reportService.getSalaryReport(user, month, year, seller),
+      data: await this.reportService.getSalaryReport(user, month, year, seller, location),
     };
 
     return res.json(response);
