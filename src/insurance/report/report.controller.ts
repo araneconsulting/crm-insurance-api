@@ -1,7 +1,9 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
+  NotFoundException,
   Query,
   Req,
   Response,
@@ -16,6 +18,9 @@ import { HasRoles } from 'auth/guard/has-roles.decorator';
 import { User } from 'database/user.model';
 import { Request } from 'express';
 import { ApiQuery } from '@nestjs/swagger';
+import * as moment from 'moment';
+import { COMPANY } from 'shared/const/project-constants';
+import { isAdmin, isExecutive } from 'shared/util/user-functions';
 
 @Controller({ path: 'reports', scope: Scope.REQUEST })
 export class ReportController {
@@ -34,14 +39,15 @@ export class ReportController {
     @Query('group_by') groupBy?: string,
     @Query('group_by_fields') groupByFields?: string,
     @Query('fields') fields?: string,
-    @Query('with_count') withCount?:boolean,
-    @Query('with_sales') withSales?:boolean,
+    @Query('with_count') withCount?: boolean,
+    @Query('with_sales') withSales?: boolean,
   ): Promise<any> {
-
     const user: Partial<User> = req.user;
 
     const fieldsArray = fields ? fields.replace(/\s/g, '').split(',') : [];
-    const groupByFieldsArray = groupByFields ? groupByFields.replace(/\s/g, '').split(',') : [];
+    const groupByFieldsArray = groupByFields
+      ? groupByFields.replace(/\s/g, '').split(',')
+      : [];
 
     const response = {
       metrics: await this.reportService.getSalesMetrics(
@@ -79,17 +85,16 @@ export class ReportController {
     @Query('month') month: number,
     @Query('year') year: number,
     @Query('seller') seller?: string,
+    @Query('location') location?: string,
   ): Promise<any> {
-
     const user: Partial<User> = req.user;
 
+    if (!isExecutive(user) && !isAdmin(user)){
+      throw new ForbiddenException('User is not allowed to get salary report.')
+    }
+
     const response = {
-      data: await this.reportService.getSalaryReport(
-        user,
-        month, 
-        year, 
-        seller
-      ),
+      data: await this.reportService.getSalaryReport(user, month, year, seller, location),
     };
 
     return res.json(response);
@@ -105,18 +110,123 @@ export class ReportController {
     @Query('year') year: number,
     @Query('seller') seller?: string,
   ): Promise<any> {
-
     const user: Partial<User> = req.user;
 
     const response = {
       data: await this.reportService.getProfitsReport(
         user,
-        month, 
-        year, 
-        seller
+        month,
+        year,
+        seller,
       ),
     };
 
+    return res.json(response);
+  }
+
+  @Get('/performance/user')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getUserPerformanceReport(
+    @Req() req: Request,
+    @Response() res,
+    @Query('month') month: number,
+    @Query('year') year: number,
+    @Query('seller') seller?: string,
+  ): Promise<any> {
+    const user: Partial<User> = req.user;
+
+    if (isAdmin(user) && !seller) {
+      return res.json({ data: {} });
+    }
+
+    const userPerformanceReport = await this.reportService.getUserPerformanceReport(
+      user,
+      month,
+      year,
+      user.id,
+    );
+
+   const userMetrics = userPerformanceReport[0];
+
+    if (!userMetrics) {
+      throw new NotFoundException(
+        'User monthly performance metrics are not available',
+      );
+    }
+
+    const baseDate = moment()
+      .year(year)
+      .month(month - 1)
+      .date(COMPANY.payrollDay);
+
+    const startDate = baseDate.format('MMM D');
+    const endDate = baseDate.add(1, 'month').subtract(1, 'day').format('MMM D');
+    //const dateRangeTitle = startDate + ' - ' + endDate + ', '+ baseDate.format('YYYY');
+    const dateRangeTitle = startDate + ' to today';
+
+    const metrics = [
+      {
+        title: dateRangeTitle,
+        subtitle: '',
+        label: 'Sales Total',
+        valuePrefix: '$',
+        value: userMetrics.totalCharge,
+        valueSuffix: '',
+        description:
+          "Sum of all my sales achieved since last month's 21st to this day.",
+      },
+      {
+        title: dateRangeTitle,
+        subtitle: '',
+        label: 'Accumulated Salary',
+        valuePrefix: '$',
+        value: userMetrics.totalSalary,
+        valueSuffix: '',
+        description:
+          'Salary is the sum of your base salary plus bonus and tips minus discounts.',
+      },
+      {
+        title: dateRangeTitle,
+        subtitle: '',
+        label: 'Accumulated Bonus',
+        valuePrefix: '$',
+        value: userMetrics.bonus,
+        valueSuffix: '',
+        description:
+          'Bonus calculation is impacted by different variables like: accumulated sales, base salary, tips, discounts, among others.',
+      },
+    ];
+
+    let message = '';
+    if (userMetrics.totalCharge > 100000) {
+      message =
+        'Come on ' +
+        userMetrics.firstName +
+        ', can you tell me how you got these numbers? You are the best, did you know?';
+    } else if (userMetrics.totalCharge > 50000) {
+      message =
+        'Hey! ' +
+        userMetrics.firstName +
+        ', it seems that you are having a month with very good performance. Keep up the good guy!';
+    } else if (userMetrics.totalCharge > 25000) {
+      message =
+        'Psst... ' +
+        userMetrics.firstName +
+        ', it seems you come with a good momentum. I am sure you will get very far this month!';
+    } else {
+      message =
+        'Uhmm ' +
+        userMetrics[0].firstName +
+        ', this seems like a month to achieve great challenges, and you will achieve good numbers!';
+    }
+
+    const response = {
+      data: {
+        message: message,
+        metrics: metrics,
+      },
+    };
     return res.json(response);
   }
 }

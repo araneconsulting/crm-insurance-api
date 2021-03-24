@@ -15,7 +15,7 @@ import { DashboardModule } from 'insurance/dashboard/dashboard.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ ignoreEnvFile: true }),
+    ConfigModule.forRoot({cache: true,}),
     ReportModule,
     SaleModule,
     DatabaseModule,

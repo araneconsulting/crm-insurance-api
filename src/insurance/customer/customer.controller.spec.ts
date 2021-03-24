@@ -46,7 +46,7 @@ describe('Customer Controller', () => {
 
  /*    it('POST on /customers should save customer', async () => {
       const customer: CreateCustomerDto = {
-        isCompany: true,
+        
         name: 'TestSoft',
         email: 'test@example.com',
         phone: '832-111-1111',

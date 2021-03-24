@@ -119,35 +119,41 @@ export class SaleService {
       })
       .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
 
-      .project({
-        type: '$type',
-        soldAt: '$soldAt',
-        liabilityCharge: { $round: ['$liabilityCharge', 2] },
-        liabilityProfit: { $round: ['$liabilityProfit', 2] },
-        cargoCharge: { $round: ['$cargoCharge', 2] },
-        cargoProfit: { $round: ['$cargoProfit', 2] },
-        physicalDamageCharge: { $round: ['$physicalDamageCharge', 2] },
-        physicalDamageProfit: { $round: ['$physicalDamageProfit', 2] },
-        wcGlUmbCharge: { $round: ['$wcGlUmbCharge', 2] },
-        wcGlUmbProfit: { $round: ['$wcGlUmbProfit', 2] },
-        fees: { $round: ['$fees', 2] },
-        permits: { $round: ['$permits', 2] },
-        tips: { $round: ['$tips', 2] },
-        chargesPaid: { $round: ['$chargesPaid', 2] },
-        premium: { $round: ['$premium', 2] },
-        amountReceivable: { $round: ['$amountReceivable', 2] },
-        totalCharge: { $round: ['$totalCharge', 2] },
-        sellerName: { $concat: ['$seller.firstName', ' ', '$seller.lastName'] },
-        location: '$location',
-        createdBy: '$createdBy',
-        updatedBy: '$updatedBy',
-        seller: 1,
-        customer: 1,
-        liabilityInsurer: 1,
-        cargoInsurer: 1,
-        physicalDamageInsurer: 1,
-        wcGlUmbInsurer: 1,
-      })
+      .append([
+        {
+          $project: {
+            type: '$type',
+            soldAt: '$soldAt',
+            liabilityCharge: { $round: ['$liabilityCharge', 2] },
+            liabilityProfit: { $round: ['$liabilityProfit', 2] },
+            cargoCharge: { $round: ['$cargoCharge', 2] },
+            cargoProfit: { $round: ['$cargoProfit', 2] },
+            physicalDamageCharge: { $round: ['$physicalDamageCharge', 2] },
+            physicalDamageProfit: { $round: ['$physicalDamageProfit', 2] },
+            wcGlUmbCharge: { $round: ['$wcGlUmbCharge', 2] },
+            wcGlUmbProfit: { $round: ['$wcGlUmbProfit', 2] },
+            fees: { $round: ['$fees', 2] },
+            permits: { $round: ['$permits', 2] },
+            tips: { $round: ['$tips', 2] },
+            chargesPaid: { $round: ['$chargesPaid', 2] },
+            premium: { $round: ['$premium', 2] },
+            amountReceivable: { $round: ['$amountReceivable', 2] },
+            totalCharge: { $round: ['$totalCharge', 2] },
+            sellerName: {
+              $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+            },
+            location: '$location',
+            createdBy: '$createdBy',
+            updatedBy: '$updatedBy',
+            seller: 1,
+            customer: 1,
+            liabilityInsurer: 1,
+            cargoInsurer: 1,
+            physicalDamageInsurer: 1,
+            wcGlUmbInsurer: 1,
+          },
+        },
+      ])
       .sort({ soldAt: -1 });
 
     return query;
@@ -205,7 +211,9 @@ export class SaleService {
         (insurer) => insurer.id === data.liabilityInsurer,
       );
       data['liabilityProfit'] = insurer
-        ? roundAmount(insurer.liabilityCommission * data.liabilityCharge)
+        ? roundAmount(
+            (insurer.liabilityCommission / 100) * data.liabilityCharge,
+          )
         : 0;
     }
 
@@ -214,7 +222,7 @@ export class SaleService {
         (insurer) => insurer.id === data.cargoInsurer,
       );
       data['cargoProfit'] = insurer
-        ? roundAmount(insurer.cargoCommission * data.cargoCharge)
+        ? roundAmount((insurer.cargoCommission / 100) * data.cargoCharge)
         : 0;
     }
 
@@ -223,7 +231,10 @@ export class SaleService {
         (insurer) => insurer.id === data.physicalDamageInsurer,
       );
       data['physicalDamageProfit'] = insurer
-        ? roundAmount(insurer.physicalDamageCommission * data.physicalDamageCharge)
+        ? roundAmount(
+            (insurer.physicalDamageCommission / 100) *
+              data.physicalDamageCharge,
+          )
         : 0;
     }
 
@@ -232,7 +243,7 @@ export class SaleService {
         (insurer) => insurer.id === data.wcGlUmbInsurer,
       );
       data['wcGlUmbProfit'] = insurer
-        ? roundAmount(insurer.wcGlUmbCommission * data.wcGlUmbCharge)
+        ? roundAmount((insurer.wcGlUmbCommission / 100) * data.wcGlUmbCharge)
         : 0;
     }
 

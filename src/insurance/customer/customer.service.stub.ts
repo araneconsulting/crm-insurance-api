@@ -13,21 +13,18 @@ export class CustomerServiceStub implements Pick<CustomerService, keyof Customer
   private customers: Customer[] = [
     {
       _id: '5ee49c3115a4e75254bb732e',
-      isCompany: true,
       name: 'FutureSoft',
       email: 'aliesky@example.com',
       phone: '832-555-5555',
     } as Customer,
     {
       _id: '5ee49c3115a4e75254bb732f',
-      isCompany: true,
       name: 'World Records',
       email: 'ernesto@example.com',
       phone: '832-111-3333',
     } as Customer,
     {
       _id: '5ee49c3115a4e75254bb7330',
-      isCompany: true,
       name: 'TED SuperStars',
       email: 'ernesto@example.com',
       phone: '832-222-8888',
@@ -39,8 +36,8 @@ export class CustomerServiceStub implements Pick<CustomerService, keyof Customer
   }
 
   findById(id: string): Observable<Customer> {
-    const { isCompany, name, email, phone } = this.customers[0];
-    return of({ _id: id, isCompany, name, email, phone } as Customer);
+    const { name, company, email, phone, fax, address, city, state, country, zip, dot } = this.customers[0];
+    return of({ _id: id, name, company, email, phone, fax, address, city, state, country, zip, dot } as Customer);
   }
 
   save(data: CreateCustomerDto): Observable<Customer> {
@@ -53,7 +50,6 @@ export class CustomerServiceStub implements Pick<CustomerService, keyof Customer
 
   deleteById(id: string): Observable<Customer> {
     return of({
-      _id: id, isCompany: true,
       name: 'TED SuperStars',
       email: 'ernesto@example.com',
       phone: '832-222-8888',
