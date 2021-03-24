@@ -86,5 +86,7 @@ export class UpdateSaleDto {
   chargesPaid: number;
 
   @IsOptional()
-  premium: number;
+  @IsNumber()
+  @IsNotEmpty()
+  totalCharge: number;
 }

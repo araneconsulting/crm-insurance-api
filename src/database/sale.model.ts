@@ -75,8 +75,8 @@ SaleSchema.pre('save', function () {
   const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
 
   this.set({
-    totalCharge: Number((liability + physicalDamage + cargo + wcGlUmb + this.fees + this.permits).toFixed(2)),
-    amountReceivable: Number((liability  + physicalDamage + cargo + wcGlUmb + this.fees + this.permits - this.chargesPaid).toFixed(2)),
+    premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
+    amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
   });
 });
 
@@ -89,8 +89,8 @@ SaleSchema.pre('updateOne', function () {
   const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
 
   this.set({
-    totalCharge: Number((liability + physicalDamage + cargo + wcGlUmb + this.fees + this.permits).toFixed(2)),
-    amountReceivable: Number((liability + physicalDamage + cargo + wcGlUmb + this.fees + this.permits - this.chargesPaid).toFixed(2))
+    premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
+    amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
   });
 });
 

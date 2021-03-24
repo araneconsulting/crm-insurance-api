@@ -108,6 +108,6 @@ export class CreateSaleDto {
   chargesPaid: number;
 
   @IsOptional()
-  premium: number;
+  totalCharge: number;
 
 }
