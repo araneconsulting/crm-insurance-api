@@ -7,19 +7,24 @@ const MONTHLY_SALES_TARGET_BY_EMPLOYEE = 50000;
 export function bonusByRole(
   role: string,
   location: string,
-  employeeTotalSales: number,
+  employeeTotalPremium: number,
+  employeeTotalPermits: number,
+  employeeTotalFees: number,
+  employeeTotalTips: number,
   officeEmployees: number,
   officeTotalSales: number,
 ): any {
-  
   let bonus = 0;
 
+  const extraBonus =
+    employeeTotalFees * 0.3 + employeeTotalPermits * 0.2 + employeeTotalTips;
+
   switch (location) {
-    case "MEXICO-I":
+    case 'MEXICO-I':
       switch (role) {
         case RoleType.CERTIFICATES:
-          bonus += employeeTotalSales * 0.01;
-          if (employeeTotalSales > MONTHLY_SALES_TARGET_BY_EMPLOYEE) {
+          bonus += employeeTotalPremium * 0.01 + extraBonus;
+          if (employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE) {
             bonus += 100;
           }
           break;
@@ -39,47 +44,45 @@ export function bonusByRole(
 
         case RoleType.MANAGER:
           if (
-            employeeTotalSales > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
-            employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE
+            employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
+            employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
-            bonus += employeeTotalSales * 0.005;
-
-          if (
-            employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
-            employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
+            bonus += employeeTotalPremium * 0.005 + extraBonus;
+          else if (
+            employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
+            employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
-            bonus += employeeTotalSales * 0.01 + 50;
-
-          if (employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
-            bonus += employeeTotalSales * 0.01 + 100;
+            bonus += employeeTotalPremium * 0.01 + 50 + extraBonus;
+          else if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
+            bonus += employeeTotalPremium * 0.01 + 100 + extraBonus;
 
           if (
             officeTotalSales >
             MONTHLY_SALES_TARGET_BY_EMPLOYEE * officeEmployees
           )
-            bonus += (officeTotalSales - employeeTotalSales) * 0.005;
+            bonus += (officeTotalSales - employeeTotalPremium) * 0.005;
           break;
 
         case RoleType.SELLER:
           if (
-            employeeTotalSales > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
-            employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE
+            employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
+            employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
-            bonus += employeeTotalSales * 0.005;
+            bonus += employeeTotalPremium * 0.005 + extraBonus;
 
           if (
-            employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
-            employeeTotalSales < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
+            employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
+            employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
-            bonus += employeeTotalSales * 0.01 + 50;
+            bonus += employeeTotalPremium * 0.01 + 50 + extraBonus;
 
-          if (employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
-            bonus += employeeTotalSales * 0.01 + 100;
+          if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
+            bonus += employeeTotalPremium * 0.01 + 100 + extraBonus;
           break;
 
         case RoleType.TRAINEE:
-          if (employeeTotalSales >= MONTHLY_SALES_TARGET_BY_EMPLOYEE)
-            bonus += employeeTotalSales * 0.01 + 50;
+          if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE)
+            bonus += employeeTotalPremium * 0.01 + 50 + extraBonus;
           break;
 
         case RoleType.OWNER:
@@ -88,7 +91,7 @@ export function bonusByRole(
       }
 
       break;
-    case "USA-I":
+    case 'USA-I':
       break;
   }
 

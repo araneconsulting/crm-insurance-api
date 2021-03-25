@@ -359,14 +359,14 @@ export class ReportService {
       null,
       'SELLER',
       [],
-      ['totalCharge', 'tips'],
+      ['premium', 'tips'],
       true,
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
-      result['totalCharge'] = roundAmount(metric.totalCharge);
+      result['premium'] = roundAmount(metric.premium);
       result['tips'] = metric.tips;
 
       return result;
@@ -375,7 +375,7 @@ export class ReportService {
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.totalCharge,
+            (accumulator, item) => accumulator + item.premium,
             0,
           )
         : 0;
@@ -389,7 +389,7 @@ export class ReportService {
 
         const result = {
           ...user._doc,
-          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           sellerName: user.firstName + ' ' + user.lastName,
         };
@@ -407,7 +407,7 @@ export class ReportService {
 
           const result = {
             ...user._doc,
-            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+            premium: userMetrics ? userMetrics.premium : 0,
             tips: userMetrics ? userMetrics.tips : 0,
             sellerName: user.firstName + ' ' + user.lastName,
           };
@@ -425,12 +425,15 @@ export class ReportService {
       employeeInfo['bonus'] = bonusByRole(
         getPrimaryRole(employeeInfo),
         employeeInfo.location,
-        employeeInfo.totalCharge,
+        employeeInfo.premium,
+        employeeInfo.permits,
+        employeeInfo.fees,
+        employeeInfo.tips,
         employeeMetrics.length,
         officeTotalSales,
       );
       employeeInfo['total'] = roundAmount(
-        employeeInfo.baseSalary + employeeInfo.bonus + employeeInfo.tips,
+        employeeInfo.baseSalary + employeeInfo.bonus,
       );
 
       return employeeInfo;
@@ -461,7 +464,9 @@ export class ReportService {
       'SELLER',
       [],
       [
-        'totalCharge',
+        'premium',
+        'permits',
+        'fees',
         'tips',
         'liabilityProfit',
         'cargoProfit',
@@ -473,8 +478,10 @@ export class ReportService {
 
     employeeMetrics = employeeMetrics.map((metric) => {
       const result = metric._id;
-      result['totalCharge'] = roundAmount(metric.totalCharge);
+      result['premium'] = roundAmount(metric.premium);
       result['tips'] = roundAmount(metric.tips);
+      result['permits'] = roundAmount(metric.permits);
+      result['fees'] = roundAmount(metric.fees);
       result['liabilityProfit'] = roundAmount(metric.liabilityProfit);
       result['cargoProfit'] = roundAmount(metric.cargoProfit);
       result['physicalDamageProfit'] = roundAmount(metric.physicalDamageProfit);
@@ -486,7 +493,7 @@ export class ReportService {
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.totalCharge,
+            (accumulator, item) => accumulator + item.premium,
             0,
           )
         : 0;
@@ -511,8 +518,10 @@ export class ReportService {
 
         const result = {
           ...user._doc,
-          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
+          fees: userMetrics ? userMetrics.fees : 0,
+          permits: userMetrics ? userMetrics.permits : 0,
           sellerName: user.firstName + ' ' + user.lastName,
           liabilityProfit: userMetrics ? userMetrics.liabilityProfit : 0,
           cargoProfit: userMetrics ? userMetrics.cargoProfit : 0,
@@ -525,12 +534,15 @@ export class ReportService {
         result['bonus'] = bonusByRole(
           getPrimaryRole(user),
           user.location,
-          result.totalCharge,
+          result.premium,
+          result.permits,
+          result.fees,
+          result.tips,
           employeeMetrics.length,
           officeTotalSales,
         );
         result['totalSalary'] = roundAmount(
-          result.bonus + result.tips + user.baseSalary,
+          result.bonus + user.baseSalary,
         );
         result['totalSaleGrossProfit'] = roundAmount(
           result.liabilityProfit +

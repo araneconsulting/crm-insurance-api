@@ -181,7 +181,7 @@ export class ReportController {
         subtitle: '',
         label: 'Sales Total',
         valuePrefix: '$',
-        value: userMetrics.totalCharge,
+        value: userMetrics.premium,
         valueSuffix: '',
         description:
           "Sum of all my sales achieved since last month's 21st to this day.",
@@ -209,17 +209,17 @@ export class ReportController {
     ];
 
     let message = '';
-    if (userMetrics.totalCharge > 100000) {
+    if (userMetrics.premium > 100000) {
       message =
         'Come on ' +
         userMetrics.firstName +
         ', can you tell me how you got these numbers? You are the best, did you know?';
-    } else if (userMetrics.totalCharge > 50000) {
+    } else if (userMetrics.premium > 50000) {
       message =
         'Hey! ' +
         userMetrics.firstName +
         ', it seems that you are having a month with very good performance. Keep up the good guy!';
-    } else if (userMetrics.totalCharge > 25000) {
+    } else if (userMetrics.premium > 25000) {
       message =
         'Psst... ' +
         userMetrics.firstName +
@@ -227,7 +227,7 @@ export class ReportController {
     } else {
       message =
         'Uhmm ' +
-        userMetrics[0].firstName +
+        userMetrics.firstName +
         ', this seems like a month to achieve great challenges, and you will achieve good numbers!';
     }
 
