@@ -89,12 +89,18 @@ export class ReportController {
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
-    if (!isExecutive(user) && !isAdmin(user)){
-      throw new ForbiddenException('User is not allowed to get salary report.')
+    if (!isExecutive(user) && !isAdmin(user)) {
+      throw new ForbiddenException('User is not allowed to get salary report.');
     }
 
     const response = {
-      data: await this.reportService.getSalaryReport(user, month, year, seller, location),
+      data: await this.reportService.getSalaryReport(
+        user,
+        month,
+        year,
+        seller,
+        location,
+      ),
     };
 
     return res.json(response);
@@ -147,7 +153,7 @@ export class ReportController {
       user.id,
     );
 
-   const userMetrics = userPerformanceReport[0];
+    const userMetrics = userPerformanceReport[0];
 
     if (!userMetrics) {
       throw new NotFoundException(
@@ -155,10 +161,14 @@ export class ReportController {
       );
     }
 
-    const baseDate = moment()
-      .year(year)
-      .month(month - 1)
-      .date(COMPANY.payrollDay);
+    const baseDate =
+      moment().date() < 21
+        ? moment({
+            year: year,
+            month: month,
+            day: COMPANY.payrollDay,
+          }).subtract(1, 'months')
+        : moment({ year: year, month: month, day: COMPANY.payrollDay });
 
     const startDate = baseDate.format('MMM D');
     const endDate = baseDate.add(1, 'month').subtract(1, 'day').format('MMM D');
