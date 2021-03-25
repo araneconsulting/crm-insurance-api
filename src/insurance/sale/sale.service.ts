@@ -26,6 +26,7 @@ import { isAdmin, isSeller } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
+import { CompanyCatalog } from 'shared/const/catalog/company';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
@@ -141,6 +142,24 @@ export class SaleService {
             totalCharge: { $round: ['$totalCharge', 2] },
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+            },
+            locationName: { $function:
+              {
+                 body: function(seller, CompanyCatalog) {
+                   return CompanyCatalog.locations.find(({ id }) => id === seller.location).name;
+                 },
+                 args: [ "$seller", CompanyCatalog],
+                 lang: "js"
+              }
+            },
+            customerName: { $function:
+              {
+                 body: function(customer) {
+                   return customer.company || customer.name;
+                 },
+                 args: [ "$customer"],
+                 lang: "js"
+              }
             },
             location: '$location',
             createdBy: '$createdBy',

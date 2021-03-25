@@ -266,7 +266,15 @@ export class ReportService {
                  lang: "js"
               }
             },
-            customerName: '$customer.name',
+            customerName: { $function:
+              {
+                 body: function(customer) {
+                   return customer.company || customer.name;
+                 },
+                 args: [ "$customer"],
+                 lang: "js"
+              }
+            },
             insurerNames: {
               $concat: [
                 { $ifNull: ['$liabilityInsurer.name', ''] },
