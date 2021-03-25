@@ -7,7 +7,7 @@ export const CompanyCatalog = {
       phone: '',
       email: 'contact@vl17insagency.com',
       fax: '',
-      manager: '{TATIANA ID}'
+      manager: 'Tatiana Nicles'
     },
     {
       id: 'USA-I',
@@ -16,7 +16,13 @@ export const CompanyCatalog = {
       phone: '+1-281-803-8156',
       email: 'contact@vl17insagency.com',
       fax: '',
-      manager: '{EDGAR ID}'
+      manager: 'Lisandra Cunill'
     },
   ],
 };
+
+export function locationName(locationCode) {
+  return CompanyCatalog.locations.find(
+    (location) => location.id === locationCode
+  ).name;
+}

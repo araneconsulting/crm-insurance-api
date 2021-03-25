@@ -21,6 +21,9 @@ import {
 } from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
 import { arrayContains, arrayMaxSize } from 'class-validator';
+import { locationName } from 'shared/const/catalog/company';
+import { CompanyCatalog } from '../../shared/const/catalog/company';
+
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -234,7 +237,6 @@ export class ReportService {
         {
           $project: {
             soldAt: '$soldAt',
-            location: '$location',
             liabilityCharge: '$liabilityCharge',
             liabilityProfit: '$liabilityProfit',
             cargoCharge: '$cargoCharge',
@@ -255,6 +257,15 @@ export class ReportService {
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
+            locationName: { $function:
+              {
+                 body: function(seller, CompanyCatalog) {
+                   return CompanyCatalog.locations.find(({ id }) => id === seller.location).name;
+                 },
+                 args: [ "$seller", CompanyCatalog],
+                 lang: "js"
+              }
+            },
             customerName: '$customer.name',
             insurerNames: {
               $concat: [
@@ -266,13 +277,7 @@ export class ReportService {
                 '/',
                 { $ifNull: ['$wcGlUmbInsurer.name', ''] },
               ],
-            },
-            //seller: 1,
-            //customer: 1,
-            //liabilityInsurer: 1,
-            //cargoInsurer: 1,
-            //physicalDamageInsurer: 1,
-            //wcGlUmbInsurer: 1,
+            }
           },
         },
       ])
