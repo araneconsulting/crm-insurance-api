@@ -11,12 +11,12 @@ export class CreateInsurerDto {
   @IsOptional()
   @IsNotEmpty()
   readonly phone: string;
-  @IsNumber()
+  @IsOptional()
   readonly liabilityCommission: number = DEFAULT_COMMISSION;
-  @IsNumber()
+  @IsOptional()
   readonly cargoCommission: number = DEFAULT_COMMISSION;
-  @IsNumber()
+  @IsOptional()
   readonly physicalDamageCommission: number = DEFAULT_COMMISSION;
-  @IsNumber()
+  @IsOptional()
   readonly wcGlUmbCommission: number = DEFAULT_COMMISSION;
 }

@@ -51,7 +51,7 @@ export class InsurerController {
   @Post('')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL, RoleType.MANAGER)
   createInsurer(
     @Body() insurer: CreateInsurerDto
   ): Observable<Insurer> {
@@ -61,7 +61,7 @@ export class InsurerController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN)
+  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL, RoleType.MANAGER)
   updateInsurer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() insurer: UpdateInsurerDto,
