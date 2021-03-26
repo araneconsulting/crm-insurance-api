@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, MaxLength, MinLength } from "class-validator";
 import { LocationType } from "shared/enum/location-type.enum";
+import { RoleType } from "shared/enum/role-type.enum";
 
 export class RegisterDto {
     @IsNotEmpty()
@@ -28,4 +29,5 @@ export class RegisterDto {
     readonly location: string;
     readonly position: string;
     readonly baseSalary?: number;
+    readonly roles: RoleType[];
 }

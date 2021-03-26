@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, IsOptional, MaxLength, MinLength } from "class-validator";
 import { LocationType } from "shared/enum/location-type.enum";
+import { RoleType } from "shared/enum/role-type.enum";
 
 export class UpdateUserDto {
 
@@ -43,5 +44,9 @@ export class UpdateUserDto {
     @IsOptional()
     @IsNotEmpty()
     readonly baseSalary: number;
+    
+    @IsOptional()
+    @IsNotEmpty()
+    readonly roles: RoleType[];
     
 }
