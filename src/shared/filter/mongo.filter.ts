@@ -34,8 +34,6 @@ export class MongoFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
         path: request.url,
       });
-    } else {
-      response.status(status).json({ message: 'Internal error.' });
     }
   }
 }
