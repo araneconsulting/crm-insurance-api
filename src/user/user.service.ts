@@ -91,7 +91,7 @@ export class UserService {
   }
 
   updateUser(id: string, data: UpdateUserDto): Observable<User> {
-    const updateQuery = this.userModel.findByIdAndUpdate({ _id: id }, data, {
+    const updateQuery = this.userModel.findOneAndUpdate({ _id: id }, data, {
       new: true,
     });
     return from(updateQuery.exec()).pipe(

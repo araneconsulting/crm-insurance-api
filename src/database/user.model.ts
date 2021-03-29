@@ -1,4 +1,4 @@
-import { compare, hash } from 'bcrypt';
+import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from "rxjs";
 import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
@@ -24,7 +24,7 @@ type UserModel = Model<User>;
 const UserSchema = new Schema<any>(
   {
     username: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
-    password: SchemaTypes.String,
+    password: {type: SchemaTypes.String},
     email: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
     firstName: { type: SchemaTypes.String, required: false },
     lastName: { type: SchemaTypes.String, required: false },
@@ -55,13 +55,27 @@ async function preSaveHook(next) {
   if (!this.isModified('password')) return next();
 
   // Hash the password
-  const password = await hash(this.password, 12);
+  const salt = genSaltSync();
+  const password = await hash(this.password, salt);
   this.set('password', password);
 
   next();
 }
 
 UserSchema.pre<User>('save', preSaveHook);
+
+UserSchema.pre('findOneAndUpdate', async function (this) {
+  let update = {...this.getUpdate()};
+
+  // Only run this function if password was modified
+  if (update.password){
+
+  // Hash the password
+  const salt = genSaltSync();
+  update.password = await hash(this.getUpdate().password, salt);
+  this.setUpdate(update);
+  }
+})
 
 function comparePasswordMethod(password: string): Observable<boolean> {
   return from(compare(password, this.password));
