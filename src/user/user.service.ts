@@ -12,8 +12,8 @@ import { UpdateUserDto } from './update-user.dto';
 export class UserService {
   constructor(
     @Inject(USER_MODEL) private userModel: UserModel,
-    private sendgridService: SendgridService
-  ) { }
+    private sendgridService: SendgridService,
+  ) {}
 
   findByUsername(username: string): Observable<User> {
     return from(this.userModel.findOne({ username }).exec());
@@ -32,7 +32,6 @@ export class UserService {
   }
 
   createUser(data: RegisterDto): Observable<User> {
-
     // Simply here we can send a verification email to the new registered user
     // by calling SendGrid directly.
     //
@@ -91,10 +90,10 @@ export class UserService {
     // );
   }
 
-
   updateUser(id: string, data: UpdateUserDto): Observable<User> {
-
-    const updateQuery = this.userModel.findByIdAndUpdate({ _id: id }, data, {new: true});
+    const updateQuery = this.userModel.findByIdAndUpdate({ _id: id }, data, {
+      new: true,
+    });
     return from(updateQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),
@@ -102,7 +101,6 @@ export class UserService {
   }
 
   delete(id: string): Observable<User> {
-
     const deleteQuery = this.userModel.findByIdAndDelete({ _id: id });
     return from(deleteQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -113,7 +111,7 @@ export class UserService {
   findById(id: string, withSales = false): Observable<User> {
     const userQuery = this.userModel.findOne({ _id: id });
     if (withSales) {
-      userQuery.populate("sales");
+      userQuery.populate('sales');
     }
     return from(userQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -124,7 +122,7 @@ export class UserService {
   findAll(withSales = false): Observable<User[]> {
     const userQuery = this.userModel.find();
     if (withSales) {
-      userQuery.populate("sales");
+      userQuery.populate('sales');
     }
     return from(userQuery.exec());
   }

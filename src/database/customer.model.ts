@@ -22,16 +22,16 @@ type CustomerModel = Model<Customer>;
 const CustomerSchema = new Schema<any>(
   {
     name: SchemaTypes.String,
-    company: SchemaTypes.String,
+    company: { type: SchemaTypes.String, unique:true },
     address: SchemaTypes.String,
     city: SchemaTypes.String,
     state: SchemaTypes.String,
     country: SchemaTypes.String,
     zip: SchemaTypes.String,
-    email: SchemaTypes.String,
+    email: { type: SchemaTypes.String, unique:true },
     phone: SchemaTypes.String,
     fax: SchemaTypes.String,
-    dot: SchemaTypes.String,
+    dot: { type: SchemaTypes.String, unique:true, required: false },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },

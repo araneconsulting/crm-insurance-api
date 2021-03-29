@@ -4,6 +4,7 @@ export class CreateCustomerDto {
   readonly name: string;
   @IsNotEmpty()
   readonly email: string;
+  @IsNotEmpty()
   readonly company: string;
   readonly address: string;
   readonly city: string;

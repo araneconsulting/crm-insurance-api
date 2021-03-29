@@ -13,7 +13,6 @@ import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import {
-  CUSTOMER_MODEL,
   INSURER_MODEL,
   SALE_MODEL,
   USER_MODEL,
@@ -21,7 +20,6 @@ import {
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
-import { Customer } from 'database/customer.model';
 import { isAdmin, isSeller } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';

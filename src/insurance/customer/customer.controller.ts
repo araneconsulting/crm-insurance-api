@@ -1,10 +1,14 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
   Delete,
+  ExceptionFilter,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -13,7 +17,8 @@ import {
   Redirect,
   Res,
   Scope,
-  UseGuards
+  UseFilters,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { map } from 'rxjs/operators';
@@ -26,59 +31,57 @@ import { Customer } from '../../database/customer.model';
 import { CreateCustomerDto } from './create-customer.dto';
 import { CustomerService } from './customer.service';
 import { UpdateCustomerDto } from './update-customer.dto';
+import { BadRequestFilter } from 'shared/filter/bad-request.filter';
+import { MongoFilter } from 'shared/filter/mongo.filter';
 
 @Controller({ path: 'customers', scope: Scope.REQUEST })
 export class CustomerController {
-  constructor(private customerService: CustomerService) { }
+  constructor(private customerService: CustomerService) {}
 
-  @Get('')
+  @Get()
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  getAllCustomers(
+  async getAllCustomers(
     @Query('q') keyword?: string,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
   ): Promise<Customer[]> {
-    return this.customerService.findAll(keyword, skip, limit);
+    return await this.customerService.findAll(keyword, skip, limit);
   }
 
   @Get(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  getCustomerById(@Param('id', ParseObjectIdPipe) id: string): Promise<Customer> {
-    return this.customerService.findById(id);
+  async getCustomerById(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<Customer> {
+    return await this.customerService.findById(id);
   }
 
-  @Post('')
+  @Post()
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
-  createCustomer(
-    @Body() customer: CreateCustomerDto
-  ): Promise<Customer> {
-    return this.customerService.save(customer);
+  @UseFilters(BadRequestFilter, MongoFilter)
+  async createCustomer(@Body() customer: CreateCustomerDto): Promise<Customer> {
+    return await this.customerService.save(customer);
   }
 
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
-  updateCustomer(
+  async updateCustomer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() customer: UpdateCustomerDto,
-    
   ): Promise<Customer> {
-    return this.customerService.update(id, customer);
+    return await this.customerService.update(id, customer);
   }
 
   @Delete(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
-  @HasRoles(RoleType.ADMIN)
-  deleteCustomerById(
-    @Param('id', ParseObjectIdPipe) id: string
+  async deleteCustomerById(
+    @Param('id', ParseObjectIdPipe) id: string,
   ): Promise<Customer> {
-    return this.customerService.deleteById(id);
+    return await this.customerService.deleteById(id);
   }
 }

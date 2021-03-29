@@ -1,5 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { AllExceptionsFilter } from 'shared/filter/all-exceptions.filter';
+import { HttpExceptionFilter } from 'shared/filter/http-exception.filter';
 import { AppModule } from './app.module';
 declare const module: any;
 
@@ -10,6 +12,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   app.useGlobalPipes(new ValidationPipe());
+  
+  app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors();
   //app.useLogger();
   const port: number = parseInt(`${process.env.PORT}`) || 5000;

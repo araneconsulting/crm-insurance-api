@@ -21,7 +21,7 @@ export class UpdateUserDto {
     // @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,20}$/,
     //     { message: " A password at least contains one numeric digit, one supercase char and one lowercase char" }
     // )
-    readonly password: string;
+    password: string;
 
     @IsOptional()
     @IsNotEmpty()
