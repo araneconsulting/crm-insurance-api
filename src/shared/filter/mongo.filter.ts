@@ -12,6 +12,7 @@ import { MongoError } from 'mongodb';
 export class MongoFilter implements ExceptionFilter {
   catch(exception: MongoError, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse();
+    console.log(exception);
     if (exception.code === 11000) {
       response
         .status(400)

@@ -12,6 +12,7 @@ import {
   Req,
   Response,
   Scope,
+  UseFilters,
   UseGuards
 } from '@nestjs/common';
 import { from, Observable } from 'rxjs';
@@ -27,6 +28,8 @@ import { UpdateSaleDto } from './update-sale.dto';
 import { Request } from 'express';
 import { User } from 'database/user.model';
 import { UserCatalog } from 'shared/const/catalog/user';
+import { BadRequestFilter } from 'shared/filter/bad-request.filter';
+import { MongoFilter } from 'shared/filter/mongo.filter';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {
@@ -62,7 +65,7 @@ export class SaleController {
   @Post('')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
+  @UseFilters(BadRequestFilter, MongoFilter)
   createSale(
     @Req() req : Request,
     @Body() sale: any
@@ -73,7 +76,7 @@ export class SaleController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
+  @UseFilters(BadRequestFilter, MongoFilter)
   updateSale(
     @Req() req : Request,
     @Param('id', ParseObjectIdPipe) id: string,
@@ -86,7 +89,6 @@ export class SaleController {
   @Delete(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.MANAGER, RoleType.SELLER, RoleType.TRAINEE)
   deleteSaleById(
     @Param('id', ParseObjectIdPipe) id: string
   ): Observable<Sale> {

@@ -69,6 +69,7 @@ export class CustomerController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(BadRequestFilter, MongoFilter)
   async updateCustomer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() customer: UpdateCustomerDto,

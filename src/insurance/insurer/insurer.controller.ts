@@ -13,6 +13,7 @@ import {
   Redirect,
   Res,
   Scope,
+  UseFilters,
   UseGuards
 } from '@nestjs/common';
 import { from, Observable } from 'rxjs';
@@ -25,6 +26,8 @@ import { Insurer } from '../../database/insurer.model';
 import { CreateInsurerDto } from './create-insurer.dto';
 import { InsurerService } from './insurer.service';
 import { UpdateInsurerDto } from './update-insurer.dto';
+import { MongoFilter } from 'shared/filter/mongo.filter';
+import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 
 @Controller({ path: 'insurers', scope: Scope.REQUEST })
 export class InsurerController {
@@ -52,6 +55,7 @@ export class InsurerController {
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL, RoleType.MANAGER)
+  @UseFilters(BadRequestFilter, MongoFilter)
   createInsurer(
     @Body() insurer: CreateInsurerDto
   ): Observable<Insurer> {
@@ -62,6 +66,7 @@ export class InsurerController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL, RoleType.MANAGER)
+  @UseFilters(BadRequestFilter, MongoFilter)
   updateInsurer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() insurer: UpdateInsurerDto,
