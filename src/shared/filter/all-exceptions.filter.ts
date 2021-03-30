@@ -9,9 +9,8 @@ import {
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
-    console.log(exception.constructor.name);
-    console.log(exception);
 
+    console.log(exception);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
@@ -22,7 +21,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       const e: Partial<HttpException> = exception;
-      console.log(e);
 
       response.status(status).json({
         statusCode: e.getStatus(),

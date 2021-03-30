@@ -31,7 +31,7 @@ const CustomerSchema = new Schema<any>(
     email: { type: SchemaTypes.String, unique:true },
     phone: SchemaTypes.String,
     fax: SchemaTypes.String,
-    dot: { type: SchemaTypes.String, unique:true, required: false },
+    dot: { type: SchemaTypes.String },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },

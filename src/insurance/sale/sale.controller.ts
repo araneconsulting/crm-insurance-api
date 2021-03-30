@@ -35,11 +35,10 @@ import { MongoFilter } from 'shared/filter/mongo.filter';
 export class SaleController {
   constructor(private saleService: SaleService) { }
 
-
-
   @Get('')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(BadRequestFilter, MongoFilter)
   async findAll(@Req() req: Request,
     @Response() res,
     @Query('start_date') startDate?: string,
@@ -53,6 +52,7 @@ export class SaleController {
   @Get(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(BadRequestFilter, MongoFilter)
   getSaleById(
     @Param('id', ParseObjectIdPipe) id: string,
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
