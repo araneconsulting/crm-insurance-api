@@ -141,7 +141,7 @@ export class ReportController {
     @Query('seller') seller?: string,
   ): Promise<any> {
 
-    console.log(month,year,seller);
+    
 
     const user: Partial<User> = req.user;
 
@@ -157,8 +157,6 @@ export class ReportController {
     );
 
     const userMetrics = userPerformanceReport[0];
-
-    console.log(userMetrics);
 
     if (!userMetrics) {
       throw new NotFoundException(
