@@ -24,7 +24,6 @@ import { arrayContains, arrayMaxSize } from 'class-validator';
 import { locationName } from 'shared/const/catalog/company';
 import { CompanyCatalog } from '../../shared/const/catalog/company';
 
-
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
   constructor(
@@ -257,23 +256,26 @@ export class ReportService {
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
-            locationName: { $function:
-              {
-                 body: function(seller, CompanyCatalog) {
-                   return CompanyCatalog.locations.find(({ id }) => id === seller.location).name;
-                 },
-                 args: [ "$seller", CompanyCatalog],
-                 lang: "js"
-              }
+            locationName: {
+              $function: {
+                body: function (seller, CompanyCatalog) {
+                  location = CompanyCatalog.locations.find(
+                    ({ id }) => id === seller.location,
+                  );
+                  return location ? location['name'] : '';
+                },
+                args: ['$seller', CompanyCatalog],
+                lang: 'js',
+              },
             },
-            customerName: { $function:
-              {
-                 body: function(customer) {
-                   return customer.company || customer.name;
-                 },
-                 args: [ "$customer"],
-                 lang: "js"
-              }
+            customerName: {
+              $function: {
+                body: function (customer) {
+                  return customer ? customer.company || customer.name : '';
+                },
+                args: ['$customer'],
+                lang: 'js',
+              },
             },
             insurerNames: {
               $concat: [
@@ -285,7 +287,7 @@ export class ReportService {
                 '/',
                 { $ifNull: ['$wcGlUmbInsurer.name', ''] },
               ],
-            }
+            },
           },
         },
       ])
@@ -554,9 +556,7 @@ export class ReportService {
           employeeMetrics.length,
           officeTotalSales,
         );
-        result['totalSalary'] = roundAmount(
-          result.bonus + user.baseSalary,
-        );
+        result['totalSalary'] = roundAmount(result.bonus + user.baseSalary);
         result['totalSaleGrossProfit'] = roundAmount(
           result.liabilityProfit +
             result.cargoProfit +

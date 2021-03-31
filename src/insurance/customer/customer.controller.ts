@@ -61,7 +61,7 @@ export class CustomerController {
   @Post()
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters( MongoFilter)
   async createCustomer(@Body() customer: CreateCustomerDto): Promise<Customer> {
     return await this.customerService.save(customer);
   }
@@ -69,7 +69,7 @@ export class CustomerController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters( MongoFilter)
   async updateCustomer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() customer: UpdateCustomerDto,

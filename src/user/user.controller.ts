@@ -40,7 +40,7 @@ export class UserController {
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters( MongoFilter)
   createUser(
     @Body() registerDto: RegisterDto): Observable<User> {
     const username = registerDto.username;
@@ -70,7 +70,7 @@ export class UserController {
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters( MongoFilter)
   updateUser(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto): Observable<Partial<User>> {

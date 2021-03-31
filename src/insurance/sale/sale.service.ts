@@ -141,23 +141,26 @@ export class SaleService {
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
-            locationName: { $function:
-              {
-                 body: function(seller, CompanyCatalog) {
-                   return CompanyCatalog.locations.find(({ id }) => id === seller.location).name;
-                 },
-                 args: [ "$seller", CompanyCatalog],
-                 lang: "js"
-              }
+            locationName: {
+              $function: {
+                body: function (seller, CompanyCatalog) {
+                  location = CompanyCatalog.locations.find(
+                    ({ id }) => id === seller.location,
+                  );
+                  return location ? location['name'] : '';
+                },
+                args: ['$seller', CompanyCatalog],
+                lang: 'js',
+              },
             },
-            customerName: { $function:
-              {
-                 body: function(customer) {
-                   return customer.company || customer.name;
-                 },
-                 args: [ "$customer"],
-                 lang: "js"
-              }
+            customerName: {
+              $function: {
+                body: function (customer) {
+                  return customer ? customer.company || customer.name : '';
+                },
+                args: ['$customer'],
+                lang: 'js',
+              },
             },
             location: '$location',
             createdBy: '$createdBy',

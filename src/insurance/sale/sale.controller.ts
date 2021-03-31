@@ -38,7 +38,7 @@ export class SaleController {
   @Get('')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters(MongoFilter)
   async findAll(@Req() req: Request,
     @Response() res,
     @Query('start_date') startDate?: string,
@@ -52,7 +52,7 @@ export class SaleController {
   @Get(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters( MongoFilter)
   getSaleById(
     @Param('id', ParseObjectIdPipe) id: string,
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
@@ -65,18 +65,18 @@ export class SaleController {
   @Post('')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(BadRequestFilter, MongoFilter)
-  createSale(
+  @UseFilters( MongoFilter)
+  async createSale(
     @Req() req : Request,
     @Body() sale: any
   ): Promise<Sale> {
-    return this.saleService.save(sale, req.user);
+    return await this.saleService.save(sale, req.user);
   }
 
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(BadRequestFilter, MongoFilter)
+  @UseFilters( MongoFilter)
   updateSale(
     @Req() req : Request,
     @Param('id', ParseObjectIdPipe) id: string,

@@ -16,7 +16,7 @@ export class RegisterController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @HttpCode(201)
-    @UseFilters(BadRequestFilter, MongoFilter)
+    @UseFilters( MongoFilter)
     register(
         @Body() registerDto: RegisterDto,
         @Res() res: Response): Observable<Response> {
