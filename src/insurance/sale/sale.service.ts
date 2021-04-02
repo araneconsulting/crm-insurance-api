@@ -20,7 +20,7 @@ import {
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
-import { isAdmin, isExecutive, isSeller } from 'shared/util/user-functions';
+import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
@@ -49,11 +49,7 @@ export class SaleService {
       filterConditions['type'] = type;
     }
 
-    if (!isAdmin(user)) {
-      filterConditions['seller'] = Types.ObjectId(user.id);
-    }
-
-    if (!isAdmin(user)) {
+    if (!isAdmin(user) || isExecutive(user)) {
       filterConditions['seller'] = Types.ObjectId(user.id);
     }
 
