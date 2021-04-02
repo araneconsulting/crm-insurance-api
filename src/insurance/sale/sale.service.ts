@@ -20,7 +20,7 @@ import {
 import { CreateSaleDto } from './create-sale.dto';
 import { UpdateSaleDto } from './update-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
-import { isAdmin, isSeller } from 'shared/util/user-functions';
+import { isAdmin, isExecutive, isSeller } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
@@ -47,6 +47,10 @@ export class SaleService {
 
     if (type) {
       filterConditions['type'] = type;
+    }
+
+    if (!isAdmin(user)) {
+      filterConditions['seller'] = Types.ObjectId(user.id);
     }
 
     if (!isAdmin(user)) {
@@ -209,19 +213,17 @@ export class SaleService {
   }
 
   async save(data: CreateSaleDto, user: Partial<User>): Promise<Sale> {
-    if ((isAdmin(user) && !data.seller) || isSeller(user)) {
-      data.seller = user.id;
-      data['location'] = user.location;
-    } else {
-      //TEMPORARY SOLUTION
-      //TODO: Set location for admin user creating sale for other sellers
-      // which implies: find seller from users model, get location and set it to the sale
-
-      const seller = await this.userModel.findOne({ _id: data.seller });
-      if (!seller) {
-        throw new ConflictException('Seller not found');
+    if (data.seller) {
+      if (!(isAdmin(user) || isExecutive(user))) {
+        data.seller = user.id;
+        data['location'] = user.location;
+      } else {
+        const seller = await this.userModel.findOne({ _id: data.seller });
+        if (!seller) {
+          throw new ConflictException('Seller not found');
+        }
+        data['location'] = seller.location;
       }
-      data['location'] = seller.location;
     }
 
     const insurers = await this.insurerModel.find({}).exec();
@@ -277,31 +279,18 @@ export class SaleService {
     data: UpdateSaleDto,
     user: Partial<User>,
   ): Observable<Sale> {
-    if ((isAdmin(user) && !data.seller) || isSeller(user)) {
-      {
-        data.seller = user.id;
-      }
-
-      return from(
-        this.saleModel
-          .findOneAndUpdate({ _id: id }, { ...data }, { new: true })
-          .exec(),
-      ).pipe(
-        mergeMap((p) => (p ? of(p) : EMPTY)),
-        throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-      );
-
-      // const filter = { _id: id };
-      // const update = { ...data, updatedBy: { _id: this.req.user.id } };
-      // return from(this.saleModel.findOne(filter).exec()).pipe(
-      //   mergeMap((sale) => (sale ? of(sale) : EMPTY)),
-      //   throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-      //   switchMap((p, i) => {
-      //     return from(this.saleModel.updateOne(filter, update).exec());
-      //   }),
-      //   map((res) => res.nModified),
-      // );
+    if (data.seller && !(isAdmin(user) || isExecutive(user))) {
+      delete data.seller;
     }
+
+    return from(
+      this.saleModel
+        .findOneAndUpdate({ _id: id }, { ...data }, { new: true })
+        .exec(),
+    ).pipe(
+      mergeMap((p) => (p ? of(p) : EMPTY)),
+      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
+    );
   }
 
   deleteById(id: string): Observable<Sale> {
@@ -309,15 +298,6 @@ export class SaleService {
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
     );
-    // const filter = { _id: id };
-    // return from(this.saleModel.findOne(filter).exec()).pipe(
-    //   mergeMap((sale) => (sale ? of(sale) : EMPTY)),
-    //   throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-    //   switchMap((p, i) => {
-    //     return from(this.saleModel.deleteOne(filter).exec());
-    //   }),
-    //   map((res) => res.deletedCount),
-    // );
   }
 
   deleteAll(): Observable<any> {

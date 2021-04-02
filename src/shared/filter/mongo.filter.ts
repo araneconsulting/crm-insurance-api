@@ -11,17 +11,9 @@ import { MongoError } from 'mongodb';
 @Catch(MongoError)
 export class MongoFilter implements ExceptionFilter {
   catch(exception: MongoError, host: ArgumentsHost) {
-    //console.log(exception);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
-/* 
-
-    console.log(exception.errorLabels);
-    console.log(exception.message);
-    console.log(exception.code);
-    console.log(exception.errmsg);
-    console.log(JSON.stringify(exception)); */
 
     switch (exception.code) {
       case 11000:

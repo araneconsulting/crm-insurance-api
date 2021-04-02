@@ -10,7 +10,7 @@ import {
 } from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-functions';
 import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
-import { ADMIN_ROLES, COMPANY, METRICS } from 'shared/const/project-constants';
+import { COMPANY, METRICS } from 'shared/const/project-constants';
 import * as moment from 'moment';
 import { bonusByRole } from '../../shared/util/salary-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
@@ -20,8 +20,6 @@ import {
   isExecutive,
 } from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
-import { arrayContains, arrayMaxSize } from 'class-validator';
-import { locationName } from 'shared/const/catalog/company';
 import { CompanyCatalog } from '../../shared/const/catalog/company';
 
 @Injectable({ scope: Scope.REQUEST })

@@ -79,6 +79,7 @@ export class ReportController {
   @Get('/salaries')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  
   async getSalaryReport(
     @Req() req: Request,
     @Response() res,
@@ -90,7 +91,7 @@ export class ReportController {
     const user: Partial<User> = req.user;
 
     if (!isExecutive(user) && !isAdmin(user)) {
-      throw new ForbiddenException('User is not allowed to get salary report.');
+      throw new ForbiddenException('You are not authorized to get salary report.');
     }
 
     const response = {
