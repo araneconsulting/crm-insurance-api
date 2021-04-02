@@ -49,7 +49,7 @@ export class SaleService {
       filterConditions['type'] = type;
     }
 
-    if (!isAdmin(user) || isExecutive(user)) {
+    if (!isAdmin(user) && !isExecutive(user)) {
       filterConditions['seller'] = Types.ObjectId(user.id);
     }
 
@@ -274,7 +274,7 @@ export class SaleService {
     data: UpdateSaleDto,
     user: Partial<User>,
   ): Observable<Sale> {
-    if (data.seller && !(isAdmin(user) || isExecutive(user))) {
+    if (data.seller && !isAdmin(user) && !isExecutive(user)) {
       delete data.seller;
     }
 

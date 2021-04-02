@@ -90,7 +90,7 @@ export class ReportController {
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
-    if (!isExecutive(user) && !isAdmin(user)) {
+    if (!isAdmin(user) && !isExecutive(user)) {
       throw new ForbiddenException('You are not authorized to get salary report.');
     }
 

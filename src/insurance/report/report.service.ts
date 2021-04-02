@@ -414,7 +414,7 @@ export class ReportService {
     } else {
       const users: any[] = await this.userModel.find({}).exec();
       allUsers = users
-        .filter((user) => !(isAdmin(user) || isExecutive(user)))
+        .filter((user) => !isAdmin(user) && !isExecutive(user))
         .map((user) => {
           const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
