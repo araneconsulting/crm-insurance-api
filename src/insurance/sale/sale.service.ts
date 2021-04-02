@@ -210,7 +210,7 @@ export class SaleService {
 
   async save(data: CreateSaleDto, user: Partial<User>): Promise<Sale> {
     if (data.seller) {
-      if (!(isAdmin(user) || isExecutive(user))) {
+      if (!data.seller || (!(isAdmin(user) || isExecutive(user)))) {
         data.seller = user.id;
         data['location'] = user.location;
       } else {
