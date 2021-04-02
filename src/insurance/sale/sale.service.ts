@@ -209,17 +209,16 @@ export class SaleService {
   }
 
   async save(data: CreateSaleDto, user: Partial<User>): Promise<Sale> {
-    if (data.seller) {
-      if (!data.seller || (!(isAdmin(user) || isExecutive(user)))) {
-        data.seller = user.id;
-        data['location'] = user.location;
-      } else {
-        const seller = await this.userModel.findOne({ _id: data.seller });
-        if (!seller) {
-          throw new ConflictException('Seller not found');
-        }
-        data['location'] = seller.location;
+    if (!data.seller || (data.seller && !isAdmin(user) && !isExecutive(user))) {
+      data.seller = user.id;
+      data['location'] = user.location;
+    } else {
+      const seller = await this.userModel.findOne({ _id: data.seller });
+      if (!seller) {
+        throw new ConflictException('Seller not found');
       }
+      data['seller'] = seller._id;
+      data['location'] = seller.location;
     }
 
     const insurers = await this.insurerModel.find({}).exec();
