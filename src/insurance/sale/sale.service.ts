@@ -34,7 +34,14 @@ export class SaleService {
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
-
+  
+  /**
+   * @param  {Partial<User>} user
+   * @param  {string} startDate?
+   * @param  {string} endDate?
+   * @param  {string} type?
+   * @returns Promise
+   */
   async findAll(
     user: Partial<User>,
     startDate?: string,
@@ -179,6 +186,13 @@ export class SaleService {
     return query;
   }
 
+  /**
+   * @param  {string} id
+   * @param  {} withSeller=false
+   * @param  {} withCustomer=false
+   * @param  {} withInsurers=false
+   * @returns Observable
+   */
   findById(
     id: string,
     withSeller = false,
@@ -207,87 +221,70 @@ export class SaleService {
       throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
     );
   }
-
-  async save(data: CreateSaleDto, user: Partial<User>): Promise<Sale> {
-    if (!data.seller || (data.seller && !isAdmin(user) && !isExecutive(user))) {
-      data.seller = user.id;
-      data['location'] = user.location;
+ 
+  /**
+   * @param  {CreateSaleDto} saleDto
+   * @param  {Partial<User>} user
+   * @returns Promise
+   */
+  async save(saleDto: CreateSaleDto, user: Partial<User>): Promise<Sale> {
+    if (
+      !saleDto.seller ||
+      (saleDto.seller && !isAdmin(user) && !isExecutive(user))
+    ) {
+      saleDto.seller = user.id;
+      saleDto['location'] = user.location;
     } else {
-      const seller = await this.userModel.findOne({ _id: data.seller });
+      const seller = await this.userModel.findOne({ _id: saleDto.seller });
       if (!seller) {
         throw new ConflictException('Seller not found');
       }
-      data['seller'] = seller._id;
-      data['location'] = seller.location;
+      saleDto['seller'] = seller._id;
+      saleDto['location'] = seller.location;
     }
 
-    const insurers = await this.insurerModel.find({}).exec();
-
-    if (data.liabilityInsurer) {
-      const insurer = insurers.find(
-        (insurer) => insurer.id === data.liabilityInsurer,
-      );
-      data['liabilityProfit'] = insurer
-        ? roundAmount(
-            (insurer.liabilityCommission / 100) * data.liabilityCharge,
-          )
-        : 0;
-    }
-
-    if (data.cargoInsurer) {
-      const insurer = insurers.find(
-        (insurer) => insurer.id === data.cargoInsurer,
-      );
-      data['cargoProfit'] = insurer
-        ? roundAmount((insurer.cargoCommission / 100) * data.cargoCharge)
-        : 0;
-    }
-
-    if (data.physicalDamageInsurer) {
-      const insurer = insurers.find(
-        (insurer) => insurer.id === data.physicalDamageInsurer,
-      );
-      data['physicalDamageProfit'] = insurer
-        ? roundAmount(
-            (insurer.physicalDamageCommission / 100) *
-              data.physicalDamageCharge,
-          )
-        : 0;
-    }
-
-    if (data.wcGlUmbInsurer) {
-      const insurer = insurers.find(
-        (insurer) => insurer.id === data.wcGlUmbInsurer,
-      );
-      data['wcGlUmbProfit'] = insurer
-        ? roundAmount((insurer.wcGlUmbCommission / 100) * data.wcGlUmbCharge)
-        : 0;
-    }
+    let saleData = await this.setSaleCalculations(saleDto);
 
     return this.saleModel.create({
-      ...data,
+      ...saleData,
     });
   }
 
-  update(
+  /**
+   * @param  {string} id
+   * @param  {UpdateSaleDto} data
+   * @param  {Partial<User>} user
+   * @returns Promise
+   */
+  async update(
     id: string,
     data: UpdateSaleDto,
     user: Partial<User>,
-  ): Observable<Sale> {
+  ): Promise<Sale> {
     if (data.seller && !isAdmin(user) && !isExecutive(user)) {
       delete data.seller;
     }
 
-    return from(
-      this.saleModel
-        .findOneAndUpdate({ _id: id }, { ...data }, { new: true })
-        .exec(),
-    ).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
+    let sale = await this.saleModel.findById(Types.ObjectId(id)).exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale:$id was not found`);
+    }
+
+    let saleDto: CreateSaleDto = {...sale["_doc"],...data};
+    let saleData = await this.setSaleCalculations(saleDto);
+
+    return this.saleModel.findOneAndUpdate(
+      { _id: Types.ObjectId(id) },
+      { ...saleData },
+      { new: true },
     );
   }
 
+  /**
+   * @param  {string} id
+   * @returns Observable
+   */
   deleteById(id: string): Observable<Sale> {
     return from(this.saleModel.findOneAndDelete({ _id: id }).exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -295,10 +292,18 @@ export class SaleService {
     );
   }
 
+  /**
+ * @returns Observable
+ */
+
   deleteAll(): Observable<any> {
     return from(this.saleModel.deleteMany({}).exec());
   }
 
+  
+  /**
+   * @param  {string} dateRange
+   */
   getDateMatchExpressionByRange(dateRange: string): any {
     //Set filtering conditions
     const dates = DateFactory.dateRangeByName(dateRange);
@@ -311,7 +316,11 @@ export class SaleService {
       : { $lte: new Date() };
   }
 
-  getDateMatchExpressionByDates(startDate?: string, endDate?: string): any {
+  /**
+   * @param  {string} startDate?
+   * @param  {string} endDate?
+   */
+  getDateMatchExpressionByDates(startDate?: string, endDate?: string): Object {
     if (startDate && endDate) {
       return {
         $gte: new Date(startDate + 'T00:00:00.000Z'),
@@ -322,5 +331,60 @@ export class SaleService {
     } else if (endDate) {
       return { $lte: new Date(endDate + 'T23:59:59.999Z') };
     } else return { $lte: new Date() };
+  }
+
+  /**
+   * @param  {CreateSaleDto} sale
+   * @returns Promise
+   */
+  async setSaleCalculations(sale: CreateSaleDto): Promise<CreateSaleDto> {
+    const insurers = await this.insurerModel.find({}).exec();
+    if (sale.liabilityInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === sale.liabilityInsurer._id.toString(),
+      );
+      sale['liabilityProfit'] = insurer
+        ? roundAmount(
+            (insurer.liabilityCommission / 100) * sale.liabilityCharge,
+          )
+        : 0;
+    }
+
+    if (sale.cargoInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === sale.cargoInsurer._id.toString(),
+      );
+      sale['cargoProfit'] = insurer
+        ? roundAmount((insurer.cargoCommission / 100) * sale.cargoCharge)
+        : 0;
+    }
+
+    if (sale.physicalDamageInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === sale.physicalDamageInsurer._id.toString(),
+      );
+      sale['physicalDamageProfit'] = insurer
+        ? roundAmount((insurer.physicalDamageCommission / 100) * sale.physicalDamageCharge)
+        : 0;
+    }
+
+    if (sale.wcGlUmbInsurer) {
+      const insurer = insurers.find(
+        (insurer) => insurer.id === sale.wcGlUmbInsurer._id.toString(),
+      );
+      sale['wcGlUmbProfit'] = insurer
+        ? roundAmount((insurer.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
+        : 0;
+    }
+
+    sale['premium'] =
+      (sale.liabilityCharge || 0) +
+      (sale.cargoCharge || 0) +
+      (sale.physicalDamageCharge || 0) +
+      (sale.wcGlUmbCharge || 0);
+    sale['amountReceivable'] =
+      (sale.totalCharge || 0) - (sale.chargesPaid || 0);
+
+    return sale;
   }
 }
