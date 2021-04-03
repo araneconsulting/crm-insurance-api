@@ -34,7 +34,7 @@ export class SaleService {
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
-  
+
   /**
    * @param  {Partial<User>} user
    * @param  {string} startDate?
@@ -341,7 +341,7 @@ export class SaleService {
     const insurers = await this.insurerModel.find({}).exec();
     if (sale.liabilityInsurer) {
       const insurer = insurers.find(
-        (insurer) => insurer.id === sale.liabilityInsurer._id.toString(),
+        (insurer) => sale.liabilityInsurer && insurer.id === sale.liabilityInsurer._id.toString(),
       );
       sale['liabilityProfit'] = insurer
         ? roundAmount(
@@ -352,7 +352,7 @@ export class SaleService {
 
     if (sale.cargoInsurer) {
       const insurer = insurers.find(
-        (insurer) => insurer.id === sale.cargoInsurer._id.toString(),
+        (insurer) => sale.cargoInsurer && insurer.id === sale.cargoInsurer._id.toString(),
       );
       sale['cargoProfit'] = insurer
         ? roundAmount((insurer.cargoCommission / 100) * sale.cargoCharge)
@@ -361,7 +361,7 @@ export class SaleService {
 
     if (sale.physicalDamageInsurer) {
       const insurer = insurers.find(
-        (insurer) => insurer.id === sale.physicalDamageInsurer._id.toString(),
+        (insurer) => sale.physicalDamageInsurer && insurer.id === sale.physicalDamageInsurer._id.toString(),
       );
       sale['physicalDamageProfit'] = insurer
         ? roundAmount((insurer.physicalDamageCommission / 100) * sale.physicalDamageCharge)
@@ -370,7 +370,7 @@ export class SaleService {
 
     if (sale.wcGlUmbInsurer) {
       const insurer = insurers.find(
-        (insurer) => insurer.id === sale.wcGlUmbInsurer._id.toString(),
+        (insurer) => sale.wcGlUmbInsurer && insurer.id === sale.wcGlUmbInsurer._id.toString(),
       );
       sale['wcGlUmbProfit'] = insurer
         ? roundAmount((insurer.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
