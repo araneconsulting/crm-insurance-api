@@ -221,13 +221,15 @@ export class SaleService {
       throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
     );
   }
- 
+
   /**
    * @param  {CreateSaleDto} saleDto
    * @param  {Partial<User>} user
    * @returns Promise
    */
   async save(saleDto: CreateSaleDto, user: Partial<User>): Promise<Sale> {
+    console.log(saleDto.soldAt);
+
     if (
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(user) && !isExecutive(user))
@@ -271,7 +273,7 @@ export class SaleService {
       throw new NotFoundException(`sale:$id was not found`);
     }
 
-    let saleDto: CreateSaleDto = {...sale["_doc"],...data};
+    let saleDto: CreateSaleDto = { ...sale['_doc'], ...data };
     let saleData = await this.setSaleCalculations(saleDto);
 
     return this.saleModel.findOneAndUpdate(
@@ -293,14 +295,13 @@ export class SaleService {
   }
 
   /**
- * @returns Observable
- */
+   * @returns Observable
+   */
 
   deleteAll(): Observable<any> {
     return from(this.saleModel.deleteMany({}).exec());
   }
 
-  
   /**
    * @param  {string} dateRange
    */
@@ -341,7 +342,10 @@ export class SaleService {
     const insurers = await this.insurerModel.find({}).exec();
     if (sale.liabilityInsurer) {
       const insurer = insurers.find(
-        (insurer) => sale.liabilityInsurer && insurer.id === sale.liabilityInsurer._id.toString(),
+        (insurer) =>
+          sale.liabilityInsurer &&
+          sale.liabilityInsurer !== '' &&
+          insurer.id === sale.liabilityInsurer.toString(),
       );
       sale['liabilityProfit'] = insurer
         ? roundAmount(
@@ -352,7 +356,10 @@ export class SaleService {
 
     if (sale.cargoInsurer) {
       const insurer = insurers.find(
-        (insurer) => sale.cargoInsurer && insurer.id === sale.cargoInsurer._id.toString(),
+        (insurer) =>
+          sale.cargoInsurer &&
+          sale.cargoInsurer !== '' &&
+          insurer.id === sale.cargoInsurer.toString(),
       );
       sale['cargoProfit'] = insurer
         ? roundAmount((insurer.cargoCommission / 100) * sale.cargoCharge)
@@ -361,16 +368,25 @@ export class SaleService {
 
     if (sale.physicalDamageInsurer) {
       const insurer = insurers.find(
-        (insurer) => sale.physicalDamageInsurer && insurer.id === sale.physicalDamageInsurer._id.toString(),
+        (insurer) =>
+          sale.physicalDamageInsurer &&
+          sale.physicalDamageInsurer !== '' &&
+          insurer.id === sale.physicalDamageInsurer.toString(),
       );
       sale['physicalDamageProfit'] = insurer
-        ? roundAmount((insurer.physicalDamageCommission / 100) * sale.physicalDamageCharge)
+        ? roundAmount(
+            (insurer.physicalDamageCommission / 100) *
+              sale.physicalDamageCharge,
+          )
         : 0;
     }
 
     if (sale.wcGlUmbInsurer) {
       const insurer = insurers.find(
-        (insurer) => sale.wcGlUmbInsurer && insurer.id === sale.wcGlUmbInsurer._id.toString(),
+        (insurer) =>
+          sale.wcGlUmbInsurer &&
+          sale.wcGlUmbInsurer !== '' &&
+          insurer.id === sale.wcGlUmbInsurer.toString(),
       );
       sale['wcGlUmbProfit'] = insurer
         ? roundAmount((insurer.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
