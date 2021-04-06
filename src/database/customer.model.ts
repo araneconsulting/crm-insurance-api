@@ -36,7 +36,12 @@ const CustomerSchema = new Schema<any>(
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true
+    }
+  },
 );
 
 const customerModelFn: (conn: Connection) => CustomerModel = (

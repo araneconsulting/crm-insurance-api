@@ -27,7 +27,12 @@ const InsurerSchema = new Schema<any>(
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true
+    }
+  },
 );
 
 const insurerModelFn: (conn: Connection) => InsurerModel = (conn: Connection) =>
