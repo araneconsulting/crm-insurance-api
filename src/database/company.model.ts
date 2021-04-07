@@ -7,15 +7,15 @@ interface Company extends Document<any> {
   readonly country: string;
   readonly email: string;
   readonly fax: string;
-  readonly industry: string;
+  readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
   readonly manager: string;
   readonly name: string;
-  readonly otherPhones: string[];
+  readonly otherPhones: string[]; // delimited by-comma string
   readonly primaryPhone: string;
   readonly primaryPhoneExtension: string;
   readonly secondaryPhone: string;
   readonly secondaryPhoneExtension: string;
-  readonly sector: string;
+  readonly sector: string; // can be: Financial, Technology, Healthcare, etc
   readonly startedAt: string;
   readonly state: string;
   readonly type: string; // headquarter (H), point of sale (P), office (O)

@@ -4,13 +4,13 @@ import { Location } from './location.model';
 import { User } from './user.model';
 interface Employee extends Document<any> {
   readonly active: boolean;
-  readonly baseSalary: number;
   readonly company: Partial<Company>;
   readonly endedAt: string;
-  readonly location: Partial<Location>;
-  readonly position: string;
   readonly gender: string; //can be: male (M), female (F), transgender (T), other (O)
-  readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Yearly (Y)
+  readonly location: Partial<Location>;
+  readonly mobilePhone: string;
+  readonly position: string; //can be: Sales Agent, IT, Certificates Assistant, etc
+  readonly payFrequency: string; //can be: hourly (H), daily (D), weekly (W), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
   readonly payRate: number;
   readonly overtimeAuthorized: boolean;
   readonly overtimePayRate: number;
@@ -20,8 +20,6 @@ interface Employee extends Document<any> {
   readonly user: Partial<User>;
   readonly workPrimaryPhone: string;
   readonly workPrimaryPhoneExtension: string;
-  readonly workSecondaryPhone: string;
-  readonly workSecondaryPhoneExtension: string;
 }
 
 type EmployeeModel = Model<Employee>;
@@ -29,12 +27,12 @@ type EmployeeModel = Model<Employee>;
 const EmployeeSchema = new Schema<any>(
   {
     active: { type: SchemaTypes.Boolean },
-    baseSalary: { type: SchemaTypes.Number },
     company: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     endedAt: { type: SchemaTypes.String },
-    location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
-    position: { type: SchemaTypes.String },
     gender: { type: SchemaTypes.String }, //can be: male (M), female (F), transgender (T), other (O)
+    location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
+    mobilePhone: { type: SchemaTypes.String },
+    position: { type: SchemaTypes.String },
     payFrequency: { type: SchemaTypes.String }, //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Yearly (Y)
     payRate: { type: SchemaTypes.Number },
     overtimeAuthorized: { type: SchemaTypes.Boolean },
@@ -45,8 +43,6 @@ const EmployeeSchema = new Schema<any>(
     user: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     workPrimaryPhone: { type: SchemaTypes.String },
     workPrimaryPhoneExtension: { type: SchemaTypes.String },
-    workSecondaryPhone: { type: SchemaTypes.String },
-    workSecondaryPhoneExtension: { type: SchemaTypes.String },
   },
   {
     timestamps: true,

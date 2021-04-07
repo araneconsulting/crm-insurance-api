@@ -5,17 +5,16 @@ interface Location extends Document<any> {
   readonly city: string;
   readonly code: string;
   readonly fax: string;
-  readonly managerName: string;
   readonly name: string;
   readonly otherPhones: string[];
-  readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Yearly (Y)  
+  readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)  
   readonly primaryPhone: string;
   readonly primaryPhoneExtension: string;
   readonly secondaryPhone: string;
   readonly secondaryPhoneExtension: string;
   readonly startedAt: string;
   readonly state: string;
-  readonly type: string; // headquarter (H), point of sale (P), office (O)
+  readonly type: string; // Headquarter (H), Point of sale (P), Office (O)
   readonly website: string;
   readonly zip: string;
 }
@@ -35,7 +34,6 @@ const LocationSchema = new Schema<any>(
     },
     email: { type: SchemaTypes.String },
     fax: { type: SchemaTypes.String },
-    managerName: { type: SchemaTypes.String },
     name: { type: SchemaTypes.String },
     otherPhones: [{ type: SchemaTypes.String, required: false }],
     payFrequency: { type: SchemaTypes.String },
