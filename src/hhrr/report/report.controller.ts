@@ -26,10 +26,10 @@ import { isAdmin, isExecutive } from 'shared/util/user-functions';
 export class ReportController {
   constructor(private reportService: ReportService) {}
 
-  @Get('/sales')
+  @Get('/companies')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async getSalesReport(
+  async getCompaniesReport(
     @Req() req: Request,
     @Response() res,
     @Query('start_date') startDate?: string,
@@ -40,7 +40,7 @@ export class ReportController {
     @Query('group_by_fields') groupByFields?: string,
     @Query('fields') fields?: string,
     @Query('with_count') withCount?: boolean,
-    @Query('with_sales') withSales?: boolean,
+    @Query('with_companies') withCompanies?: boolean,
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
@@ -50,7 +50,7 @@ export class ReportController {
       : [];
 
     const response = {
-      metrics: await this.reportService.getSalesMetrics(
+      metrics: await this.reportService.getCompaniesMetrics(
         user,
         startDate,
         endDate,
@@ -63,8 +63,8 @@ export class ReportController {
       ),
     };
 
-    if (Boolean(withSales)) {
-      response['sales'] = await this.reportService.getAllSales(
+    if (Boolean(withCompanies)) {
+      response['companies'] = await this.reportService.getAllCompanies(
         user,
         startDate,
         endDate,
@@ -79,7 +79,6 @@ export class ReportController {
   @Get('/salaries')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  
   async getSalaryReport(
     @Req() req: Request,
     @Response() res,
@@ -91,7 +90,9 @@ export class ReportController {
     const user: Partial<User> = req.user;
 
     if (!isAdmin(user) && !isExecutive(user)) {
-      throw new ForbiddenException('You are not authorized to get salary report.');
+      throw new ForbiddenException(
+        'You are not authorized to get salary report.',
+      );
     }
 
     const response = {
@@ -141,9 +142,6 @@ export class ReportController {
     @Query('year') year: number,
     @Query('seller') seller?: string,
   ): Promise<any> {
-
-    
-
     const user: Partial<User> = req.user;
 
     if (isAdmin(user) && !seller) {
@@ -183,12 +181,12 @@ export class ReportController {
       {
         title: dateRangeTitle,
         subtitle: '',
-        label: 'Sales Total',
+        label: 'Companies Total',
         valuePrefix: '$',
         value: userMetrics.premium,
         valueSuffix: '',
         description:
-          "Sum of all my sales achieved since last month's 21st to this day.",
+          "Sum of all my companies achieved since last month's 21st to this day.",
       },
       {
         title: dateRangeTitle,
@@ -208,7 +206,7 @@ export class ReportController {
         value: userMetrics.bonus,
         valueSuffix: '',
         description:
-          'Bonus calculation is impacted by different variables like: accumulated sales, base salary, tips, discounts, among others.',
+          'Bonus calculation is impacted by different variables like: accumulated companies, base salary, tips, discounts, among others.',
       },
     ];
 

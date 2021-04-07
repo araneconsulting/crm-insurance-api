@@ -3,19 +3,19 @@ import {
   Injectable,
   Scope,
 } from '@nestjs/common';
-import { Sale } from 'database/sale.model';
+import { Company } from 'database/company.model';
 import { User } from 'database/user.model';
 import { Model } from 'mongoose';
 import { getModifiersByGroupingCriteria, getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import {
-  SALE_MODEL,
+  COMPANY_MODEL,
 } from '../../database/database.constants';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DashboardService {
-  constructor(@Inject(SALE_MODEL) private saleModel: Model<Sale>) {}
+  constructor(@Inject(COMPANY_MODEL) private companyModel: Model<Company>) {}
 
-  async getSaleDatasets(
+  /* async getCompanyDatasets(
     dataCriteria: string,
     groupingCriteria: string,
     aggregation: string,
@@ -80,5 +80,5 @@ export class DashboardService {
     query.group(groupExpression);
 
     return query;
-  }
+  } */
 }

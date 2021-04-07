@@ -22,14 +22,14 @@ import { randomBytes } from 'crypto';
 import { colorSchemes } from 'shared/const/color-schemes';
 import { roundAmount } from 'shared/util/math-functions';
 
-@Controller({ path: 'dashboards', scope: Scope.REQUEST })
+@Controller({ path: 'dashboards/hhrr', scope: Scope.REQUEST })
 export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
-  @Get('sales/bar')
+  @Get('companies/bar')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async getSalesBarChart(
+  async getCompaniesBarChart(
     @Req() req: Request,
     @Response() res,
     @Query('data_criteria') dataCriteria: string,
@@ -40,9 +40,9 @@ export class DashboardController {
     @Query('end_date') endDate?: string,
     @Query('options') options?: string,
   ): Promise<any> {
-    const user: Partial<User> = req.user;
+    /* const user: Partial<User> = req.user;
 
-    const aggregations = await this.dashboardService.getSaleDatasets(
+    const aggregations = await this.dashboardService.getCompaniesDatasets(
       dataCriteria,
       groupingCriteria,
       aggregation,
@@ -80,11 +80,14 @@ export class DashboardController {
       },
       options: {},
     };
+ */
 
+    //temporary response
+    const response = {}
     return res.json(response);
   }
 
-  @Post('sales/batch')
+  @Post('companies/batch')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getSalesCharts(
@@ -94,7 +97,7 @@ export class DashboardController {
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
   ): Promise<any> {
-    const user: Partial<User> = req.user;
+    /* const user: Partial<User> = req.user;
 
     const queries = body.hasOwnProperty('queries') && body['queries'];
 
@@ -166,6 +169,7 @@ export class DashboardController {
       });
     } else {
       throw new BadRequestException('Invalid Request');
-    }
+    } */
+    return res.json({});
   }
 }

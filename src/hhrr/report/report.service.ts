@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { Customer } from 'database/customer.model';
-import { Sale } from 'database/sale.model';
+import { Company } from 'database/company.model';
 import { User } from 'database/user.model';
 import { Model, Types } from 'mongoose';
 import {
-  SALE_MODEL,
+  COMPANY_MODEL,
   USER_MODEL,
   CUSTOMER_MODEL,
 } from '../../database/database.constants';
@@ -25,12 +25,12 @@ import { CompanyCatalog } from '../../shared/const/catalog/company';
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
   constructor(
-    @Inject(SALE_MODEL) private saleModel: Model<Sale>,
+    @Inject(COMPANY_MODEL) private companyModel: Model<Company>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
   ) {}
 
-  async getSalesMetrics(
+  async getCompaniesMetrics(
     user: Partial<User>,
     startDate?: string,
     endDate?: string,
@@ -38,7 +38,7 @@ export class ReportService {
     filterValue?: string,
     groupBy?: string,
     groupByFields?: string[],
-    fields: string[] = METRICS.sales.returnedFields,
+    fields: string[] = METRICS.companies.returnedFields,
     withCount = false,
   ): Promise<any> {
     let seller: Partial<User> = null;
@@ -74,7 +74,7 @@ export class ReportService {
 
     const id = this.GetGroupingId(groupBy, groupByFields);
 
-    const query = this.saleModel.aggregate();
+    const query = this.companyModel.aggregate();
 
     if ((!seller && !customer && !location) || seller || customer) {
       query.match(filterConditions);
@@ -120,7 +120,7 @@ export class ReportService {
     return query;
   }
 
-  async getAllSales(
+  async getAllCompanies(
     user: Partial<User>,
     startDate?: string,
     endDate?: string,
@@ -158,7 +158,7 @@ export class ReportService {
         break;
     }
 
-    const query = this.saleModel.aggregate();
+    const query = this.companyModel.aggregate();
 
     if ((!seller && !customer && !location) || seller || customer) {
       query.match(filterConditions);
@@ -364,7 +364,7 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
-    let employeeMetrics = await this.getSalesMetrics(
+    let employeeMetrics = await this.getCompaniesMetrics(
       user,
       startDate,
       endDate,
@@ -385,7 +385,7 @@ export class ReportService {
       return result;
     });
 
-    const officeTotalSales =
+    const officeTotalCompanies =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
             (accumulator, item) => accumulator + item.premium,
@@ -443,7 +443,7 @@ export class ReportService {
         employeeInfo.fees,
         employeeInfo.tips,
         employeeMetrics.length,
-        officeTotalSales,
+        officeTotalCompanies,
       );
       employeeInfo['total'] = roundAmount(
         employeeInfo.baseSalary + employeeInfo.bonus,
@@ -468,7 +468,7 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
-    let employeeMetrics = await this.getSalesMetrics(
+    let employeeMetrics = await this.getCompaniesMetrics(
       user,
       startDate,
       endDate,
@@ -503,7 +503,7 @@ export class ReportService {
       return result;
     });
 
-    const officeTotalSales =
+    const officeTotalCompanies =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
             (accumulator, item) => accumulator + item.premium,
@@ -552,17 +552,17 @@ export class ReportService {
           result.fees,
           result.tips,
           employeeMetrics.length,
-          officeTotalSales,
+          officeTotalCompanies,
         );
         result['totalSalary'] = roundAmount(result.bonus + user.baseSalary);
-        result['totalSaleGrossProfit'] = roundAmount(
+        result['totalCompanyGrossProfit'] = roundAmount(
           result.liabilityProfit +
             result.cargoProfit +
             result.physicalDamageProfit +
             result.wcGlUmbProfit,
         );
-        result['totalSaleNetProfit'] = roundAmount(
-          result.totalSaleGrossProfit - result.baseSalary - result.bonus,
+        result['totalCompanyNetProfit'] = roundAmount(
+          result.totalCompanyGrossProfit - result.baseSalary - result.bonus,
         );
 
         return result;

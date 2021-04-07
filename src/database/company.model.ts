@@ -1,3 +1,4 @@
+import { IsPhoneNumber } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 interface Company extends Document<any> {
   readonly address_1: string;
@@ -8,7 +9,6 @@ interface Company extends Document<any> {
   readonly email: string;
   readonly fax: string;
   readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
-  readonly manager: string;
   readonly name: string;
   readonly otherPhones: string[]; // delimited by-comma string
   readonly primaryPhone: string;
@@ -40,7 +40,6 @@ const CompanySchema = new Schema<any>(
     email: { type: SchemaTypes.String },
     fax: { type: SchemaTypes.String },
     industry: { type: SchemaTypes.String },
-    manager: { type: SchemaTypes.String },
     name: { type: SchemaTypes.String },
     otherPhones: [{ type: SchemaTypes.String, required: false }],
     primaryPhone: { type: SchemaTypes.String },

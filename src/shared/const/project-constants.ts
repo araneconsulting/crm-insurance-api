@@ -22,6 +22,10 @@ export const METRICS = {
       'totalCharge',
     ],
   },
+  companies: {
+    returnedFields: [],
+  }
+
 };
 
 export const COMPANY = {
