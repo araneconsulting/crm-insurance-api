@@ -31,6 +31,10 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
 
+  @IsOptional()
+  @IsNotEmpty()
+  readonly logo: string;
+
   @IsNotEmpty()
   readonly name: string;
 

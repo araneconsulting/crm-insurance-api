@@ -35,6 +35,10 @@ export class UpdateCompanyDto {
 
   @IsOptional()
   @IsNotEmpty()
+  readonly logo: string;
+
+  @IsOptional()
+  @IsNotEmpty()
   readonly name: string;
 
   @IsOptional()
