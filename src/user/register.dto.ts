@@ -1,9 +1,10 @@
-import { IsEmail, IsNotEmpty, MaxLength, MinLength } from "class-validator";
+import { IsAlphanumeric, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, MaxLength, MinLength } from "class-validator";
 import { LocationType } from "shared/enum/location-type.enum";
 import { RoleType } from "shared/enum/role-type.enum";
 
 export class RegisterDto {
     @IsNotEmpty()
+    @IsAlphanumeric()
     readonly username: string;
 
     @IsNotEmpty()
@@ -26,8 +27,25 @@ export class RegisterDto {
     readonly lastName: string;
 
     //Employee fields (this will be moved to a child class later)
-    readonly location: string;
-    readonly position: string;
+    @IsOptional()
+    @IsNotEmpty()
+    readonly location?: string;
+    
+    @IsOptional()
+    @IsNotEmpty()
+    readonly position?: string;
+    
+    @IsOptional()
+    @IsNotEmpty()
+    @IsPhoneNumber()
+    readonly phone?: string;
+    
+    @IsOptional()
+    @IsNotEmpty()
+    @IsNumber()
     readonly baseSalary?: number;
-    readonly roles: RoleType[];
+
+    @IsOptional()
+    @IsNotEmpty()
+    readonly roles?: RoleType[];
 }

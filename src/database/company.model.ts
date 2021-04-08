@@ -18,7 +18,7 @@ interface Company extends Document<any> {
   readonly sector: string; // can be: Financial, Technology, Healthcare, etc
   readonly startedAt: string;
   readonly state: string;
-  readonly type: string; // headquarter (H), point of sale (P), office (O)
+  readonly type: string; 
   readonly website: string;
   readonly zip: string;
 }

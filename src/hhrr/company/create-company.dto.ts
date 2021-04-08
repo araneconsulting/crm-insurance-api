@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 export class CreateCompanyDto {
   @IsOptional()
   @IsNotEmpty()
@@ -38,7 +38,6 @@ export class CreateCompanyDto {
   readonly otherPhones: string[]; // delimited by-comma string
   
   @IsOptional()
-  @IsPhoneNumber()
   readonly primaryPhone: string;
 
   @IsOptional()

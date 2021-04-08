@@ -12,6 +12,7 @@ import { InsurerModule } from 'insurance/insurer/insurer.module';
 import { SaleModule } from 'insurance/sale/sale.module';
 import { ReportModule } from 'insurance/report/report.module';
 import { DashboardModule } from 'insurance/dashboard/dashboard.module';
+import { CompanyModule } from 'hhrr/company/company.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { DashboardModule } from 'insurance/dashboard/dashboard.module';
     InsurerModule,
     DashboardModule,
     AuthModule,
+    CompanyModule,
     UserModule,
     SendgridModule,
     LoggerModule.forRoot(),

@@ -20,6 +20,7 @@ export class UpdateCompanyDto {
   @IsNotEmpty()
   readonly country: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsEmail()
   readonly email: string;
