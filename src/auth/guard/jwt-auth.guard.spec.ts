@@ -36,8 +36,8 @@ describe('LocalAuthGuard', () => {
 
   it('handleRequest', async () => {
     expect(
-      await guard.handleRequest(undefined, { username: 'liuver' }, undefined),
-    ).toEqual({ username: 'liuver' });
+      await guard.handleRequest(undefined, { email: 'liuver@gmail.com' }, undefined),
+    ).toEqual({ email: 'liuver@gmail.com' });
   });
 
   it('handleRequest: Unauthorized', async () => {

@@ -27,11 +27,11 @@ describe('API endpoints testing (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post('/register')
         .send({
-          username: 'liuver',
+          username: 'john',
           password: 'password',
-          email: 'liuver@test.com',
-          firstName: 'Liuver',
-          lastName: 'Duran'
+          email: 'admin@example.com',
+          firstName: 'John',
+          lastName: 'Dowd'
         });
       expect(res.status).toBe(409);
     });
@@ -40,11 +40,11 @@ describe('API endpoints testing (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post('/register')
         .send({
-          username: 'liuver',
+          username: 'john',
           password: 'password',
-          email: 'liuver@gmail.com',
-          firstName: 'Liuver',
-          lastName: 'Duran'
+          email: 'admin@example.com',
+          firstName: 'John',
+          lastName: 'Dowd'
         });
       expect(res.status).toBe(409);
     });
@@ -53,11 +53,11 @@ describe('API endpoints testing (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post('/register')
         .send({
-          username: 'liuver',
+          username: 'john',
           password: 'password',
-          email: 'liuver@gmail.com',
-          firstName: 'Liuver',
-          lastName: 'Duran'
+          email: 'admin@example.com',
+          firstName: 'John',
+          lastName: 'Dowd'
         });
       expect(res.status).toBe(201);
     });
@@ -111,7 +111,7 @@ describe('API endpoints testing (e2e)', () => {
     beforeEach(async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ username: 'liuver', password: 'password' });
+        .send({ email: 'admin@gmail.com', password: 'password' });
 
       expect(res.status).toBe(201);
       jwttoken = res.body.access_token;
@@ -211,7 +211,7 @@ describe('API endpoints testing (e2e)', () => {
     beforeEach(async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ username: 'admin', password: 'password' });
+        .send({ email: 'admin@gmail.com', password: 'password' });
       jwttoken = res.body.access_token;
       // console.log(jwttoken);
     });

@@ -17,7 +17,7 @@ describe('ProfileController', () => {
   });
 
   it('should call req', async () => {
-    const req = {user :{username:'test'}} as AuthenticatedRequest;
-    expect(controller.getProfile(req).username).toBe('test');
+    const req = {user :{email:'test@gmail.com'}} as AuthenticatedRequest;
+    expect(controller.getProfile(req).email).toBe('test@gmail.com');
   });
 });

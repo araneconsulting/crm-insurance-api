@@ -95,8 +95,8 @@ describe('UserService', () => {
       .mockImplementation((conditions: any, projection: any, options: any) => {
         return {
           exec: jest.fn().mockResolvedValue({
-            username: 'liuver',
-            email: 'liuver@example.com',
+            username: 'john',
+            email: 'admin@example.com',
           } as User),
         } as any;
       });
@@ -117,16 +117,16 @@ describe('UserService', () => {
         .mockImplementation((conditions: any, projection: any, options: any) => {
           return {
             exec: jest.fn().mockResolvedValue({
-              username: 'liuver',
-              email: 'liuver@example.com',
+              username: 'john',
+              email: 'admin@example.com',
             } as User),
           } as any;
         });
 
       const foundUser = await service.findById('liuver').toPromise();
       expect(foundUser).toEqual({
-        username: 'liuver',
-        email: 'liuver@example.com',
+        username: 'john',
+        email: 'admin@example.com',
       });
       expect(model.findOne).lastCalledWith({ _id: 'liuver' });
       expect(model.findOne).toBeCalledTimes(1);
@@ -156,16 +156,16 @@ describe('UserService', () => {
           return {
             populate: jest.fn().mockReturnThis(),
             exec: jest.fn().mockResolvedValue({
-              username: 'liuver',
-              email: 'liuver@example.com',
+              username: 'john',
+              email: 'admin@example.com',
             } as User),
           } as any;
         });
 
       const foundUser = await service.findById('liuver', true).toPromise();
       expect(foundUser).toEqual({
-        username: 'liuver',
-        email: 'liuver@example.com',
+        username: 'john',
+        email: 'admin@example.com',
       });
       expect(model.findOne).lastCalledWith({ _id: 'liuver' });
       expect(model.findOne).toBeCalledTimes(1);

@@ -42,7 +42,7 @@ describe('JwtStrategy', () => {
         location: 'MEXICO-I',
         phone: '1234567890'
       });
-      expect(user.username).toEqual('test');
+      expect(user.email).toEqual('test');
       expect(user.id).toEqual('testid');
     });
   });
