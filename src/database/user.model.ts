@@ -1,56 +1,89 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { from, Observable } from "rxjs";
+import { from, Observable } from 'rxjs';
 import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
-import { LocationType } from 'shared/enum/location-type.enum';
 import { RoleType } from '../shared/enum/role-type.enum';
+import { Company } from './company.model';
+
 interface User extends Document<any> {
   comparePassword(password: string): Observable<boolean>;
-  readonly username: string;
+  readonly communication: Communications;
   readonly email: string;
-  readonly password: string;
+  readonly emailSettings: Partial<EmailSettings>;
   readonly firstName: string;
+  readonly gender: string; //can be: male (M), female (F), transgender (T), other (O)
+  readonly language: string;
   readonly lastName: string;
+  readonly password: string;
+  readonly mobilePhone: string;
   readonly phone: string;
-  readonly roles: RoleType[];
-  readonly location: string;
   readonly position: string;
-  readonly baseSalary: number;
-  readonly startedAt: string,
+  readonly roles: RoleType[];
+  readonly startedAt: string;
+  readonly timezone: string;
+  readonly username: string;
+  readonly website: string;
+
+  //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
+  readonly company: Partial<Company>;
+  readonly employeeInfo: EmployeeInfo;
+  readonly location: Partial<Location>;
+  readonly supervisor: Partial<User>;
 }
 
 type UserModel = Model<User>;
 
 const UserSchema = new Schema<any>(
   {
-    username: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
-    password: {type: SchemaTypes.String},
-    email: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
-    firstName: { type: SchemaTypes.String, required: false },
-    lastName: { type: SchemaTypes.String, required: false },
-    phone: { type : SchemaTypes.String , unique : true, required : false, dropDups: true },
-    location: { type: SchemaTypes.String, required: true },
-    position: { type: SchemaTypes.String, required: true },
-    baseSalary: SchemaTypes.Number,
-    startedAt: SchemaTypes.Date,
-    roles: [
-      { type: SchemaTypes.String, required: false },
-    ],
-    createdAt: { type: SchemaTypes.Date, required: false },
-    updatedAt: { type: SchemaTypes.Date, required: false },
+    communications: { type: SchemaTypes.Map },
+    email: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: true,
+      dropDups: true,
+    },
+    emailSettings: { type: SchemaTypes.Map },
+    firstName: { type: SchemaTypes.String },
+    gender: { type: SchemaTypes.String },
+    language: { type: SchemaTypes.String, default: 'en' },
+    lastName: { type: SchemaTypes.String },
+    password: { type: SchemaTypes.String },
+    mobilePhone: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: false,
+      dropDups: true,
+    },
+    phone: { type: SchemaTypes.String, required: false },
+    position: { type: SchemaTypes.String },
+    roles: [{ type: SchemaTypes.String }],
+    startedAt: { type: SchemaTypes.Date },
+    timezone: { type: SchemaTypes.String, default: 'CDT' },
+    username: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: true,
+      dropDups: true,
+    },
+    website: { type: SchemaTypes.String },
+    createdAt: { type: SchemaTypes.Date },
+    updatedAt: { type: SchemaTypes.Date },
+
+    //EMPLOYEE DATA
+    company: { type: SchemaTypes.ObjectId, ref: 'Company' },
+    employeeInfo: { type: SchemaTypes.ObjectId, ref: 'EmployeeInfo' },
+    location: { type: SchemaTypes.ObjectId, ref: 'Location' },
+    supervisor: { type: SchemaTypes.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,
     toJSON: {
-      virtuals: true
-    }
+      virtuals: true,
+    },
   },
 );
 
-// see: https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
-// and https://stackoverflow.com/questions/48023018/nodejs-bcrypt-async-mongoose-login
 async function preSaveHook(next) {
-
   // Only run this function if password was modified
   if (!this.isModified('password')) return next();
 
@@ -65,17 +98,16 @@ async function preSaveHook(next) {
 UserSchema.pre<User>('save', preSaveHook);
 
 UserSchema.pre('findOneAndUpdate', async function (this) {
-  let update = {...this.getUpdate()};
+  let update = { ...this.getUpdate() };
 
   // Only run this function if password was modified
-  if (update.password){
-
-  // Hash the password
-  const salt = genSaltSync();
-  update.password = await hash(this.getUpdate().password, salt);
-  this.setUpdate(update);
+  if (update.password) {
+    // Hash the password
+    const salt = genSaltSync();
+    update.password = await hash(this.getUpdate().password, salt);
+    this.setUpdate(update);
   }
-})
+});
 
 function comparePasswordMethod(password: string): Observable<boolean> {
   return from(compare(password, this.password));
@@ -83,19 +115,19 @@ function comparePasswordMethod(password: string): Observable<boolean> {
 
 UserSchema.methods.comparePassword = comparePasswordMethod;
 
-function nameGetHook() : string {
+function nameGetHook(): string {
   return `${this.firstName} ${this.lastName}`;
 }
 
 UserSchema.virtual('name').get(nameGetHook);
 
-function isAdminGetHook() : boolean{
+function isAdminGetHook(): boolean {
   return ADMIN_ROLES.includes(this.roles[0]);
 }
 
 UserSchema.virtual('isAdmin').get(isAdminGetHook);
 
-function isSellerGetHook() : boolean{
+function isSellerGetHook(): boolean {
   return SELLER_ROLES.includes(this.roles[0]);
 }
 
@@ -110,4 +142,59 @@ UserSchema.virtual('sales', {
 const userModelFn: (conn: Connection) => UserModel = (conn: Connection) =>
   conn.model<User, UserModel>('User', UserSchema, 'users');
 
-export { User, UserModel, UserSchema, preSaveHook, nameGetHook, isAdminGetHook, isSellerGetHook, comparePasswordMethod, userModelFn };
+export {
+  User,
+  UserModel,
+  UserSchema,
+  preSaveHook,
+  nameGetHook,
+  isAdminGetHook,
+  isSellerGetHook,
+  comparePasswordMethod,
+  userModelFn,
+};
+
+interface EmployeeInfo extends Map<any, any> {
+  readonly endedAt: string;
+  readonly location: Partial<Location>;
+  readonly position: string; //can be: Sales Agent, IT, Certificates Assistant, etc
+  readonly payFrequency: string; //can be: hourly (H), daily (D), weekly (W), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
+  readonly payRate: number;
+  readonly overtimeAuthorized: boolean;
+  readonly overtimePayRate: number;
+  readonly salaryFormula: string;
+  readonly startedAt: string;
+  readonly user: Partial<User>;
+  readonly workPrimaryPhone: string;
+  readonly workPrimaryPhoneExtension: string;
+}
+
+interface ActivityRelatesEmail extends Map<any, any> {
+  readonly youHaveNewNotifications: boolean;
+  readonly youAreSentADirectMessage: boolean;
+  readonly someoneAddsYouAsAsAConnection: boolean;
+  readonly uponNewOrder: boolean;
+  readonly newMembershipApproval: boolean;
+  readonly memberRegistration: boolean;
+}
+
+interface EmailSettings extends Map<any, any> {
+  readonly emailNotification: boolean;
+  readonly sendCopyToPersonalEmail: boolean;
+  readonly activityRelatesEmail: Partial<ActivityRelatesEmail>;
+}
+
+interface Communications extends Map<any, any> {
+  readonly email: boolean;
+  readonly sms: boolean;
+  readonly phone: boolean;
+}
+
+interface Address extends Map<any, any> {
+  readonly address1: string;
+  readonly address2: string;
+  readonly city: string;
+  readonly state: string;
+  readonly country: string;
+  readonly postalCode: string;
+}

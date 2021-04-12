@@ -67,7 +67,7 @@ export class CompanyService {
   }
 
   deleteById(id: string): Promise<Company> {
-    return from(this.companyModel.findOneAndDelete({ _id: id }).exec())
+    return from(this.companyModel.findOneAndRemove({ _id: id }).exec())
       .pipe(
         mergeMap((p) => (p ? of(p) : EMPTY)),
         throwIfEmpty(() => new NotFoundException(`company:$id was not found`)),

@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import jwtConfig from '../../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { JwtPayload } from '../interface/jwt-payload.interface';
-import { UserPrincipal } from '../interface/user-principal.interface';
+import { AuthenticatedUser } from '../interface/authenticated-user.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   //payload is the decoded jwt clmais.
-  validate(payload: JwtPayload): UserPrincipal {
+  validate(payload: JwtPayload): AuthenticatedUser {
     //console.log('jwt payload:' + JSON.stringify(payload));
     return {
       username: payload.upn,

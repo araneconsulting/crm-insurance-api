@@ -5,7 +5,7 @@ import { mergeMap, map, throwIfEmpty } from 'rxjs/operators';
 import { UserService } from '../user/user.service';
 import { AccessToken } from './interface/access-token.interface';
 import { JwtPayload } from './interface/jwt-payload.interface';
-import { UserPrincipal } from './interface/user-principal.interface';
+import { AuthenticatedUser } from './interface/authenticated-user.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  validateUser(username: string, pass: string): Observable<UserPrincipal> {
+  validateUser(username: string, pass: string): Observable<AuthenticatedUser> {
     return this.userService.findByUsername(username).pipe(
       //if user is not found, convert it into an EMPTY.
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -53,7 +53,7 @@ export class AuthService {
                 position,
                 location,
                 phone,
-              } as UserPrincipal;
+              } as AuthenticatedUser;
             } else {
               // The same reason above.
               //throw new UnauthorizedException('password was not matched.')
@@ -68,12 +68,12 @@ export class AuthService {
   }
 
   // If `LocalStrateg#validateUser` return a `Observable`, the `request.user` is
-  // bound to a `Observable<UserPrincipal>`, not a `UserPrincipal`.
+  // bound to a `Observable<AuthenticatedUser>`, not a `AuthenticatedUser`.
   //
   // I would like use the current `Promise` for this case, thus it will get
-  // a `UserPrincipal` here directly.
+  // a `AuthenticatedUser` here directly.
   //
-  login(user: UserPrincipal): Observable<AccessToken> {
+  login(user: AuthenticatedUser): Observable<AccessToken> {
     const payload: JwtPayload = {
       upn: user.username, //upn is defined in Microprofile JWT spec, a human readable principal name.
       sub: user.id,

@@ -73,7 +73,7 @@ export class UserController {
   @UseFilters( MongoFilter)
   updateUser(
     @Param('id', ParseObjectIdPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto): Observable<Partial<User>> {
+    @Body() updateUserDto: Partial<User>): Observable<Partial<User>> {
 
     return this.userService.findById(id).pipe(
       mergeMap( found =>  {

@@ -1,6 +1,6 @@
 import { Request } from 'express';
-import { UserPrincipal } from './user-principal.interface';
+import { AuthenticatedUser } from './authenticated-user.interface';
 
 export interface AuthenticatedRequest extends Request {
-  readonly user: UserPrincipal;
+  readonly user: AuthenticatedUser;
 }

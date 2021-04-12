@@ -1,7 +1,7 @@
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 interface Location extends Document<any> {
-  readonly address_1: string;
-  readonly address_2: string;
+  readonly address1: string;
+  readonly address2: string;
   readonly city: string;
   readonly code: string;
   readonly fax: string;
@@ -23,8 +23,8 @@ type LocationModel = Model<Location>;
 
 const LocationSchema = new Schema<any>(
   {
-    address_1: { type: SchemaTypes.String },
-    address_2: { type: SchemaTypes.String },
+    address1: { type: SchemaTypes.String },
+    address2: { type: SchemaTypes.String },
     city: { type: SchemaTypes.String },
     code: {
       type: SchemaTypes.String,

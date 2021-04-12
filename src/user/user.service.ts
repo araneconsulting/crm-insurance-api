@@ -90,7 +90,7 @@ export class UserService {
     // );
   }
 
-  updateUser(id: string, data: UpdateUserDto): Observable<User> {
+  updateUser(id: string, data: Partial<User>): Observable<User> {
     const updateQuery = this.userModel.findOneAndUpdate({ _id: id }, data, {
       new: true,
     });

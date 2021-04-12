@@ -2,11 +2,11 @@ import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber } from 'class-validator'
 export class UpdateCompanyDto {
   @IsOptional()
   @IsNotEmpty()
-  readonly address_1: string;
+  readonly address1: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly address_2: string;
+  readonly address2: string;
 
   @IsOptional()
   @IsNotEmpty()

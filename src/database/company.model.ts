@@ -1,11 +1,10 @@
 import { IsPhoneNumber } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-
-var mongoose_delete = require('mongoose-delete');
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface Company extends Document<any> {
-  readonly address_1: string;
-  readonly address_2: string;
+  readonly address1: string;
+  readonly address2: string;
   readonly city: string;
   readonly code: string;
   readonly country: string;
@@ -31,8 +30,8 @@ type CompanyModel = Model<Company>;
 
 const CompanySchema = new Schema<any>(
   {
-    address_1: { type: SchemaTypes.String },
-    address_2: { type: SchemaTypes.String },
+    address1: { type: SchemaTypes.String },
+    address2: { type: SchemaTypes.String },
     city: { type: SchemaTypes.String },
     code: {
       type: SchemaTypes.String,
@@ -66,7 +65,7 @@ const CompanySchema = new Schema<any>(
   },
 );
 
-CompanySchema.plugin(mongoose_delete, { deletedBy : true });
+CompanySchema.plugin(mongoSoftDelete);
 
 const companyModelFn: (conn: Connection) => CompanyModel = (conn: Connection) =>
   conn.model<Company, CompanyModel>('Company', CompanySchema, 'companies');
