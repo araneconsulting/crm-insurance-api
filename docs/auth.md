@@ -265,8 +265,8 @@ export class AuthService {
       roles: user.roles,
     };
     return from(this.jwtService.signAsync(payload)).pipe(
-      map(access_token => {
-        access_token;
+      map(accessToken => {
+        accessToken;
       }),
     );
   }
@@ -423,10 +423,10 @@ Login using the *username/password* pair.
 
 ```bash
 >curl http://localhost:5000/auth/login -d "{\"username\":\"liuver\", \"password\":\"password\"}" -H "Content-Type:application/json"
->{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cG4iOiJoYW50c3kiLCJzdWIiOiI1ZjJkMGU0ODZhOTZiZTEyMDBmZWZjZWMiLCJlbWFpbCI6ImhhbnRzeUBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNTk2Nzg4NDg5LCJleHAiOjE1OTY3OTIwODl9.4oYpKTikoTfeeaUBoEFr9d1LPcN1pYqHjWXRuZXOfek"}
+>{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cG4iOiJoYW50c3kiLCJzdWIiOiI1ZjJkMGU0ODZhOTZiZTEyMDBmZWZjZWMiLCJlbWFpbCI6ImhhbnRzeUBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNTk2Nzg4NDg5LCJleHAiOjE1OTY3OTIwODl9.4oYpKTikoTfeeaUBoEFr9d1LPcN1pYqHjWXRuZXOfek"}
 ```
 
-Try to access the */profile* endpoint using this *access_token*.
+Try to access the */profile* endpoint using this *accessToken*.
 
 ```bash
 >curl http://localhost:5000/profile -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cG4iOiJoYW50c3kiLCJzdWIiOiI1ZjJkMGU0ODZhOTZiZTEyMDBmZWZjZWMiLCJlbWFpbCI6ImhhbnRzeUBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNTk2Nzg4NDg5LCJleHAiOjE1OTY3OTIwODl9.4oYpKTikoTfeeaUBoEFr9d1LPcN1pYqHjWXRuZXOfek"

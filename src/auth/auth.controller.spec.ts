@@ -27,9 +27,9 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
-    it('should return access_token', async () => {
+    it('should return accessToken', async () => {
       jest.spyOn(authService, 'login').mockImplementation((user: any) => {
-        return of({ access_token: 'jwttoken' });
+        return of({ accessToken: 'jwttoken' });
       });
 
 

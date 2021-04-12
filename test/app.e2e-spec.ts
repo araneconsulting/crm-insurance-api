@@ -114,7 +114,7 @@ describe('API endpoints testing (e2e)', () => {
         .send({ email: 'admin@gmail.com', password: 'password' });
 
       expect(res.status).toBe(201);
-      jwttoken = res.body.access_token;
+      jwttoken = res.body.authToken;
       //console.log(JSON.stringify(res));
     });
 
@@ -212,7 +212,7 @@ describe('API endpoints testing (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: 'admin@gmail.com', password: 'password' });
-      jwttoken = res.body.access_token;
+      jwttoken = res.body.authToken;
       // console.log(jwttoken);
     });
 

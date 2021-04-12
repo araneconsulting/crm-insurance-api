@@ -86,8 +86,8 @@ export class AuthService {
       phone: user.phone,
     };
     return from(this.jwtService.signAsync(payload)).pipe(
-      map((access_token) => {
-        return { access_token };
+      map((accessToken) => {
+        return { accessToken };
       }),
     );
   }

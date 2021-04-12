@@ -124,7 +124,7 @@ describe('AuthService', () => {
         })
         .subscribe({
           next: (data) => {
-            expect(data.access_token).toBe('test');
+            expect(data.accessToken).toBe('test');
             expect(jwtService.signAsync).toBeCalledTimes(1);
             expect(jwtService.signAsync).toBeCalledWith({
               upn: 'test',

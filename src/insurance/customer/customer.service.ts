@@ -17,9 +17,8 @@ export class CustomerService {
   ) {}
 
   findAll(keyword?: string, skip = 0, limit = 0): Promise<Customer[]> {
-    if (keyword && keyword) {
-      return;
-      this.customerModel
+    if (keyword && keyword.length > 0) {
+      return this.customerModel
         .find({
           $or: [
             { name: { $regex: '.*' + keyword + '.*' } },

@@ -514,7 +514,7 @@ Use `curl` to test the endpoints provided in the application.
 
 $ curl http://localhost:5000/auth/login -d "{\"username\":\"liuver\",\"password\":\"password\"}" -H "Content-Type:application/json" 
 
-{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cG4iOiJoYW50c3kiLCJzdWIiOiI1ZWYwYjdkNTRkMDY3MzIxMTQxODQ1ZjYiLCJlbWFpbCI6ImhhbnRzeUBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNTkyODM0MDE3LCJleHAiOjE1OTI4Mzc2MTd9.Jx53KIWHgyPADhLr-LhjW-iu1e8hD650e9nduGgJ8Bw"}
+{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cG4iOiJoYW50c3kiLCJzdWIiOiI1ZWYwYjdkNTRkMDY3MzIxMTQxODQ1ZjYiLCJlbWFpbCI6ImhhbnRzeUBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNTkyODM0MDE3LCJleHAiOjE1OTI4Mzc2MTd9.Jx53KIWHgyPADhLr-LhjW-iu1e8hD650e9nduGgJ8Bw"}
 
 $ curl -X POST http://localhost:5000/posts -d "{\"title\":\"my title\",\"content\":\"my content\"}" -H "Content-Type:application/json" -H "Authorization:Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cG4iOiJoYW50c3kiLCJzdWIiOiI1ZWYwYjdkNTRkMDY3MzIxMTQxODQ1ZjYiLCJlbWFpbCI6ImhhbnRzeUBleGFtcGxlLmNvbSIsInJvbGVzIjpbIlVTRVIiXSwiaWF0IjoxNTkyODM0MDE3LCJleHAiOjE1OTI4Mzc2MTd9.Jx53KIWHgyPADhLr-LhjW-iu1e8hD650e9nduGgJ8Bw"
 

@@ -45,8 +45,12 @@ export class CustomerController {
     @Query('q') keyword?: string,
     @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
-  ): Promise<Customer[]> {
-    return await this.customerService.findAll(keyword, skip, limit);
+  ): Promise<any> {
+    const res = await this.customerService.findAll(keyword, skip, limit);
+    return {
+      totalCount: res.length,
+      entities: res,
+    };
   }
 
   @Get(':id')
@@ -61,7 +65,7 @@ export class CustomerController {
   @Post()
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters( MongoFilter)
+  @UseFilters(MongoFilter)
   async createCustomer(@Body() customer: CreateCustomerDto): Promise<Customer> {
     return await this.customerService.save(customer);
   }
@@ -69,7 +73,7 @@ export class CustomerController {
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters( MongoFilter)
+  @UseFilters(MongoFilter)
   async updateCustomer(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() customer: UpdateCustomerDto,
