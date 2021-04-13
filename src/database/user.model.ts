@@ -1,4 +1,5 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
+import { IsOptional } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
@@ -6,6 +7,7 @@ import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
 
 interface User extends Document<any> {
+
   comparePassword(password: string): Observable<boolean>;
   readonly communication: Communications;
   readonly email: string;

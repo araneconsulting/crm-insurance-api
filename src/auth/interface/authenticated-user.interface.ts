@@ -8,6 +8,6 @@ export interface AuthenticatedUser {
   readonly email: string;
   readonly roles: RoleType[];
   readonly position: string;
-  readonly location: string;
+  readonly location: Partial<Location>;
   readonly phone: string;
 }

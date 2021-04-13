@@ -85,7 +85,7 @@ export class CreateSaleDto {
   @IsOptional()
   @IsNotEmpty()
   @IsNumber()
-  location: string;
+  location: Partial<Location>;
 
   @IsOptional()
   @IsNumber()

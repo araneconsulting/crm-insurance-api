@@ -1,11 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'database/user.model';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, map, throwIfEmpty } from 'rxjs/operators';
 import { UserService } from '../user/user.service';
 import { AccessToken } from './interface/access-token.interface';
 import { JwtPayload } from './interface/jwt-payload.interface';
-import { AuthenticatedUser } from './interface/authenticated-user.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  validateUser(username: string, pass: string): Observable<AuthenticatedUser> {
+  validateUser(username: string, pass: string): Observable<User> {
     return this.userService.findByUsername(username).pipe(
       //if user is not found, convert it into an EMPTY.
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -30,7 +30,6 @@ export class AuthService {
       mergeMap((user) => {
         const {
           _id,
-          password,
           username,
           email,
           roles,
@@ -53,7 +52,7 @@ export class AuthService {
                 position,
                 location,
                 phone,
-              } as AuthenticatedUser;
+              } as User;
             } else {
               // The same reason above.
               //throw new UnauthorizedException('password was not matched.')
@@ -68,12 +67,12 @@ export class AuthService {
   }
 
   // If `LocalStrateg#validateUser` return a `Observable`, the `request.user` is
-  // bound to a `Observable<AuthenticatedUser>`, not a `AuthenticatedUser`.
+  // bound to a `Observable<Partial<User>>`, not a `Partial<User>`.
   //
   // I would like use the current `Promise` for this case, thus it will get
-  // a `AuthenticatedUser` here directly.
+  // a `Partial<User>` here directly.
   //
-  login(user: AuthenticatedUser): Observable<AccessToken> {
+  login(user: Partial<User>): Observable<AccessToken> {
     const payload: JwtPayload = {
       upn: user.username, //upn is defined in Microprofile JWT spec, a human readable principal name.
       sub: user.id,

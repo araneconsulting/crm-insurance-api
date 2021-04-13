@@ -8,6 +8,6 @@ export interface JwtPayload {
     readonly firstName: string,
     readonly lastName: string,
     readonly position: string;
-    readonly location: string;
+    readonly location: Partial<Location>;
     readonly phone: string;
   }

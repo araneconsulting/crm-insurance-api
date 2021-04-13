@@ -273,13 +273,13 @@ export class SaleService {
       throw new NotFoundException(`sale:$id was not found`);
     }
 
-    let saleDto: CreateSaleDto = { ...sale['_doc'], ...data };
+    let saleDto = { ...sale['_doc'], ...data };
 
     let saleData = await this.setSaleCalculations(saleDto);
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
-      saleData,
+      {saleData},
       { new: true },
     );
   }
