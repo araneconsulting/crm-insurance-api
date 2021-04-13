@@ -18,17 +18,22 @@ export class UserService {
   findByUsername(username: string): Observable<User> {
     return from(this.userModel.findOne({ username }).exec());
   }
+  
+  
+  findByEmail(email: string): Observable<User> {
+    return from(this.userModel.findOne({ email }).exec());
+  }
 
   existsByUsername(username: string): Observable<boolean> {
     return from(this.userModel.exists({ username }));
   }
 
-  existsById(id: string): Observable<boolean> {
-    return from(this.userModel.exists({ id }));
-  }
-
   existsByEmail(email: string): Observable<boolean> {
     return from(this.userModel.exists({ email }));
+  }
+
+  existsById(id: string): Observable<boolean> {
+    return from(this.userModel.exists({ id }));
   }
 
   createUser(data: RegisterDto): Observable<User> {

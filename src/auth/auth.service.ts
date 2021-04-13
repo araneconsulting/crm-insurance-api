@@ -14,17 +14,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  validateUser(username: string, pass: string): Observable<User> {
-    return this.userService.findByUsername(username).pipe(
+  validateUser(email: string, pass: string): Observable<User> {
+    return this.userService.findByEmail(email).pipe(
       //if user is not found, convert it into an EMPTY.
       mergeMap((p) => (p ? of(p) : EMPTY)),
 
       // Using a general message in the authentication progress is more reasonable.
       // Concise info could be considered for security.
       // Detailed info will be helpful for crackers.
-      // throwIfEmpty(() => new NotFoundException(`username:${username} was not found`)),
+      // throwIfEmpty(() => new NotFoundException(`email:${email} was not found`)),
       throwIfEmpty(
-        () => new UnauthorizedException(`username or password is not matched`),
+        () => new UnauthorizedException(`email or password is not matched`),
       ),
 
       mergeMap((user) => {
@@ -57,7 +57,7 @@ export class AuthService {
               // The same reason above.
               //throw new UnauthorizedException('password was not matched.')
               throw new UnauthorizedException(
-                'username or password is not matched',
+                'email or password is not matched',
               );
             }
           }),
@@ -74,9 +74,9 @@ export class AuthService {
   //
   login(user: Partial<User>): Observable<AccessToken> {
     const payload: JwtPayload = {
-      upn: user.username, //upn is defined in Microprofile JWT spec, a human readable principal name.
+      upn: user.email, //upn is defined in Microprofile JWT spec, a human readable principal name.
       sub: user.id,
-      email: user.email,
+      username: user.username,
       roles: user.roles,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -85,8 +85,8 @@ export class AuthService {
       phone: user.phone,
     };
     return from(this.jwtService.signAsync(payload)).pipe(
-      map((access_token) => {
-        return { access_token };
+      map((accessToken) => {
+        return { accessToken };
       }),
     );
   }

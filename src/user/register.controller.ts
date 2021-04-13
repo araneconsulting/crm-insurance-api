@@ -20,12 +20,12 @@ export class RegisterController {
     register(
         @Body() registerDto: RegisterDto,
         @Res() res: Response): Observable<Response> {
-        const username = registerDto.username;
+        const email = registerDto.email;
 
-        return this.userService.existsByUsername(username).pipe(
+        return this.userService.existsByEmail(email).pipe(
             mergeMap(exists => {
                 if (exists) {
-                    throw new ConflictException(`username:${username} exists already`)
+                    throw new ConflictException(`email:${email} exists already`)
                 }
                 else {
                     const email = registerDto.email;

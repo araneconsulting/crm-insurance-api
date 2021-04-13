@@ -20,8 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   validate(payload: JwtPayload): Partial<User> {
     //console.log('jwt payload:' + JSON.stringify(payload));
     return {
-      username: payload.upn,
-      email: payload.email,
+      email: payload.upn,
+      username: payload.username,
       id: payload.sub,
       roles: payload.roles,
       firstName: payload.firstName,
