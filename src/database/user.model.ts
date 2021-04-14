@@ -7,9 +7,9 @@ import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
 
 interface User extends Document<any> {
-
   comparePassword(password: string): Observable<boolean>;
-  readonly communication: Communications;
+  readonly address: Address;
+  readonly communication: Communication;
   readonly email: string;
   readonly emailSettings: Partial<EmailSettings>;
   readonly firstName: string;
@@ -37,14 +37,45 @@ type UserModel = Model<User>;
 
 const UserSchema = new Schema<any>(
   {
-    communications: { type: SchemaTypes.Map },
+    address: {
+      type: SchemaTypes.Map,
+      default: {
+        address2: '',
+        address1: '',
+        city: '',
+        state: '',
+        country: 'US',
+        postalCode: '',
+      },
+    },
+    communication: {
+      type: SchemaTypes.Map,
+      default: {
+        email: true,
+        sms: true,
+        phone: false,
+      },
+    },
     email: {
       type: SchemaTypes.String,
       unique: true,
       required: true,
       dropDups: true,
     },
-    emailSettings: { type: SchemaTypes.Map },
+    emailSettings: {
+      type: SchemaTypes.Map,
+      default: {
+        emailNotification: true,
+        sendCopyToPersonalEmail: false,
+        activityRelatesEmail: {
+          youHaveNewNotifications: false,
+          youAreSentADirectMessage: false,
+          locationTargetReached: false,
+          newTeamMember: false,
+          employeeTargetReached: true,
+        },
+      },
+    },
     firstName: { type: SchemaTypes.String },
     gender: { type: SchemaTypes.String },
     language: { type: SchemaTypes.String, default: 'en' },
@@ -68,8 +99,6 @@ const UserSchema = new Schema<any>(
       dropDups: true,
     },
     website: { type: SchemaTypes.String },
-    createdAt: { type: SchemaTypes.Date },
-    updatedAt: { type: SchemaTypes.Date },
 
     //EMPLOYEE DATA
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
@@ -174,10 +203,9 @@ interface EmployeeInfo extends Map<any, any> {
 interface ActivityRelatesEmail extends Map<any, any> {
   readonly youHaveNewNotifications: boolean;
   readonly youAreSentADirectMessage: boolean;
-  readonly someoneAddsYouAsAsAConnection: boolean;
-  readonly uponNewOrder: boolean;
-  readonly newMembershipApproval: boolean;
-  readonly memberRegistration: boolean;
+  readonly locationTargetReached: boolean;
+  readonly newTeamMember: boolean;
+  readonly employeeTargetReached: boolean;
 }
 
 interface EmailSettings extends Map<any, any> {
@@ -186,7 +214,7 @@ interface EmailSettings extends Map<any, any> {
   readonly activityRelatesEmail: Partial<ActivityRelatesEmail>;
 }
 
-interface Communications extends Map<any, any> {
+interface Communication extends Map<any, any> {
   readonly email: boolean;
   readonly sms: boolean;
   readonly phone: boolean;
