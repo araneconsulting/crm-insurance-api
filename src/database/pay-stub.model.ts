@@ -1,11 +1,11 @@
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { Employee } from './employee.model';
 import { PayAddon } from './pay-addon.model';
 import { Payroll } from './payroll.model';
+import { User } from './user.model';
 
 interface PayStub extends Document<any> {
   readonly addons: PayAddon[];  
-  readonly employee: Partial<Employee>;
+  readonly employee: Partial<User>;
   readonly normalHoursWorked: number;
   readonly overtimeHoursWorked: number;
   readonly payRate: number;
@@ -29,7 +29,6 @@ const PayStubSchema = new Schema<any>(
     },
   },
 );
-
 const payStubModelFn: (conn: Connection) => PayStubModel = (
   conn: Connection,
 ) =>

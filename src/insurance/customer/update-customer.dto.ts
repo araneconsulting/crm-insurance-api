@@ -1,15 +1,21 @@
 import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { User } from 'database/user.model';
+import { AddressDto } from 'shared/dto/address.dto';
+import { CommunicationDto } from 'shared/dto/communication.dto';
+import { TruckingInfoDto } from './dto/trucking-info.dto';
 export class UpdateCustomerDto {
-  readonly name: string;
-  readonly email: string;
+  readonly address: AddressDto;
+  readonly birthday: Date;
+  readonly communication: CommunicationDto;
   readonly company: string;
-  readonly address: string;
-  readonly city: string;
-  readonly state: string;
-  readonly country: string;
-  readonly zip: string;
+  readonly createdBy?: Partial<User>;
+  readonly email: string;
   readonly fax: string;
-  readonly dot: string;
+  readonly name: string;
   readonly phone: string;
+  readonly type: string;
+  readonly updatedBy?: Partial<User>;
+  //EXTRA FIELDS
+  readonly truckingInfo?: TruckingInfoDto;
 
 }

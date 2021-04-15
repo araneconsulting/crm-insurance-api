@@ -1,17 +1,20 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
-import { IsOptional } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
+import { CommunicationDto } from 'shared/dto/communication.dto';
+import { AddressDto } from 'shared/dto/address.dto';
 import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
+import { EmployeeInfoDto } from 'shared/dto/employee-info.dto';
+import { EmailSettingsDto } from 'user/dto/email-settings.dto';
 
 interface User extends Document<any> {
-  comparePassword(password: string): Observable<boolean>;
-  readonly address: Address;
-  readonly communication: Communication;
+  readonly address: AddressDto;
+  readonly birthday: string;
+  readonly communication: CommunicationDto;
   readonly email: string;
-  readonly emailSettings: Partial<EmailSettings>;
+  readonly emailSettings: EmailSettingsDto;
   readonly firstName: string;
   readonly gender: string; //can be: male (M), female (F), transgender (T), other (O)
   readonly language: string;
@@ -19,18 +22,19 @@ interface User extends Document<any> {
   readonly password: string;
   readonly mobilePhone: string;
   readonly phone: string;
-  readonly position: string;
   readonly roles: RoleType[];
   readonly startedAt: string;
   readonly timezone: string;
   readonly username: string;
   readonly website: string;
-
+  
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
   readonly company: Partial<Company>;
-  readonly employeeInfo: EmployeeInfo;
+  readonly employeeInfo: EmployeeInfoDto;
   readonly location: Partial<Location>;
   readonly supervisor: Partial<User>;
+  
+  comparePassword(password: string): Observable<boolean>;
 }
 
 type UserModel = Model<User>;
@@ -45,9 +49,10 @@ const UserSchema = new Schema<any>(
         city: '',
         state: '',
         country: 'US',
-        postalCode: '',
+        zip: '',
       },
     },
+    birthday: { type: SchemaTypes.Date },
     communication: {
       type: SchemaTypes.Map,
       default: {
@@ -88,7 +93,6 @@ const UserSchema = new Schema<any>(
       dropDups: true,
     },
     phone: { type: SchemaTypes.String, required: false },
-    position: { type: SchemaTypes.String },
     roles: [{ type: SchemaTypes.String }],
     startedAt: { type: SchemaTypes.Date },
     timezone: { type: SchemaTypes.String, default: 'CDT' },
@@ -184,47 +188,3 @@ export {
   comparePasswordMethod,
   userModelFn,
 };
-
-interface EmployeeInfo extends Map<any, any> {
-  readonly endedAt: string;
-  readonly location: Partial<Location>;
-  readonly position: string; //can be: Sales Agent, IT, Certificates Assistant, etc
-  readonly payFrequency: string; //can be: hourly (H), daily (D), weekly (W), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
-  readonly payRate: number;
-  readonly overtimeAuthorized: boolean;
-  readonly overtimePayRate: number;
-  readonly salaryFormula: string;
-  readonly startedAt: string;
-  readonly user: Partial<User>;
-  readonly workPrimaryPhone: string;
-  readonly workPrimaryPhoneExtension: string;
-}
-
-interface ActivityRelatesEmail extends Map<any, any> {
-  readonly youHaveNewNotifications: boolean;
-  readonly youAreSentADirectMessage: boolean;
-  readonly locationTargetReached: boolean;
-  readonly newTeamMember: boolean;
-  readonly employeeTargetReached: boolean;
-}
-
-interface EmailSettings extends Map<any, any> {
-  readonly emailNotification: boolean;
-  readonly sendCopyToPersonalEmail: boolean;
-  readonly activityRelatesEmail: Partial<ActivityRelatesEmail>;
-}
-
-interface Communication extends Map<any, any> {
-  readonly email: boolean;
-  readonly sms: boolean;
-  readonly phone: boolean;
-}
-
-interface Address extends Map<any, any> {
-  readonly address1: string;
-  readonly address2: string;
-  readonly city: string;
-  readonly state: string;
-  readonly country: string;
-  readonly postalCode: string;
-}

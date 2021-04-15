@@ -26,9 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       roles: payload.roles,
       firstName: payload.firstName,
       lastName: payload.lastName,
-      position: payload.position,
-      location: payload.location,
-      phone: payload.phone,
+      mobilePhone: payload.phone,
     };
   }
 }

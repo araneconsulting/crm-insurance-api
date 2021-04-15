@@ -9,8 +9,8 @@ import { RoleType } from 'shared/enum/role-type.enum';
 import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 import { ParseObjectIdPipe } from '../shared/pipe/parse-object-id.pipe';
-import { RegisterDto } from './register.dto';
-import { UpdateUserDto } from './update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 
 @Controller({ path: "/users" })
@@ -42,8 +42,8 @@ export class UserController {
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL)
   @UseFilters( MongoFilter)
   createUser(
-    @Body() registerDto: RegisterDto): Observable<User> {
-    const email = registerDto.email;
+    @Body() createUserDto: CreateUserDto): Observable<User> {
+    const email = createUserDto.email;
 
     return this.userService.existsByEmail(email).pipe(
       mergeMap(exists => {
@@ -51,14 +51,14 @@ export class UserController {
           throw new ConflictException(`email:${email} exists already`)
         }
         else {
-          const email = registerDto.email;
+          const email = createUserDto.email;
           return this.userService.existsByEmail(email).pipe(
             mergeMap(exists => {
               if (exists) {
                 throw new ConflictException(`email:${email} exists already`)
               }
               else {
-                return this.userService.createUser(registerDto);
+                return this.userService.createUser(createUserDto);
               }
             })
           );
@@ -73,7 +73,7 @@ export class UserController {
   @UseFilters( MongoFilter)
   updateUser(
     @Param('id', ParseObjectIdPipe) id: string,
-    @Body() updateUserDto: Partial<User>): Observable<Partial<User>> {
+    @Body() updateUserDto: UpdateUserDto): Observable<Partial<User>> {
 
     return this.userService.findById(id).pipe(
       mergeMap( found =>  {

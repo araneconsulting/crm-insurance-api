@@ -35,7 +35,6 @@ export class AuthService {
           roles,
           firstName,
           lastName,
-          position,
           location,
           phone,
         } = user;
@@ -49,7 +48,6 @@ export class AuthService {
                 roles,
                 firstName,
                 lastName,
-                position,
                 location,
                 phone,
               } as User;
@@ -80,8 +78,7 @@ export class AuthService {
       roles: user.roles,
       firstName: user.firstName,
       lastName: user.lastName,
-      position: user.position,
-      location: user.location,
+      email: user.email,
       phone: user.phone,
     };
     return from(this.jwtService.signAsync(payload)).pipe(

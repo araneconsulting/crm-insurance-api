@@ -13,7 +13,6 @@ import {
 } from './database.constants';
 import { Company, CompanySchema } from './company.model';
 import { Customer, CustomerSchema } from './customer.model';
-import { Employee, EmployeeSchema } from './employee.model';
 import { Insurer, InsurerSchema } from './insurer.model';
 import { Location, LocationSchema } from './location.model';
 import { Payroll, PayrollSchema } from './payroll.model';
@@ -56,12 +55,6 @@ export const databaseModelsProviders = [
     provide: LOCATION_MODEL,
     useFactory: (connection: Connection) =>
       connection.model<Location>('Location', LocationSchema, 'locations'),
-    inject: [DATABASE_CONNECTION],
-  },
-  {
-    provide: EMPLOYEE_MODEL,
-    useFactory: (connection: Connection) =>
-      connection.model<Employee>('Employee', EmployeeSchema, 'employees'),
     inject: [DATABASE_CONNECTION],
   },
   {

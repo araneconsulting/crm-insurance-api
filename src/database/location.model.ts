@@ -1,8 +1,7 @@
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
+import { AddressDto } from 'shared/dto/address.dto';
 interface Location extends Document<any> {
-  readonly address1: string;
-  readonly address2: string;
-  readonly city: string;
+  readonly address: AddressDto;
   readonly code: string;
   readonly fax: string;
   readonly name: string;
@@ -13,19 +12,25 @@ interface Location extends Document<any> {
   readonly secondaryPhone: string;
   readonly secondaryPhoneExtension: string;
   readonly startedAt: string;
-  readonly state: string;
   readonly type: string; // Headquarter (H), Point of sale (P), Office (O)
   readonly website: string;
-  readonly zip: string;
 }
 
 type LocationModel = Model<Location>;
 
 const LocationSchema = new Schema<any>(
   {
-    address1: { type: SchemaTypes.String },
-    address2: { type: SchemaTypes.String },
-    city: { type: SchemaTypes.String },
+    address: {
+      type: SchemaTypes.Map,
+      default: {
+        address2: '',
+        address1: '',
+        city: '',
+        state: '',
+        country: 'US',
+        zip: '',
+      },
+    },
     code: {
       type: SchemaTypes.String,
       unique: true,
@@ -42,10 +47,8 @@ const LocationSchema = new Schema<any>(
     secondaryPhone: { type: SchemaTypes.String },
     secondaryPhoneExtension: { type: SchemaTypes.String },
     startedAt: { type: SchemaTypes.Date },
-    state: { type: SchemaTypes.String },
     type: { type: SchemaTypes.String }, // headquarter (H), point of sale (P), office (O)
     website: { type: SchemaTypes.String },
-    zip: { type: SchemaTypes.String },
   },
   {
     timestamps: true,
