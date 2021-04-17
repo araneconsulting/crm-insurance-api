@@ -1,6 +1,6 @@
 import { IsBoolean, IsBooleanString } from "class-validator";
 
-export class CommunicationDto extends Map<any, any> {
+export class Communication extends Map<any, any> {
   @IsBoolean()
   readonly email: boolean;
 

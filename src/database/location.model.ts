@@ -1,10 +1,10 @@
-import { BusinessInfoDto } from 'business-management/company/dto/company.dto';
+import { BusinessInfo } from 'business/company/dto/company.dto';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface Location extends Document<any> {
   readonly alias: string;
-  readonly info: BusinessInfoDto;
+  readonly info: BusinessInfo;
   readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
 }
 

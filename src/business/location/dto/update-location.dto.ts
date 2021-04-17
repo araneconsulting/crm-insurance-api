@@ -1,4 +1,4 @@
-import { BusinessInfoDto } from 'business-management/company/dto/company.dto';
+import { BusinessInfo } from 'business/company/dto/company.dto';
 import {
   IsNotEmpty,
   IsNotEmptyObject,
@@ -13,7 +13,7 @@ export class UpdateLocationDto {
 
   @IsOptional()
   @IsNotEmptyObject()
-  readonly info: BusinessInfoDto;
+  readonly info: BusinessInfo;
 
   @IsOptional()
   @IsNotEmpty()

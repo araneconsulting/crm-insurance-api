@@ -1,3 +1,4 @@
+import { EmployeeInfo } from 'business/sub-docs/employee-info';
 import {
   IsArray,
   IsEmail,
@@ -6,16 +7,15 @@ IsNotEmpty,
 } from 'class-validator';
 import { Company } from 'database/company.model';
 import { User } from 'database/user.model';
-import { AddressDto } from 'shared/dto/address.dto';
-import { CommunicationDto } from 'shared/dto/communication.dto';
-import { EmployeeInfoDto } from 'shared/dto/employee-info.dto';
+import { Address } from 'shared/sub-documents/address';
+import { Communication } from 'shared/sub-documents/communication';
 import { RoleType } from '../../shared/enum/role-type.enum';
 import { EmailSettingsDto } from './email-settings.dto';
 
 export class UserDto extends Map<any, any> {
   @IsOptional()
   @IsNotEmpty()
-  readonly address: AddressDto;
+  readonly address: Address;
 
   @IsOptional()
   @IsNotEmpty()
@@ -23,7 +23,7 @@ export class UserDto extends Map<any, any> {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly communication: CommunicationDto;
+  readonly communication: Communication;
 
   @IsOptional()
   @IsNotEmpty()
@@ -86,7 +86,7 @@ export class UserDto extends Map<any, any> {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly employeeInfo: EmployeeInfoDto;
+  readonly employeeInfo: EmployeeInfo;
 
   @IsOptional()
   @IsNotEmpty()

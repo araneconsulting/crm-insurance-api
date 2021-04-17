@@ -1,10 +1,10 @@
 import { IsPhoneNumber } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { AddressDto } from 'shared/dto/address.dto';
+import { Address } from 'shared/sub-documents/address';
 
 interface Company extends Document<any> {
-  readonly address: AddressDto;
+  readonly address: Address;
   readonly alias: string;
   readonly email: string;
   readonly fax: string;

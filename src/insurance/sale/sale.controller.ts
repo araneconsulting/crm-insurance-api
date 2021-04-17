@@ -22,11 +22,11 @@ import { RolesGuard } from '../../auth/guard/roles.guard';
 import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
 import { Sale } from '../../database/sale.model';
 import { SaleService } from './sale.service';
-import { UpdateSaleDto } from './update-sale.dto';
 import { Request } from 'express';
 import { User } from 'database/user.model';
 import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
+import { UpdateSaleDto } from './dto/update-sale.dto';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {

@@ -1,15 +1,15 @@
+import { EmployeeInfo } from 'business/sub-docs/employee-info';
 import { Company } from 'database/company.model';
 import { User } from 'database/user.model';
-import { AddressDto } from 'shared/dto/address.dto';
-import { CommunicationDto } from 'shared/dto/communication.dto';
-import { EmployeeInfoDto } from 'shared/dto/employee-info.dto';
+import { Address } from 'shared/sub-documents/address';
+import { Communication } from 'shared/sub-documents/communication';
 import { EmailSettingsDto } from 'user/dto/email-settings.dto';
 import { RoleType } from '../../shared/enum/role-type.enum';
 
 export interface AuthenticatedUser {
-  readonly address: AddressDto;
+  readonly address: Address;
   readonly dob: string;
-  readonly communication: CommunicationDto;
+  readonly communication: Communication;
   readonly email: string;
   readonly emailSettings: EmailSettingsDto;
   readonly firstName: string;
@@ -26,7 +26,7 @@ export interface AuthenticatedUser {
   
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
   readonly company: Partial<Company>;
-  readonly employeeInfo: EmployeeInfoDto;
+  readonly employeeInfo: EmployeeInfo;
   readonly location: Partial<Location>;
   readonly supervisor: Partial<User>;
 }

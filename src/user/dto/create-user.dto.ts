@@ -11,22 +11,22 @@ IsNotEmptyObject,
 } from 'class-validator';
 import { Company } from 'database/company.model';
 import { User } from 'database/user.model';
-import { AddressDto } from 'shared/dto/address.dto';
-import { CommunicationDto } from 'shared/dto/communication.dto';
-import { EmployeeInfoDto } from 'shared/dto/employee-info.dto';
+import { Address } from 'shared/sub-documents/address';
+import { Communication } from 'shared/sub-documents/communication';
 import { RoleType } from 'shared/enum/role-type.enum';
 import { EmailSettingsDto } from './email-settings.dto';
+import { EmployeeInfo } from 'business/sub-docs/employee-info';
 
 export class CreateUserDto {
   @IsOptional()
-  readonly address: AddressDto;
+  readonly address: Address;
 
   @IsOptional()
   readonly dob: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly communication: CommunicationDto;
+  readonly communication: Communication;
 
   @IsNotEmpty()
   @IsEmail()
@@ -90,7 +90,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsNotEmptyObject()
-  readonly employeeInfo: EmployeeInfoDto;
+  readonly employeeInfo: EmployeeInfo;
 
   @IsOptional()
   @IsNotEmpty()

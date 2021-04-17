@@ -1,4 +1,4 @@
-import { BusinessInfoDto } from 'business-management/company/dto/company.dto';
+import { BusinessInfo } from 'business/company/dto/company.dto';
 import { IsNotEmpty, IsNotEmptyObject, IsString } from 'class-validator';
 export class CreateLocationDto {
   @IsNotEmpty()
@@ -6,7 +6,7 @@ export class CreateLocationDto {
   readonly alias: string;
 
   @IsNotEmptyObject()
-  readonly info: BusinessInfoDto;
+  readonly info: BusinessInfo;
 
   @IsNotEmpty()
   @IsString()

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class AddressDto extends Map<any, any> {
+export class Address extends Map<any, any> {
   @IsNotEmpty()
   readonly address1: string;
 

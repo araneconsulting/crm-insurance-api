@@ -1,15 +1,15 @@
-import { BusinessInfoDto } from 'business-management/company/dto/company.dto';
+import { BusinessInfo } from 'business/company/dto/company.dto';
 import { TruckingInfoDto } from 'insurance/customer/dto/trucking-info.dto';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { AddressDto } from 'shared/dto/address.dto';
-import { CommunicationDto } from 'shared/dto/communication.dto';
-import { ContactInfoDto } from 'shared/dto/contact-info.dto';
+import { Address } from 'shared/sub-documents/address';
+import { Communication } from 'shared/sub-documents/communication';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import { ContactInfo } from 'business/sub-docs/contact-info';
 interface Customer extends Document<any> {
-  readonly company: BusinessInfoDto;
-  readonly contact: ContactInfoDto;
-  readonly communication: CommunicationDto;
+  readonly company: BusinessInfo;
+  readonly contact: ContactInfo;
+  readonly communication: Communication;
   readonly createdBy?: Partial<User>;
   readonly type: string;
   readonly updatedBy?: Partial<User>;

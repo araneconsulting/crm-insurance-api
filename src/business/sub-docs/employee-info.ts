@@ -1,6 +1,6 @@
 import { IsBoolean, IsBooleanString, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 
-export class EmployeeInfoDto extends Map<any, any> {
+export class EmployeeInfo extends Map<any, any> {
 
   @IsOptional()
   @IsDateString()

@@ -4,7 +4,7 @@ import {
   OnModuleInit
 } from '@nestjs/common';
 import { Model, SchemaType } from 'mongoose';
-import { CreateSaleDto } from './create-sale.dto';
+import { CreateSaleDto } from './dto/create-sale.dto';
 import { Sale } from 'database/sale.model';
 import { INSURER_MODEL, SALE_MODEL, USER_MODEL } from 'database/database.constants';
 import { Customer } from 'database/customer.model';

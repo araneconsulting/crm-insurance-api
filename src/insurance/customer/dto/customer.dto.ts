@@ -1,15 +1,12 @@
-import { BusinessInfoDto } from 'business-management/company/dto/company.dto';
-import { IsBoolean, IsNotEmpty, IsNotEmptyObject, IsOptional, IsString } from 'class-validator';
+import { BusinessInfo } from 'business/company/dto/company.dto';
+import { ContactInfo } from 'business/sub-docs/contact-info';
 import { User } from 'database/user.model';
-import { AddressDto } from 'shared/dto/address.dto';
-import { CommunicationDto } from 'shared/dto/communication.dto';
-import { ContactInfoDto } from 'shared/dto/contact-info.dto';
-import { TruckingInfoDto } from './trucking-info.dto';
+import { Communication } from 'shared/sub-documents/communication';
 export class UpdateCustomerDto {
   
-  readonly company?: BusinessInfoDto;
-  readonly contact?: ContactInfoDto;
-  readonly communication?: CommunicationDto;
+  readonly company?: BusinessInfo;
+  readonly contact?: ContactInfo;
+  readonly communication?: Communication;
   readonly createdBy?: Partial<User>;
   readonly type: string;
   readonly updatedBy?: Partial<User>;

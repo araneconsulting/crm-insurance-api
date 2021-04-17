@@ -3,13 +3,13 @@ import {
 IsNotEmpty,
   IsOptional,
 } from 'class-validator';
-import { AddressDto } from 'shared/dto/address.dto';
-import { CommunicationDto } from 'shared/dto/communication.dto';
+import { Address } from 'shared/sub-documents/address';
+import { Communication } from 'shared/sub-documents/communication';
 
-export class ContactInfoDto extends Map<any, any> {
+export class ContactInfo extends Map<any, any> {
   @IsOptional()
   @IsNotEmpty()
-  readonly address: AddressDto;
+  readonly address: Address;
 
   @IsOptional()
   @IsNotEmpty()

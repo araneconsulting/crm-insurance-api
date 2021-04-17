@@ -2,18 +2,18 @@ import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from 'rxjs';
 import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
-import { CommunicationDto } from 'shared/dto/communication.dto';
-import { AddressDto } from 'shared/dto/address.dto';
+import { Communication } from 'shared/sub-documents/communication';
+import { Address } from 'shared/sub-documents/address';
 import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
-import { EmployeeInfoDto } from 'shared/dto/employee-info.dto';
 import { EmailSettingsDto } from 'user/dto/email-settings.dto';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import { EmployeeInfo } from 'business/sub-docs/employee-info';
 
 interface User extends Document<any> {
-  readonly address: AddressDto;
+  readonly address: Address;
   readonly dob: string;
-  readonly communication: CommunicationDto;
+  readonly communication: Communication;
   readonly email: string;
   readonly emailSettings: EmailSettingsDto;
   readonly firstName: string;
@@ -31,7 +31,7 @@ interface User extends Document<any> {
   
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
   readonly company: Partial<Company>;
-  readonly employeeInfo: EmployeeInfoDto;
+  readonly employeeInfo: EmployeeInfo;
   readonly supervisor: Partial<User>;
   
   comparePassword(password: string): Observable<boolean>;

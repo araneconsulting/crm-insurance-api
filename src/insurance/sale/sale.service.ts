@@ -17,14 +17,14 @@ import {
   SALE_MODEL,
   USER_MODEL,
 } from '../../database/database.constants';
-import { CreateSaleDto } from './create-sale.dto';
-import { UpdateSaleDto } from './update-sale.dto';
+import { CreateSaleDto } from './dto/create-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
 import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
 import { CompanyCatalog } from 'shared/const/catalog/company';
+import { UpdateSaleDto } from './dto/update-sale.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
