@@ -1,0 +1,19 @@
+{
+  "address": {
+    "address1": "",
+    "address2": "",
+    "city": "",
+    "state": "",
+    "country": "US",
+    "zip": ""
+  },
+  "dob": "12-24-1980",
+  "email": "ernest.ford@gmail.com",
+  "firstName": "Ernest",
+  "language": "en",
+  "lastName": "Ford",
+  "mobilePhone": "+18451245632",
+  "phone": "",
+  "timezone": "CDT",
+  "website": ""
+}
