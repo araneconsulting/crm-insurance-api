@@ -28,9 +28,9 @@ import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
 import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
 import { Customer } from '../../database/customer.model';
-import { CreateCustomerDto } from './create-customer.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerService } from './customer.service';
-import { UpdateCustomerDto } from './update-customer.dto';
+import { UpdateCustomerDto } from './dto/customer.dto';
 import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 

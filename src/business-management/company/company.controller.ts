@@ -22,9 +22,9 @@ import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
 import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
 import { Company } from '../../database/company.model';
-import { CreateCompanyDto } from './create-company.dto';
+import { CreateCompanyDto } from './dto/create-company.dto';
 import { CompanyService } from './company.service';
-import { UpdateCompanyDto } from './update-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
@@ -33,7 +33,7 @@ export class CompanyController {
 
   @Get()
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN)
+  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllCompanies(
     @Query('q') keyword?: string,
@@ -45,7 +45,7 @@ export class CompanyController {
 
   @Get(':id')
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN)
+  //@HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getCompanyById(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -55,7 +55,7 @@ export class CompanyController {
 
   @Post()
   @HttpCode(201)
-  @HasRoles(RoleType.SUPER_ADMIN)
+  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async createCompany(@Body() company: CreateCompanyDto): Promise<Company> {
@@ -64,7 +64,7 @@ export class CompanyController {
 
   @Put(':id')
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN)
+  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async updateCompany(
@@ -75,7 +75,7 @@ export class CompanyController {
   }
 
   @Delete(':id')
-  @HasRoles(RoleType.SUPER_ADMIN)
+  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async deleteCompanyById(

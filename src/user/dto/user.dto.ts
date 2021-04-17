@@ -1,8 +1,7 @@
 import {
   IsArray,
   IsEmail,
-  IsNotEmpty,
-  IsNotEmptyObject,
+IsNotEmpty,
   IsOptional,
 } from 'class-validator';
 import { Company } from 'database/company.model';
@@ -15,15 +14,15 @@ import { EmailSettingsDto } from './email-settings.dto';
 
 export class UserDto extends Map<any, any> {
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly address: AddressDto;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly birthday: string;
+  readonly dob: string;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly communication: CommunicationDto;
 
   @IsOptional()
@@ -32,7 +31,7 @@ export class UserDto extends Map<any, any> {
   readonly email: string;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly emailSettings: EmailSettingsDto;
 
   @IsOptional()
@@ -82,18 +81,18 @@ export class UserDto extends Map<any, any> {
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly company: Partial<Company>;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly employeeInfo: EmployeeInfoDto;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly location: Partial<Location>;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly supervisor: Partial<User>;
 }

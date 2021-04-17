@@ -1,4 +1,4 @@
-import { IsBoolean, IsBooleanString, IsDateString, IsEnum, IsNotEmpty, IsNotEmptyObject, IsNumber, IsOptional } from "class-validator";
+import { IsBoolean, IsBooleanString, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 
 export class EmployeeInfoDto extends Map<any, any> {
 

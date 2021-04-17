@@ -1,14 +1,14 @@
 import { IsArray, IsEmail, IsNotEmpty, IsOptional } from "class-validator";
 import { AddressDto } from "shared/dto/address.dto";
 
-export class CompanyDto {
+export class BusinessInfoDto {
     
     @IsOptional()
     readonly address: AddressDto;
 
     @IsOptional()
     @IsNotEmpty()
-    readonly code: string;
+    readonly alias: string;
     
     @IsEmail()
     @IsNotEmpty()

@@ -35,7 +35,6 @@ export class AuthService {
           roles,
           firstName,
           lastName,
-          location,
           phone,
         } = user;
         return user.comparePassword(pass).pipe(
@@ -48,7 +47,6 @@ export class AuthService {
                 roles,
                 firstName,
                 lastName,
-                location,
                 phone,
               } as User;
             } else {

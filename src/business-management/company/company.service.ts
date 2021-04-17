@@ -6,8 +6,8 @@ import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import { COMPANY_MODEL } from '../../database/database.constants';
-import { CreateCompanyDto } from './create-company.dto';
-import { UpdateCompanyDto } from './update-company.dto';
+import { CreateCompanyDto } from './dto/create-company.dto';
+import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CompanyService {

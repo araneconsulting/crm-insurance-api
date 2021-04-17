@@ -1,3 +1,4 @@
 export class TruckingInfoDto {
-    readonly dot: string;
+    readonly dotNumber: string;
+    readonly mcNumber: string;
 }

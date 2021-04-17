@@ -8,7 +8,7 @@ import { RoleType } from '../../shared/enum/role-type.enum';
 
 export interface AuthenticatedUser {
   readonly address: AddressDto;
-  readonly birthday: string;
+  readonly dob: string;
   readonly communication: CommunicationDto;
   readonly email: string;
   readonly emailSettings: EmailSettingsDto;

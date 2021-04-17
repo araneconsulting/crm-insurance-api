@@ -2,6 +2,7 @@ import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { Company } from './company.model';
 import { Location } from './location.model';
 import { User } from './user.model';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 interface Payroll extends Document<any> {
   readonly generatedBy: Partial<User>;
   readonly company: Partial<Company>;
@@ -31,6 +32,8 @@ const PayrollSchema = new Schema<any>(
     },
   },
 );
+
+PayrollSchema.plugin(mongoSoftDelete);
 
 const payrollModelFn: (conn: Connection) => PayrollModel = (conn: Connection) =>
   conn.model<Payroll, PayrollModel>('Payroll', PayrollSchema, 'payrolls');

@@ -5,7 +5,7 @@ import { AddressDto } from 'shared/dto/address.dto';
 
 interface Company extends Document<any> {
   readonly address: AddressDto;
-  readonly code: string;
+  readonly alias: string;
   readonly email: string;
   readonly fax: string;
   readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
@@ -37,7 +37,7 @@ const CompanySchema = new Schema<any>(
         zip: '',
       },
     },
-    code: {
+    alias: {
       type: SchemaTypes.String,
       unique: true,
       required: true,

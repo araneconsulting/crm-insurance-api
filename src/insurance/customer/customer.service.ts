@@ -6,8 +6,8 @@ import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import { CUSTOMER_MODEL } from '../../database/database.constants';
-import { CreateCustomerDto } from './create-customer.dto';
-import { UpdateCustomerDto } from './update-customer.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { UpdateCustomerDto } from './dto/customer.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CustomerService {

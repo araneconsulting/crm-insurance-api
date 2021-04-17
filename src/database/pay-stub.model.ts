@@ -2,6 +2,7 @@ import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { PayAddon } from './pay-addon.model';
 import { Payroll } from './payroll.model';
 import { User } from './user.model';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface PayStub extends Document<any> {
   readonly addons: PayAddon[];  
@@ -29,6 +30,10 @@ const PayStubSchema = new Schema<any>(
     },
   },
 );
+
+
+PayStubSchema.plugin(mongoSoftDelete);
+
 const payStubModelFn: (conn: Connection) => PayStubModel = (
   conn: Connection,
 ) =>

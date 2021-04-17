@@ -6,7 +6,7 @@ import {
 import { Model } from 'mongoose';
 import { COMPANY_MODEL } from '../../database/database.constants';
 import { Company } from '../../database/company.model';
-import { CreateCompanyDto } from './create-company.dto';
+import { CreateCompanyDto } from './dto/create-company.dto';
 
 @Injectable()
 export class CompanyDataInitializerService

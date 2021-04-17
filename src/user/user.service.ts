@@ -44,7 +44,7 @@ export class UserService {
 
     // Use base64 to genrate a random string
     // const randomCode = btoa(Math.random().toString()).slice(0, 4);
-    // console.log(`random code:${randomCode}`);
+    // console.log(`random alias:${randomCode}`);
 
     // const created = this.userModel.create({
     //   ...data,
@@ -59,8 +59,8 @@ export class UserService {
     //   to: data.email,
     //   from: 'no-reply@example.com', // Use the email address or domain you verified above
     //   subject: 'Welcome to Nestjs Sample',
-    //   text: `verification code:${randomCode}`,
-    //   html: `<strong>verification code:${randomCode}</strong>`,
+    //   text: `verification alias:${randomCode}`,
+    //   html: `<strong>verification alias:${randomCode}</strong>`,
     // };
     // this.sendgridService.send(msg)
     //   .subscribe({

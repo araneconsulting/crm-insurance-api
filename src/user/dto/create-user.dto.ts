@@ -2,8 +2,8 @@ import {
   IsAlphanumeric,
   IsArray,
   IsEmail,
-  IsNotEmpty,
-  IsNotEmptyObject,
+IsNotEmpty,
+IsNotEmptyObject,
   IsOptional,
   Matches,
   MaxLength,
@@ -19,15 +19,13 @@ import { EmailSettingsDto } from './email-settings.dto';
 
 export class CreateUserDto {
   @IsOptional()
-  @IsNotEmptyObject()
   readonly address: AddressDto;
 
   @IsOptional()
-  @IsNotEmpty()
-  readonly birthday: string;
+  readonly dob: string;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly communication: CommunicationDto;
 
   @IsNotEmpty()
@@ -35,18 +33,16 @@ export class CreateUserDto {
   readonly email: string;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly emailSettings: EmailSettingsDto;
 
   @IsNotEmpty()
   readonly firstName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly gender: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly language: string;
 
   @IsOptional()
@@ -54,7 +50,6 @@ export class CreateUserDto {
   readonly lastName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly mobilePhone: string;
 
   @IsNotEmpty()
@@ -62,14 +57,13 @@ export class CreateUserDto {
   @MaxLength(20, {
     message: " The password can't accept more than 20 characters ",
   })
-  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,20}$/, {
+  /* @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,20}$/, {
     message:
       ' A password at least contains one numeric digit, one supercase char and one lowercase char',
-  })
+  }) */
   readonly password: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly phone: string;
 
   @IsOptional()
@@ -77,11 +71,9 @@ export class CreateUserDto {
   readonly roles: RoleType[];
 
   @IsOptional()
-  @IsNotEmpty()
   readonly startedAt: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly timezone: string;
 
   @IsNotEmpty()
@@ -89,12 +81,11 @@ export class CreateUserDto {
   readonly username: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly website: string;
 
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
 
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly company: Partial<Company>;
 
   @IsOptional()
@@ -102,10 +93,10 @@ export class CreateUserDto {
   readonly employeeInfo: EmployeeInfoDto;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly location: Partial<Location>;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsNotEmpty()
   readonly supervisor: Partial<User>;
 }

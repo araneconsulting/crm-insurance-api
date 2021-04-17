@@ -11,6 +11,7 @@ import { MongoFilter } from 'shared/filter/mongo.filter';
 import { ParseObjectIdPipe } from '../shared/pipe/parse-object-id.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
 
 @Controller({ path: "/users" })

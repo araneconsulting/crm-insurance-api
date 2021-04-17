@@ -1,4 +1,5 @@
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface PayAddon extends Document<any> {
   readonly amount: number;
@@ -29,6 +30,8 @@ const PayAddonSchema = new Schema<any>(
     },
   },
 );
+
+PayAddonSchema.plugin(mongoSoftDelete);
 
 const payAddonModelFn: (conn: Connection) => PayAddonModel = (
   conn: Connection,

@@ -2,6 +2,7 @@ import { Connection, Document, Model, Mongoose, Schema, SchemaType, SchemaTypes 
 import { Customer } from './customer.model';
 import { Insurer } from './insurer.model';
 import { User } from './user.model';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface Sale extends Document<any> {
   readonly type: string, //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
@@ -66,6 +67,8 @@ const SaleSchema = new Schema<any>(
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+SaleSchema.plugin(mongoSoftDelete);
 
 SaleSchema.pre('save', function () {
 

@@ -1,5 +1,6 @@
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { User } from './user.model';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface Insurer extends Document {
   readonly name: string,
@@ -34,6 +35,8 @@ const InsurerSchema = new Schema<any>(
     }
   },
 );
+
+InsurerSchema.plugin(mongoSoftDelete);
 
 const insurerModelFn: (conn: Connection) => InsurerModel = (conn: Connection) =>
   conn.model<Insurer, InsurerModel>('Insurer', InsurerSchema, 'insurers');

@@ -8,10 +8,11 @@ import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
 import { EmployeeInfoDto } from 'shared/dto/employee-info.dto';
 import { EmailSettingsDto } from 'user/dto/email-settings.dto';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 
 interface User extends Document<any> {
   readonly address: AddressDto;
-  readonly birthday: string;
+  readonly dob: string;
   readonly communication: CommunicationDto;
   readonly email: string;
   readonly emailSettings: EmailSettingsDto;
@@ -31,7 +32,6 @@ interface User extends Document<any> {
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
   readonly company: Partial<Company>;
   readonly employeeInfo: EmployeeInfoDto;
-  readonly location: Partial<Location>;
   readonly supervisor: Partial<User>;
   
   comparePassword(password: string): Observable<boolean>;
@@ -52,7 +52,7 @@ const UserSchema = new Schema<any>(
         zip: '',
       },
     },
-    birthday: { type: SchemaTypes.Date },
+    dob: { type: SchemaTypes.Date },
     communication: {
       type: SchemaTypes.Map,
       default: {
@@ -106,8 +106,7 @@ const UserSchema = new Schema<any>(
 
     //EMPLOYEE DATA
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
-    employeeInfo: { type: SchemaTypes.ObjectId, ref: 'EmployeeInfo' },
-    location: { type: SchemaTypes.ObjectId, ref: 'Location' },
+    employeeInfo: { type: SchemaTypes.Map, default: {}},
     supervisor: { type: SchemaTypes.ObjectId, ref: 'User' },
   },
   {
@@ -117,6 +116,8 @@ const UserSchema = new Schema<any>(
     },
   },
 );
+
+UserSchema.plugin(mongoSoftDelete);
 
 async function preSaveHook(next) {
   // Only run this function if password was modified

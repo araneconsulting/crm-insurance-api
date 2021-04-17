@@ -6,7 +6,7 @@ import {
 import { Model } from 'mongoose';
 import { CUSTOMER_MODEL, SALE_MODEL, INSURER_MODEL } from '../../database/database.constants';
 import { Customer } from '../../database/customer.model';
-import { CreateCustomerDto } from './create-customer.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 import { Sale } from 'database/sale.model';
 import { Insurer } from 'database/insurer.model';
 
