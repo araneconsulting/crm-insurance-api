@@ -70,7 +70,7 @@
     "run-script-webpack-plugin": "^0.0.10",
     "supertest": "^6.0.0",
     "ts-jest": "26.5.0",
-    "ts-loader": "^8.0.0",
+    "ts-loader": "^9.0.0",
     "ts-mockito": "^2.6.1",
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
