@@ -1,4 +1,4 @@
-import { BusinessInfo } from 'business/company/dto/company.dto';
+import { BusinessInfo } from 'business/sub-docs/business-info';
 import { ContactInfo } from 'business/sub-docs/contact-info';
 import { User } from 'database/user.model';
 import { Communication } from 'shared/sub-documents/communication';

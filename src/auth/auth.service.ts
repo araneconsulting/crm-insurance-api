@@ -15,6 +15,9 @@ export class AuthService {
   ) {}
 
   validateUser(email: string, pass: string): Observable<User> {
+
+    console.log(email);
+
     return this.userService.findByEmail(email).pipe(
       //if user is not found, convert it into an EMPTY.
       mergeMap((p) => (p ? of(p) : EMPTY)),

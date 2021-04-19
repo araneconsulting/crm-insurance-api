@@ -48,8 +48,7 @@ export class CustomerController {
   ): Promise<any> {
     const res = await this.customerService.findAll(keyword, skip, limit);
     return {
-      totalCount: res.length,
-      entities: res,
+      data: res,
     };
   }
 

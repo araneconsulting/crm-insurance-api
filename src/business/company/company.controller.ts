@@ -33,7 +33,7 @@ export class CompanyController {
 
   @Get()
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllCompanies(
     @Query('q') keyword?: string,
@@ -45,7 +45,7 @@ export class CompanyController {
 
   @Get(':id')
   @HttpCode(200)
-  //@HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  //@HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getCompanyById(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -55,7 +55,7 @@ export class CompanyController {
 
   @Post()
   @HttpCode(201)
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async createCompany(@Body() company: CreateCompanyDto): Promise<Company> {
@@ -64,7 +64,7 @@ export class CompanyController {
 
   @Put(':id')
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async updateCompany(
@@ -75,7 +75,7 @@ export class CompanyController {
   }
 
   @Delete(':id')
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async deleteCompanyById(

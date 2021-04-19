@@ -47,7 +47,5 @@
     "overtimeAuthorized": true,
     "overtimePayRate": 1.5,
     "salaryFormula": "BASE + EMPLOYEE_SALES_BONUS_RANGE('0.5|25000|50000|0', '1|50000|100000|50', '1|100000|-1|100') + LOCATION_SALES_BONUS_EMPLOYEES_COUNT('1')"
-  },
-  "location": "___23723ghg3k2jh4j32j3jk4g32jh4",
-  "supervisor": "___23723ghg3k2jh4j32j3jk4g32jh4"
+  }
 }

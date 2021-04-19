@@ -1,23 +1,13 @@
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { Address } from 'shared/sub-documents/address';
 export class CreateCompanyDto {
-  @IsOptional()
-  @IsNotEmpty()
-  readonly address1: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  readonly address2: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  readonly city: string;
-
+  
   @IsNotEmpty()
   readonly alias: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly country: string;
+  readonly address: Address;
 
   @IsNotEmpty()
   @IsEmail()
@@ -64,18 +54,10 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   readonly startedAt: string;
 
-  @IsOptional()
-  @IsNotEmpty()
-  readonly state: string;
-
   @IsNotEmpty()
   readonly type: string; // headquarter (H), point of sale (P), office (O)
 
   @IsOptional()
   @IsNotEmpty()
   readonly website: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  readonly zip: string;
 }

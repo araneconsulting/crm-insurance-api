@@ -17,8 +17,7 @@ export class UserService {
   findByUsername(username: string): Observable<User> {
     return from(this.userModel.findOne({ username }).exec());
   }
-  
-  
+
   findByEmail(email: string): Observable<User> {
     return from(this.userModel.findOne({ email }).exec());
   }
@@ -123,11 +122,72 @@ export class UserService {
     );
   }
 
-  findAll(withSales = false): Observable<User[]> {
+  /* findAll(withSales = false): Observable<User[]> {
     const userQuery = this.userModel.find();
     if (withSales) {
       userQuery.populate('sales');
     }
     return from(userQuery.exec());
+  } */
+
+  async findAll(skip = 0, limit = 0): Promise<User[]> {
+    return this.userModel.find({}).skip(skip).limit(limit).exec();
+  }
+
+  async search(queryParams?: any): Promise<any> {
+    console.log(queryParams);
+
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    console.log(sortCriteria, skipCriteria, limitCriteria);
+
+    if (
+      queryParams.filter &&
+      Object.keys(queryParams.filter).length > 0 &&
+      queryParams.filter.constructor === Object
+    ) {
+      const filterQueries = Object.keys(queryParams.filter).map((key) => {
+        return {
+          [key]: {
+            $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+          },
+        };
+      });
+
+      console.log(filterQueries);
+
+      return {
+        totalCount: await this.userModel
+          .find({
+            $or: filterQueries,
+          })
+          .countDocuments()
+          .exec(),
+
+        entities: await this.userModel
+          .find({
+            $or: filterQueries,
+          })
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    } else {
+      return {
+        totalCount: await this.userModel.find().countDocuments().exec(),
+
+        entities: await this.userModel
+          .find({})
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    }
   }
 }

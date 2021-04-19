@@ -1,4 +1,4 @@
-import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, Post, Put, Query, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { HasRoles } from 'auth/guard/has-roles.decorator';
 import { JwtAuthGuard } from 'auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'auth/guard/roles.guard';
@@ -30,10 +30,21 @@ export class UserController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  getAllUsers(
-    @Query('withSales', new DefaultValuePipe(false)) withSales?: boolean
-  ): Observable<Partial<User>[]> {
-    return this.userService.findAll(withSales);
+  async getAllUsers(
+  ): Promise<any> {
+    const res = await this.userService.findAll();
+    return {
+      data: res,
+    };
+  }
+
+  @Post('/search')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchUsers(
+    @Body() query: any,
+  ): Promise<any> {
+    console.log(query.queryParams);
+    return await this.userService.search(query.queryParams);
   }
 
 

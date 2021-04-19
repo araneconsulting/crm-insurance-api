@@ -10,7 +10,7 @@ import { User } from 'database/user.model';
 import { Address } from 'shared/sub-documents/address';
 import { Communication } from 'shared/sub-documents/communication';
 import { RoleType } from '../../shared/enum/role-type.enum';
-import { EmailSettingsDto } from './email-settings.dto';
+import { EmailSettings } from './email-settings';
 
 export class UserDto extends Map<any, any> {
   @IsOptional()
@@ -32,7 +32,7 @@ export class UserDto extends Map<any, any> {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly emailSettings: EmailSettingsDto;
+  readonly emailSettings: EmailSettings;
 
   @IsOptional()
   @IsNotEmpty()

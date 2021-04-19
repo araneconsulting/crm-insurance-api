@@ -31,7 +31,7 @@ export class LocationController {
 
   @Get()
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllLocations(
     @Query('q') keyword?: string,
@@ -43,7 +43,7 @@ export class LocationController {
 
   @Get(':id')
   @HttpCode(200)
-  //@HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  //@HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getLocationById(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -53,7 +53,7 @@ export class LocationController {
 
   @Post()
   @HttpCode(201)
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async createLocation(@Body() location: CreateLocationDto): Promise<Location> {
@@ -62,7 +62,7 @@ export class LocationController {
 
   @Put(':id')
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async updateLocation(
@@ -73,7 +73,7 @@ export class LocationController {
   }
 
   @Delete(':id')
-  @HasRoles(RoleType.SUPER_ADMIN,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async deleteLocationById(

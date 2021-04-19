@@ -1,7 +1,5 @@
-import { BusinessInfo } from 'business/company/dto/company.dto';
-import { TruckingInfoDto } from 'insurance/customer/dto/trucking-info.dto';
+import { BusinessInfo } from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { Address } from 'shared/sub-documents/address';
 import { Communication } from 'shared/sub-documents/communication';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
@@ -11,7 +9,7 @@ interface Customer extends Document<any> {
   readonly contact: ContactInfo;
   readonly communication: Communication;
   readonly createdBy?: Partial<User>;
-  readonly type: string;
+  readonly type: string; //BUSINESS o INDIVIDUAL
   readonly updatedBy?: Partial<User>;
 }
 

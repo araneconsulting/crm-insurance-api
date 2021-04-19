@@ -6,7 +6,7 @@ import { Communication } from 'shared/sub-documents/communication';
 import { Address } from 'shared/sub-documents/address';
 import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
-import { EmailSettingsDto } from 'user/dto/email-settings.dto';
+import { EmailSettings } from 'user/dto/email-settings';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { EmployeeInfo } from 'business/sub-docs/employee-info';
 
@@ -15,7 +15,7 @@ interface User extends Document<any> {
   readonly dob: string;
   readonly communication: Communication;
   readonly email: string;
-  readonly emailSettings: EmailSettingsDto;
+  readonly emailSettings: EmailSettings;
   readonly firstName: string;
   readonly gender: string; //can be: male (M), female (F), transgender (T), other (O)
   readonly language: string;
@@ -24,7 +24,6 @@ interface User extends Document<any> {
   readonly mobilePhone: string;
   readonly phone: string;
   readonly roles: RoleType[];
-  readonly startedAt: string;
   readonly timezone: string;
   readonly username: string;
   readonly website: string;

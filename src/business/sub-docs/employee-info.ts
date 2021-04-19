@@ -47,5 +47,6 @@ export class EmployeeInfo extends Map<any, any> {
 
   @IsOptional()
   @IsNumber()
-  hourlyRate: number;
+  readonly hourlyRate: number;
+  
 }

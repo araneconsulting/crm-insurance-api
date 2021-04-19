@@ -10,7 +10,6 @@ interface PayStub extends Document<any> {
   readonly normalHoursWorked: number;
   readonly overtimeHoursWorked: number;
   readonly payRate: number;
-  readonly payroll: Partial<Payroll>;
 }
 
 type PayStubModel = Model<PayStub>;
@@ -21,7 +20,6 @@ const PayStubSchema = new Schema<any>(
     normalHoursWorked: { type: SchemaTypes.Number },
     overtimeHoursWorked: { type: SchemaTypes.Number },
     payRate: { type: SchemaTypes.Number },
-    payroll: { type: SchemaTypes.ObjectId, ref: 'Payroll', required: false },
   },
   {
     timestamps: true,

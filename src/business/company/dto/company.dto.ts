@@ -5,10 +5,6 @@ export class BusinessInfo {
     
     @IsOptional()
     readonly address: Address;
-
-    @IsOptional()
-    @IsNotEmpty()
-    readonly alias: string;
     
     @IsEmail()
     @IsNotEmpty()
@@ -31,7 +27,7 @@ export class BusinessInfo {
 
     @IsOptional()
     @IsArray()
-    readonly otherPhones: string[]; // delimited by-comma string
+    readonly otherPhones: string[]; 
     
     @IsOptional()
     @IsNotEmpty()
@@ -59,7 +55,7 @@ export class BusinessInfo {
 
     @IsOptional()
     @IsNotEmpty()
-    readonly type: string; 
+    readonly type: string;  //LLC, INC
 
     @IsOptional()
     @IsNotEmpty()
