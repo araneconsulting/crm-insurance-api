@@ -1,9 +1,6 @@
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Address } from 'shared/sub-documents/address';
 export class CreateCompanyDto {
-  
-  @IsNotEmpty()
-  readonly alias: string;
 
   @IsOptional()
   @IsNotEmpty()

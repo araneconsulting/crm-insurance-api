@@ -5,7 +5,6 @@ import { Address } from 'shared/sub-documents/address';
 
 interface Company extends Document<any> {
   readonly address: Address;
-  readonly alias: string;
   readonly email: string;
   readonly fax: string;
   readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
@@ -37,17 +36,21 @@ const CompanySchema = new Schema<any>(
         zip: '',
       },
     },
-    alias: {
+    email: {
       type: SchemaTypes.String,
       unique: true,
       required: true,
       dropDups: true,
     },
-    email: { type: SchemaTypes.String },
     fax: { type: SchemaTypes.String },
     industry: { type: SchemaTypes.String },
     logo: { type: SchemaTypes.String },
-    name: { type: SchemaTypes.String },
+    name: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: true,
+      dropDups: true,
+    },
     otherPhones: [{ type: SchemaTypes.String, required: false }],
     primaryPhone: { type: SchemaTypes.String },
     primaryPhoneExtension: { type: SchemaTypes.String },

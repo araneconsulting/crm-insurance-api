@@ -14,10 +14,6 @@ export class UpdateCompanyDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly alias: string;
-
-  @IsOptional()
-  @IsNotEmpty()
   readonly country: string;
 
   @IsOptional()
