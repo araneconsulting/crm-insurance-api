@@ -368,8 +368,8 @@ export class ReportService {
       user,
       startDate,
       endDate,
-      null,
-      null,
+      'location',
+      location,
       'SELLER',
       [],
       ['premium', 'tips'],
@@ -384,6 +384,8 @@ export class ReportService {
 
       return result;
     });
+
+    //console.log(employeeMetrics);
 
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
@@ -414,7 +416,7 @@ export class ReportService {
     } else {
       const users: any[] = await this.userModel.find({}).exec();
       allUsers = users
-        .filter((user) => !isAdmin(user) && !isExecutive(user))
+        .filter((user) => !isAdmin(user) && user.location === location)
         .map((user) => {
           const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
@@ -430,7 +432,7 @@ export class ReportService {
     }
 
     const userFilteredByLocation =
-      isExecutive(user) && !isAdmin(user)
+      !isAdmin(user)
         ? allUsers.filter((employee) => employee.location === user.location)
         : allUsers;
 
