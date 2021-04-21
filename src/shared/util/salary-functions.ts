@@ -23,9 +23,25 @@ export function bonusByRole(
     case 'MEXICO-I':
       switch (role) {
         case RoleType.CERTIFICATES:
-          bonus += employeeTotalPremium * 0.01 + extraBonus;
+          bonus += extraBonus;
+          bonus += employeeTotalPremium * 0.01;
           if (employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE) {
+            bonus += 50;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
+          ) {
             bonus += 100;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 3
+          ) {
+            bonus += 150;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 4
+          ) {
+            bonus += 200;
           }
           break;
 
@@ -33,6 +49,7 @@ export function bonusByRole(
           break;
 
         case RoleType.LEGAL:
+          bonus += extraBonus;
           if (officeEmployees >= 20) bonus += 400;
 
           if (
@@ -40,6 +57,27 @@ export function bonusByRole(
             officeEmployees * MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
             bonus += 100;
+
+          bonus += employeeTotalPremium * 0.01;
+
+          if (employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE) {
+            bonus += 50;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
+          ) {
+            bonus += 100;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 3
+          ) {
+            bonus += 150;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 4
+          ) {
+            bonus += 200;
+          }
           break;
 
         case RoleType.MANAGER:
@@ -54,14 +92,24 @@ export function bonusByRole(
             employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
             bonus += employeeTotalPremium * 0.01 + 50;
-          else if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
+          else if (
+            employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2 &&
+            employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 3
+          )
             bonus += employeeTotalPremium * 0.01 + 100;
+          else if (
+            employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 3 &&
+            employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 4
+          )
+            bonus += employeeTotalPremium * 0.01 + 150;
+          else if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 4)
+            bonus += employeeTotalPremium * 0.01 + 200;
 
           if (
             officeTotalSales >
             MONTHLY_SALES_TARGET_BY_EMPLOYEE * officeEmployees
           )
-            bonus += (officeTotalSales - employeeTotalPremium) * 0.005;
+            bonus += (officeTotalSales) * 0.005;
 
           break;
 
@@ -86,8 +134,26 @@ export function bonusByRole(
 
         case RoleType.TRAINEE:
           bonus += extraBonus;
-          if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE)
-            bonus += employeeTotalPremium * 0.01 + 50;
+          bonus += employeeTotalPremium * 0.01;
+
+          if (employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE) {
+            bonus += 50;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
+          ) {
+            bonus += 100;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 3
+          ) {
+            bonus += 150;
+          } else if (
+            employeeTotalPremium >
+            MONTHLY_SALES_TARGET_BY_EMPLOYEE * 4
+          ) {
+            bonus += 200;
+          }
           break;
 
         case RoleType.OWNER:

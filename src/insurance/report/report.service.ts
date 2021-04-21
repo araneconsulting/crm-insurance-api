@@ -379,10 +379,10 @@ export class ReportService {
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
-      result['premium'] = roundAmount(metric.premium||0);
-      result['permits'] = roundAmount(metric.permits||0);
-      result['fees'] = roundAmount(metric.fees||0);
-      result['tips'] = roundAmount(metric.tips||0);
+      result['premium'] = roundAmount(metric.premium || 0);
+      result['permits'] = roundAmount(metric.permits || 0);
+      result['fees'] = roundAmount(metric.fees || 0);
+      result['tips'] = roundAmount(metric.tips || 0);
 
       return result;
     });
@@ -399,9 +399,12 @@ export class ReportService {
       officeSellerCount = sellerMetrics.length;
 
       officeSellerTotalSales = sellerMetrics.reduce(
-        (accumulator, item) => accumulator + (item.premium || 0),
+        (accumulator, item) => item.roles[0] !== 'MANAGER'
+        ? accumulator + (item.premium || 0)
+        : accumulator,
         0,
       );
+
     }
 
     let allUsers = [];
@@ -481,7 +484,7 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
-      location = location || user.location;
+    location = location || user.location;
 
     let employeeMetrics = await this.getSalesMetrics(
       user,
@@ -530,7 +533,10 @@ export class ReportService {
       officeSellerCount = sellerMetrics.length;
 
       officeSellerTotalSales = sellerMetrics.reduce(
-        (accumulator, item) => accumulator + (item.premium || 0),
+        (accumulator, item) =>
+          item.roles[0] !== 'MANAGER'
+            ? accumulator + (item.premium || 0)
+            : accumulator,
         0,
       );
     }
@@ -545,7 +551,7 @@ export class ReportService {
         throw new NotFoundException('User not found');
       }
     } else {
-      users = await this.userModel.find({'location':location}).exec();
+      users = await this.userModel.find({ location: location }).exec();
     }
 
     const profitsReport = users
