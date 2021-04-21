@@ -390,7 +390,7 @@ export class ReportService {
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.premium,
+            (accumulator, item) => ['SELLER', 'MANAGER'].includes(item.roles[0]) ? accumulator + item.premium : 0,
             0,
           )
         : 0;
