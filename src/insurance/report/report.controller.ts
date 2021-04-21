@@ -116,6 +116,7 @@ export class ReportController {
     @Query('month') month: number,
     @Query('year') year: number,
     @Query('seller') seller?: string,
+    @Query('location') location?: string,
   ): Promise<any> {
     const user: Partial<User> = req.user;
 
@@ -125,6 +126,7 @@ export class ReportController {
         month,
         year,
         seller,
+        location
       ),
     };
 
@@ -141,8 +143,6 @@ export class ReportController {
     @Query('year') year: number,
     @Query('seller') seller?: string,
   ): Promise<any> {
-
-    
 
     const user: Partial<User> = req.user;
 

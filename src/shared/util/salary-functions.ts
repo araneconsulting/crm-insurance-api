@@ -7,12 +7,12 @@ const MONTHLY_SALES_TARGET_BY_EMPLOYEE = 50000;
 export function bonusByRole(
   role: string,
   location: string,
-  employeeTotalPremium: number,
-  employeeTotalPermits: number,
-  employeeTotalFees: number,
-  employeeTotalTips: number,
-  officeEmployees: number,
-  officeTotalSales: number,
+  employeeTotalPremium = 0,
+  employeeTotalPermits = 0,
+  employeeTotalFees = 0,
+  employeeTotalTips = 0,
+  officeEmployees = 0,
+  officeTotalSales = 0,
 ): any {
   let bonus = 0;
 
@@ -61,6 +61,7 @@ export function bonusByRole(
             MONTHLY_SALES_TARGET_BY_EMPLOYEE * officeEmployees
           )
             bonus += (officeTotalSales - employeeTotalPremium) * 0.005;
+
           break;
 
         case RoleType.SELLER:
@@ -78,6 +79,7 @@ export function bonusByRole(
 
           if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
             bonus += employeeTotalPremium * 0.01 + 100 + extraBonus;
+
           break;
 
         case RoleType.TRAINEE:

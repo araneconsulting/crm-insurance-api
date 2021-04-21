@@ -385,15 +385,22 @@ export class ReportService {
       return result;
     });
 
-    //console.log(employeeMetrics);
+    let sellerMetrics = [];
+    let officeSellerTotalSales = 0;
+    let officeSellerCount = 0;
 
-    const officeTotalSales =
-      employeeMetrics && employeeMetrics.length
-        ? employeeMetrics.reduce(
-            (accumulator, item) => ['SELLER', 'MANAGER'].includes(item.roles[0]) ? accumulator + item.premium : 0,
-            0,
-          )
-        : 0;
+    if (employeeMetrics && employeeMetrics.length) {
+      sellerMetrics = employeeMetrics.filter((user) =>
+        ['SELLER', 'MANAGER'].includes(user.roles[0]),
+      );
+
+      officeSellerCount = sellerMetrics.length;
+
+      officeSellerTotalSales = sellerMetrics.reduce(
+        (accumulator, item) => accumulator + (item.premium || 0),
+        0,
+      );
+    }
 
     let allUsers = [];
 
@@ -431,10 +438,9 @@ export class ReportService {
         });
     }
 
-    const userFilteredByLocation =
-      !isAdmin(user)
-        ? allUsers.filter((employee) => employee.location === user.location)
-        : allUsers;
+    const userFilteredByLocation = !isAdmin(user)
+      ? allUsers.filter((employee) => employee.location === user.location)
+      : allUsers;
 
     const payroll = userFilteredByLocation.map((employeeInfo) => {
       employeeInfo['bonus'] = bonusByRole(
@@ -444,8 +450,8 @@ export class ReportService {
         employeeInfo.permits,
         employeeInfo.fees,
         employeeInfo.tips,
-        employeeMetrics.length,
-        officeTotalSales,
+        officeSellerCount,
+        officeSellerTotalSales,
       );
       employeeInfo['total'] = roundAmount(
         employeeInfo.baseSalary + employeeInfo.bonus,
@@ -462,6 +468,7 @@ export class ReportService {
     month: number,
     year: number,
     seller?: string,
+    location?: string,
   ): Promise<any> {
     const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'month')
@@ -470,12 +477,14 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
+      location = location || user.location;
+
     let employeeMetrics = await this.getSalesMetrics(
       user,
       startDate,
       endDate,
-      null,
-      null,
+      'location',
+      location,
       'SELLER',
       [],
       [
@@ -505,13 +514,22 @@ export class ReportService {
       return result;
     });
 
-    const officeTotalSales =
-      employeeMetrics && employeeMetrics.length
-        ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.premium,
-            0,
-          )
-        : 0;
+    let sellerMetrics = [];
+    let officeSellerTotalSales = 0;
+    let officeSellerCount = 0;
+
+    if (employeeMetrics && employeeMetrics.length) {
+      sellerMetrics = employeeMetrics.filter((user) =>
+        ['SELLER', 'MANAGER'].includes(user.roles[0]),
+      );
+
+      officeSellerCount = sellerMetrics.length;
+
+      officeSellerTotalSales = sellerMetrics.reduce(
+        (accumulator, item) => accumulator + (item.premium || 0),
+        0,
+      );
+    }
 
     let users = [];
 
@@ -523,7 +541,7 @@ export class ReportService {
         throw new NotFoundException('User not found');
       }
     } else {
-      users = await this.userModel.find({}).exec();
+      users = await this.userModel.find({'location':location}).exec();
     }
 
     const profitsReport = users
@@ -553,8 +571,8 @@ export class ReportService {
           result.permits,
           result.fees,
           result.tips,
-          employeeMetrics.length,
-          officeTotalSales,
+          officeSellerCount,
+          officeSellerTotalSales,
         );
         result['totalSalary'] = roundAmount(result.bonus + user.baseSalary);
         result['totalSaleGrossProfit'] = roundAmount(
