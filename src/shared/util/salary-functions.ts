@@ -43,18 +43,19 @@ export function bonusByRole(
           break;
 
         case RoleType.MANAGER:
+          bonus += extraBonus;
           if (
             employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
             employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
-            bonus += employeeTotalPremium * 0.005 + extraBonus;
+            bonus += employeeTotalPremium * 0.005;
           else if (
             employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
             employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
-            bonus += employeeTotalPremium * 0.01 + 50 + extraBonus;
+            bonus += employeeTotalPremium * 0.01 + 50;
           else if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
-            bonus += employeeTotalPremium * 0.01 + 100 + extraBonus;
+            bonus += employeeTotalPremium * 0.01 + 100;
 
           if (
             officeTotalSales >
@@ -65,26 +66,28 @@ export function bonusByRole(
           break;
 
         case RoleType.SELLER:
+          bonus += extraBonus;
           if (
             employeeTotalPremium > MONTHLY_SALES_TARGET_BY_EMPLOYEE / 2 &&
             employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE
           )
-            bonus += employeeTotalPremium * 0.005 + extraBonus;
+            bonus += employeeTotalPremium * 0.005;
 
           if (
             employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE &&
             employeeTotalPremium < MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2
           )
-            bonus += employeeTotalPremium * 0.01 + 50 + extraBonus;
+            bonus += employeeTotalPremium * 0.01 + 50;
 
           if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE * 2)
-            bonus += employeeTotalPremium * 0.01 + 100 + extraBonus;
+            bonus += employeeTotalPremium * 0.01 + 100;
 
           break;
 
         case RoleType.TRAINEE:
+          bonus += extraBonus;
           if (employeeTotalPremium >= MONTHLY_SALES_TARGET_BY_EMPLOYEE)
-            bonus += employeeTotalPremium * 0.01 + 50 + extraBonus;
+            bonus += employeeTotalPremium * 0.01 + 50;
           break;
 
         case RoleType.OWNER:

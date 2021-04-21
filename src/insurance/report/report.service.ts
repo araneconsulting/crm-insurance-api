@@ -372,15 +372,17 @@ export class ReportService {
       location,
       'SELLER',
       [],
-      ['premium', 'tips'],
+      ['premium', 'tips', 'fees', 'permits'],
       true,
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
-      result['premium'] = roundAmount(metric.premium);
-      result['tips'] = metric.tips;
+      result['premium'] = roundAmount(metric.premium||0);
+      result['permits'] = roundAmount(metric.permits||0);
+      result['fees'] = roundAmount(metric.fees||0);
+      result['tips'] = roundAmount(metric.tips||0);
 
       return result;
     });
@@ -413,6 +415,7 @@ export class ReportService {
           ...user._doc,
           premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
+          permits: userMetrics ? userMetrics.permits : 0,
           sellerName: user.firstName + ' ' + user.lastName,
         };
 
@@ -431,6 +434,7 @@ export class ReportService {
             ...user._doc,
             premium: userMetrics ? userMetrics.premium : 0,
             tips: userMetrics ? userMetrics.tips : 0,
+            permits: userMetrics ? userMetrics.permits : 0,
             sellerName: user.firstName + ' ' + user.lastName,
           };
 
