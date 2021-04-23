@@ -94,6 +94,7 @@ export class DashboardController {
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
   ): Promise<any> {
+    console.log(startDate, endDate);
     const user: Partial<User> = req.user;
 
     const queries = body.hasOwnProperty('queries') && body['queries'];
