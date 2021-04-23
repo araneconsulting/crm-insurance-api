@@ -111,11 +111,24 @@ export class UserService {
     );
   }
 
-  findById(id: string, withSales = false): Observable<User> {
+  findById(id: string, withSales = false, withCompany=false, withLocation=false, withSupervisor=false): Observable<User> {
     const userQuery = this.userModel.findOne({ _id: id });
     if (withSales) {
       userQuery.populate('sales');
     }
+    if (withCompany) {
+      userQuery.populate('company');
+    }
+
+    if (withLocation) {
+      userQuery.populate('location');
+    }
+
+    if (withSupervisor) {
+      userQuery.populate('supervisor');
+    }
+
+
     return from(userQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),

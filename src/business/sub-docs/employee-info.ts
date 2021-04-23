@@ -5,9 +5,6 @@ export class EmployeeInfo extends Map<any, any> {
   @IsOptional()
   @IsDateString()
   readonly endedAt: string;
-  
-  @IsOptional()
-  readonly location: Partial<Location>;
 
   @IsOptional()
   @IsNotEmpty()

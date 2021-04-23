@@ -235,14 +235,14 @@ export class SaleService {
       (saleDto.seller && !isAdmin(user) && !isExecutive(user))
     ) {
       saleDto.seller = user.id;
-      saleDto['location'] = user.employeeInfo.location;
+      saleDto['location'] = user.location;
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
       if (!seller) {
         throw new ConflictException('Seller not found');
       }
       saleDto['seller'] = seller._id;
-      saleDto['location'] = seller.employeeInfo.location;
+      saleDto['location'] = seller.location;
     }
 
     let saleData = await this.setSaleCalculations(saleDto);

@@ -431,13 +431,13 @@ export class ReportService {
 
     const userFilteredByLocation =
       isExecutive(user) && !isAdmin(user)
-        ? allUsers.filter((employee) => employee.location === user.employeeInfo.location)
+        ? allUsers.filter((employee) => employee.location === user.location)
         : allUsers;
 
     const payroll = userFilteredByLocation.map((employeeInfo) => {
       employeeInfo['bonus'] = bonusByRole(
         getPrimaryRole(employeeInfo),
-        employeeInfo.location,
+        user.location.toString(),
         employeeInfo.premium,
         employeeInfo.permits,
         employeeInfo.fees,
