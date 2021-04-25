@@ -16,21 +16,8 @@ export class CustomerService {
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
-  findAll(keyword?: string, skip = 0, limit = 0): Promise<Customer[]> {
-    if (keyword && keyword.length > 0) {
-      return this.customerModel
-        .find({
-          $or: [
-            { name: { $regex: '.*' + keyword + '.*' } },
-            { email: { $regex: '.*' + keyword + '.*' } },
-          ],
-        })
-        .skip(skip)
-        .limit(limit)
-        .exec();
-    } else {
+  findAll(skip = 0, limit = 0): Promise<Customer[]> {
       return this.customerModel.find({}).skip(skip).limit(limit).exec();
-    }
   }
 
   findById(id: string): Promise<Customer> {
@@ -77,5 +64,57 @@ export class CustomerService {
 
   deleteAll(): Promise<any> {
     return this.customerModel.deleteMany({}).exec();
+  }
+
+  async search(queryParams?: any): Promise<any> {
+
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    if (
+      queryParams.filter &&
+      Object.keys(queryParams.filter).length > 0 &&
+      queryParams.filter.constructor === Object
+    ) {
+      const filterQueries = Object.keys(queryParams.filter).map((key) => {
+        return {
+          [key]: {
+            $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+          },
+        };
+      });
+
+      return {
+        totalCount: await this.customerModel
+          .find({
+            $or: filterQueries,
+          })
+          .countDocuments()
+          .exec(),
+
+        entities: await this.customerModel
+          .find({
+            $or: filterQueries,
+          })
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    } else {
+      return {
+        totalCount: await this.customerModel.find().countDocuments().exec(),
+
+        entities: await this.customerModel
+          .find({})
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    }
   }
 }

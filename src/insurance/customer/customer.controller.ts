@@ -42,14 +42,19 @@ export class CustomerController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllCustomers(
-    @Query('q') keyword?: string,
-    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
-    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
   ): Promise<any> {
-    const res = await this.customerService.findAll(keyword, skip, limit);
+    const res = await this.customerService.findAll();
     return {
       data: res,
     };
+  }
+
+  @Post('/search')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchUsers(
+    @Body() query: any,
+  ): Promise<any> {
+    return await this.customerService.search(query.queryParams);
   }
 
   @Get(':id')
