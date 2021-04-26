@@ -1,4 +1,4 @@
-import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Query, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, DefaultValuePipe, Delete, Get, HttpCode, Param, Post, Put, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { HasRoles } from 'auth/guard/has-roles.decorator';
 import { JwtAuthGuard } from 'auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'auth/guard/roles.guard';
@@ -11,13 +11,14 @@ import { MongoFilter } from 'shared/filter/mongo.filter';
 import { ParseObjectIdPipe } from '../shared/pipe/parse-object-id.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
 
 @Controller({ path: "/users" })
 export class UserController {
 
-  constructor(private userService: UserService) { }
+  constructor(
+    private userService: UserService,
+    ) { }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -113,6 +114,4 @@ export class UserController {
         })
       );
   }
-
-
 }

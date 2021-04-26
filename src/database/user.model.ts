@@ -1,7 +1,7 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from 'rxjs';
-import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
+import { ADMIN_ROLES, SELLER_ROLES, SUPER_ADMIN_ROLES } from 'shared/const/project-constants';
 import { Communication } from 'shared/sub-documents/communication';
 import { Address } from 'shared/sub-documents/address';
 import { RoleType } from '../shared/enum/role-type.enum';
@@ -27,13 +27,13 @@ interface User extends Document<any> {
   readonly timezone: string;
   readonly username: string;
   readonly website: string;
-  
+
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
   readonly company: Partial<Company>;
   readonly employeeInfo: EmployeeInfo;
   readonly supervisor: Partial<User>;
   readonly location: Partial<Location>;
-  
+
   comparePassword(password: string): Observable<boolean>;
 }
 
@@ -106,7 +106,7 @@ const UserSchema = new Schema<any>(
 
     //EMPLOYEE DATA
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
-    employeeInfo: { type: SchemaTypes.Map, default: {}},
+    employeeInfo: { type: SchemaTypes.Map, default: {} },
     supervisor: { type: SchemaTypes.ObjectId, ref: 'User' },
     location: { type: SchemaTypes.ObjectId, ref: 'Location' },
   },
@@ -164,6 +164,12 @@ function isAdminGetHook(): boolean {
 
 UserSchema.virtual('isAdmin').get(isAdminGetHook);
 
+function isSuperAdminGetHook(): boolean {
+  return SUPER_ADMIN_ROLES.includes(this.roles[0]);
+}
+
+UserSchema.virtual('isSuperAdmin').get(isSuperAdminGetHook);
+
 function isSellerGetHook(): boolean {
   return SELLER_ROLES.includes(this.roles[0]);
 }
@@ -186,6 +192,7 @@ export {
   preSaveHook,
   nameGetHook,
   isAdminGetHook,
+  isSuperAdminGetHook,
   isSellerGetHook,
   comparePasswordMethod,
   userModelFn,

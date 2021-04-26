@@ -20,7 +20,7 @@ export class UpdateLocationDto {
 
   @IsOptional()
   @IsNotEmptyObject()
-  readonly info: BusinessInfo;
+  readonly business: BusinessInfo;
 
   @IsOptional()
   @IsNotEmpty()

@@ -1,24 +1,24 @@
 import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { CreateLocationDto } from 'business/location/dto/create-location.dto';
-import { UpdateLocationDto } from 'business/location/dto/update-location.dto';
-import { Location } from 'database/location.model';
+import { CreatePayrollDto } from 'business/payroll/dto/create-payroll.dto';
+import { UpdatePayrollDto } from 'business/payroll/dto/update-payroll.dto';
+import { Payroll } from 'database/payroll.model';
 import { Model } from 'mongoose';
 import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
-import { LOCATION_MODEL } from '../../database/database.constants';
+import { PAYROLL_MODEL } from '../../database/database.constants';
 
 @Injectable({ scope: Scope.REQUEST })
-export class LocationService {
+export class PayrollService {
   constructor(
-    @Inject(LOCATION_MODEL) private locationModel: Model<Location>,
+    @Inject(PAYROLL_MODEL) private payrollModel: Model<Payroll>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
-  findAll(keyword?: string, skip = 0, limit = 0): Promise<Location[]> {
+  findAll(keyword?: string, skip = 0, limit = 0): Promise<Payroll[]> {
     if (keyword && keyword) {
-      return this.locationModel
+      return this.payrollModel
         .find({
           $or: [
             { name: { $regex: '.*' + keyword + '.*' } },
@@ -29,29 +29,29 @@ export class LocationService {
         .limit(limit)
         .exec();
     } else {
-      return this.locationModel.find({}).skip(skip).limit(limit).exec();
+      return this.payrollModel.find({}).skip(skip).limit(limit).exec();
     }
   }
 
-  findById(id: string): Promise<Location> {
-    return from(this.locationModel.findOne({ _id: id }).exec())
+  findById(id: string): Promise<Payroll> {
+    return from(this.payrollModel.findOne({ _id: id }).exec())
       .pipe(
         mergeMap((p) => (p ? of(p) : EMPTY)),
-        throwIfEmpty(() => new NotFoundException(`location:$id was not found`)),
+        throwIfEmpty(() => new NotFoundException(`payroll:$id was not found`)),
       )
       .toPromise();
   }
 
-  save(data: CreateLocationDto): Promise<Location> {
-    return this.locationModel.create({
+  save(data: CreatePayrollDto): Promise<Payroll> {
+    return this.payrollModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },
     });
   }
 
-  update(id: string, data: UpdateLocationDto): Promise<Location> {
+  update(id: string, data: UpdatePayrollDto): Promise<Payroll> {
     return from(
-      this.locationModel
+      this.payrollModel
         .findOneAndUpdate(
           { _id: id },
           { ...data, updatedBy: { _id: this.req.user.id } },
@@ -61,21 +61,21 @@ export class LocationService {
     )
       .pipe(
         mergeMap((p) => (p ? of(p) : EMPTY)),
-        throwIfEmpty(() => new NotFoundException(`location:$id was not found`)),
+        throwIfEmpty(() => new NotFoundException(`payroll:$id was not found`)),
       )
       .toPromise();
   }
 
-  deleteById(id: string): Promise<Location> {
-    return from(this.locationModel.findOneAndRemove({ _id: id }).exec())
+  deleteById(id: string): Promise<Payroll> {
+    return from(this.payrollModel.findOneAndRemove({ _id: id }).exec())
       .pipe(
         mergeMap((p) => (p ? of(p) : EMPTY)),
-        throwIfEmpty(() => new NotFoundException(`location:$id was not found`)),
+        throwIfEmpty(() => new NotFoundException(`payroll:$id was not found`)),
       )
       .toPromise();
   }
 
   deleteAll(): Promise<any> {
-    return this.locationModel.deleteMany({}).exec();
+    return this.payrollModel.deleteMany({}).exec();
   }
 }

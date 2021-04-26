@@ -92,4 +92,12 @@ export class InsurerService {
   deleteAll(): Observable<any> {
     return from(this.insurerModel.deleteMany({}).exec());
   }
+
+  async getCatalog(filterCriteria: any): Promise<any> {
+    return await this.insurerModel
+      .find(filterCriteria)
+      .select('name _id')
+      .sort({ name: 1 })
+      .exec();
+  }
 }

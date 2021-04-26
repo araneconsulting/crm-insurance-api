@@ -78,4 +78,12 @@ export class LocationService {
   deleteAll(): Promise<any> {
     return this.locationModel.deleteMany({}).exec();
   }
+
+  async getCatalog(filterCriteria: any): Promise<any> {
+    return await this.locationModel
+      .find(filterCriteria)
+      .select('business.name _id')
+      .sort({ name: 1 })
+      .exec();
+  }
 }

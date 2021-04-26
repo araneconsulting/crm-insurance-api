@@ -5,7 +5,7 @@ import { Communication } from 'shared/sub-documents/communication';
 export class CreateCustomerDto {
   @IsOptional()
   @IsNotEmptyObject()
-  readonly company?: BusinessInfo;
+  readonly business?: BusinessInfo;
 
   @IsOptional()
   @IsNotEmptyObject()

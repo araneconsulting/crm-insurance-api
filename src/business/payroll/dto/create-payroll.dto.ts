@@ -3,7 +3,7 @@ import { Company } from 'database/company.model';
 export class CreatePayrollDto {
   
   @IsOptional()
-  readonly company?: Partial<Company>;
+  readonly company: Partial<Company>;
 
   @IsOptional()
   readonly location?: Partial<Location>;
@@ -16,5 +16,5 @@ export class CreatePayrollDto {
 
   @IsOptional() 
   @IsNotEmpty()
-  readonly scope?: string; //can be Company (C), Location (L), Individual (I)
+  readonly scope?: string; //can be Company (C), Payroll (L), Individual (I)
 }

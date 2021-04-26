@@ -11,7 +11,7 @@ export class CreateLocationDto {
   readonly company: Partial<Company>;
 
   @IsNotEmptyObject()
-  readonly info: BusinessInfo;
+  readonly business: BusinessInfo;
 
   @IsNotEmpty()
   @IsString()

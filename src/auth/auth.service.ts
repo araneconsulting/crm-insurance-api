@@ -15,7 +15,6 @@ export class AuthService {
   ) {}
 
   validateUser(email: string, pass: string): Observable<User> {
-
     console.log(email);
 
     return this.userService.findByEmail(email).pipe(
@@ -39,6 +38,7 @@ export class AuthService {
           firstName,
           lastName,
           phone,
+          company,
         } = user;
         return user.comparePassword(pass).pipe(
           map((m) => {
@@ -51,6 +51,7 @@ export class AuthService {
                 firstName,
                 lastName,
                 phone,
+                company,
               } as User;
             } else {
               // The same reason above.
@@ -81,7 +82,9 @@ export class AuthService {
       lastName: user.lastName,
       email: user.email,
       phone: user.phone,
+      company: user.company,
     };
+    console.log('after login', user);
     return from(this.jwtService.signAsync(payload)).pipe(
       map((accessToken) => {
         return { accessToken };

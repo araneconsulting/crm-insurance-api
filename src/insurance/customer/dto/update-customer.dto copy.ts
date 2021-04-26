@@ -9,7 +9,7 @@ export class UpdateCustomerDto {
   
   @IsOptional()
   @IsNotEmptyObject()
-  readonly company?: BusinessInfo;
+  readonly business?: BusinessInfo;
 
   @IsOptional()
   @IsNotEmptyObject()

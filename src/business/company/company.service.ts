@@ -78,4 +78,52 @@ export class CompanyService {
   deleteAll(): Promise<any> {
     return this.companyModel.deleteMany({}).exec();
   }
+
+  async search(queryParams?: any, projection?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    let filterCriteria = {};
+
+    if (
+      queryParams.filter &&
+      Object.keys(queryParams.filter).length > 0 &&
+      queryParams.filter.constructor === Object
+    ) {
+      filterCriteria = {
+        $or: Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        }),
+      };
+    }
+
+    return {
+      totalCount: await this.companyModel
+        .find(filterCriteria)
+        .countDocuments()
+        .exec(),
+      entities: await this.companyModel
+        .find(filterCriteria)
+        .select('name')
+        .skip(skipCriteria)
+        .limit(limitCriteria)
+        .sort(sortCriteria)
+        .exec(),
+    };
+  }
+
+  async getCatalog(filterCriteria: any): Promise<any> {
+    return await this.companyModel
+      .find(filterCriteria)
+      .select('name _id')
+      .sort({ name: 1 })
+      .exec();
+  }
 }

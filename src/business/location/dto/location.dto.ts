@@ -7,6 +7,6 @@ export class CompanyDto {
     
     readonly alias: string;
     readonly company: Partial<Company>;
-    readonly info: BusinessInfo;
+    readonly business: BusinessInfo;
     readonly payFrequency: string;
 }

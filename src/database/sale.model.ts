@@ -3,6 +3,7 @@ import { Customer } from './customer.model';
 import { Insurer } from './insurer.model';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import { Company } from './company.model';
 
 interface Sale extends Document<any> {
   readonly type: string, //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
@@ -31,7 +32,7 @@ interface Sale extends Document<any> {
   readonly premium: number,
   readonly amountReceivable: number,
   readonly totalCharge: number,
-  
+  readonly company: Partial<Company>,
 }
 
 type SaleModel = Model<Sale>;
@@ -64,6 +65,7 @@ const SaleSchema = new Schema<any>(
     totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
+    company: { type: SchemaTypes.ObjectId, ref: 'Company', required: false },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );

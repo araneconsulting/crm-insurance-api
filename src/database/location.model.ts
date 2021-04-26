@@ -5,9 +5,9 @@ import { Company } from './company.model';
 
 interface Location extends Document<any> {
   readonly alias: string;
-  readonly company: Partial<Company>;
-  readonly info: BusinessInfo;
+  readonly business: BusinessInfo;
   readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
+  readonly company: Partial<Company>;
 }
 
 type LocationModel = Model<Location>;
@@ -15,8 +15,7 @@ type LocationModel = Model<Location>;
 const LocationSchema = new Schema<any>(
   {
     alias: { type: SchemaTypes.String },
-    company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
-    info: {
+    business: {
       type: SchemaTypes.Map,
       default: {
         address: {
@@ -50,6 +49,7 @@ const LocationSchema = new Schema<any>(
       },
     },
     payFrequency: { type: SchemaTypes.String },
+    company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
   },
   {
     timestamps: true,

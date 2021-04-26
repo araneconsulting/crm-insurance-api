@@ -11,5 +11,5 @@ export class UpdatePayrollDto {
 
   @IsOptional() 
   @IsNotEmpty()
-  readonly scope?: string; //can be Company (C), Location (L), Individual (I)
+  readonly scope?: string; //can be Company (C), Payroll (L), Individual (I)
 }

@@ -10,7 +10,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(USER_MODEL) private userModel: UserModel,
+    @Inject(USER_MODEL) 
+    private userModel: UserModel,
     private sendgridService: SendgridService,
   ) {}
 
@@ -111,7 +112,13 @@ export class UserService {
     );
   }
 
-  findById(id: string, withSales = false, withCompany=false, withLocation=false, withSupervisor=false): Observable<User> {
+  findById(
+    id: string,
+    withSales = false,
+    withCompany = false,
+    withLocation = false,
+    withSupervisor = false,
+  ): Observable<User> {
     const userQuery = this.userModel.findOne({ _id: id });
     if (withSales) {
       userQuery.populate('sales');
@@ -127,7 +134,6 @@ export class UserService {
     if (withSupervisor) {
       userQuery.populate('supervisor');
     }
-
 
     return from(userQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -147,60 +153,52 @@ export class UserService {
     return this.userModel.find({}).skip(skip).limit(limit).exec();
   }
 
-  async search(queryParams?: any): Promise<any> {
-    console.log(queryParams);
-
+  async search(queryParams?: any, projection?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
 
-    console.log(sortCriteria, skipCriteria, limitCriteria);
+    let filterCriteria = {};
 
     if (
       queryParams.filter &&
       Object.keys(queryParams.filter).length > 0 &&
       queryParams.filter.constructor === Object
     ) {
-      const filterQueries = Object.keys(queryParams.filter).map((key) => {
-        return {
-          [key]: {
-            $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
-          },
-        };
-      });
-
-      console.log(filterQueries);
-
-      return {
-        totalCount: await this.userModel
-          .find({
-            $or: filterQueries,
-          })
-          .countDocuments()
-          .exec(),
-
-        entities: await this.userModel
-          .find({
-            $or: filterQueries,
-          })
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    } else {
-      return {
-        totalCount: await this.userModel.find().countDocuments().exec(),
-
-        entities: await this.userModel
-          .find({})
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
+      filterCriteria = {
+        $or: Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        }),
       };
     }
+
+    return {
+      totalCount: await this.userModel
+        .find(filterCriteria)
+        .countDocuments()
+        .exec(),
+      entities: await this.userModel
+        .find(filterCriteria)
+        .select(['name'])
+        .skip(skipCriteria)
+        .limit(limitCriteria)
+        .sort(sortCriteria)
+        .exec(),
+    };
   }
+
+  async getCatalog(filterCriteria?: any): Promise<any> {
+    return await this.userModel
+      .find(filterCriteria || {})
+      .select('firstName lastName roles _id')
+      .sort({ name: 1 })
+      .exec();
+  }
+
 }
