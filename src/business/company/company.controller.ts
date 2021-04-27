@@ -36,6 +36,8 @@ import { LocationService } from 'business/location/location.service';
 import { CustomerService } from 'insurance/customer/customer.service';
 import { Types } from 'mongoose';
 import { InsurerService } from 'insurance/insurer/insurer.service';
+import { UserCatalog } from 'shared/const/catalog/user';
+import { DateCatalog } from 'shared/const/catalog/date';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -116,6 +118,8 @@ export class CompanyController {
       locations: await this.locationService.getCatalog(entitiesFilter),
       customers: await this.customerService.getCatalog(entitiesFilter),
       insurers: await this.insurerService.getCatalog(entitiesFilter),
+      roles: UserCatalog.roles,
+      dateRanges: DateCatalog.ranges,
     });
   }
 }
