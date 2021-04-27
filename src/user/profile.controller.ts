@@ -18,6 +18,7 @@ export class ProfileController {
     return this.userService.findById(
       req.user['id'],
       false,
+      false,
       !!withCompany,
       !!withLocation,
       !!withSupervisor,

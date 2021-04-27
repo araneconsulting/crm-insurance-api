@@ -84,7 +84,7 @@ export class AuthService {
       phone: user.phone,
       company: user.company,
     };
-    console.log('after login', user);
+    
     return from(this.jwtService.signAsync(payload)).pipe(
       map((accessToken) => {
         return { accessToken };

@@ -114,6 +114,7 @@ export class UserService {
 
   findById(
     id: string,
+    withPassword = false,
     withSales = false,
     withCompany = false,
     withLocation = false,
@@ -133,6 +134,10 @@ export class UserService {
 
     if (withSupervisor) {
       userQuery.populate('supervisor');
+    }
+
+    if (!withPassword){
+      userQuery.select('-password');
     }
 
     return from(userQuery.exec()).pipe(
@@ -185,7 +190,6 @@ export class UserService {
         .exec(),
       entities: await this.userModel
         .find(filterCriteria)
-        .select(['name'])
         .skip(skipCriteria)
         .limit(limitCriteria)
         .sort(sortCriteria)
