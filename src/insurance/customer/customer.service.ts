@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Customer } from 'database/customer.model';
+import { query } from 'express';
 import { Model } from 'mongoose';
 import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
@@ -17,7 +18,7 @@ export class CustomerService {
   ) {}
 
   findAll(skip = 0, limit = 0): Promise<Customer[]> {
-      return this.customerModel.find({}).skip(skip).limit(limit).exec();
+    return this.customerModel.find({}).skip(skip).limit(limit).exec();
   }
 
   findById(id: string): Promise<Customer> {
@@ -67,38 +68,48 @@ export class CustomerService {
   }
 
   async search(queryParams?: any): Promise<any> {
-
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
+    
+    let type = null;
+    if (queryParams.filter.hasOwnProperty('type')) {
+      type = queryParams.filter.type;
+      delete queryParams.filter['type'];
+    }
 
     if (
-      queryParams.filter &&
-      Object.keys(queryParams.filter).length > 0 &&
-      queryParams.filter.constructor === Object
+      type ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      const filterQueries = Object.keys(queryParams.filter).map((key) => {
-        return {
-          [key]: {
-            $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
-          },
-        };
-      });
+      let conditions = type
+        ? {
+            $and: [{ type: type }],
+          }
+        : {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+
+        conditions['$or'] = filterQueries;
+        
+      }
 
       return {
         totalCount: await this.customerModel
-          .find({
-            $or: filterQueries,
-          })
+          .find(conditions)
           .countDocuments()
           .exec(),
-
         entities: await this.customerModel
-          .find({
-            $or: filterQueries,
-          })
+          .find(conditions)
           .skip(skipCriteria)
           .limit(limitCriteria)
           .sort(sortCriteria)
@@ -107,9 +118,8 @@ export class CustomerService {
     } else {
       return {
         totalCount: await this.customerModel.find().countDocuments().exec(),
-
         entities: await this.customerModel
-          .find({})
+          .find()
           .skip(skipCriteria)
           .limit(limitCriteria)
           .sort(sortCriteria)
@@ -125,5 +135,4 @@ export class CustomerService {
       .sort({ name: 1 })
       .exec();
   }
-
 }

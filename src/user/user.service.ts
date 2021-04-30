@@ -158,43 +158,65 @@ export class UserService {
     return this.userModel.find({}).skip(skip).limit(limit).exec();
   }
 
-  async search(queryParams?: any, projection?: any): Promise<any> {
+  async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
-
-    let filterCriteria = {};
+    
+    let roles = null;
+    if (queryParams.filter.hasOwnProperty('roles')) {
+      roles = queryParams.filter.roles;
+      delete queryParams.filter['roles'];
+    }
 
     if (
-      queryParams.filter &&
-      Object.keys(queryParams.filter).length > 0 &&
-      queryParams.filter.constructor === Object
+      roles ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      filterCriteria = {
-        $or: Object.keys(queryParams.filter).map((key) => {
+      let conditions = roles
+        ? {
+            $and: [{ roles: roles }],
+          }
+        : {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
           return {
             [key]: {
               $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
             },
           };
-        }),
+        });
+
+        conditions['$or'] = filterQueries;
+        
+      }
+
+      return {
+        totalCount: await this.userModel
+          .find(conditions)
+          .countDocuments()
+          .exec(),
+        entities: await this.userModel
+          .find(conditions)
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    } else {
+      return {
+        totalCount: await this.userModel.find().countDocuments().exec(),
+        entities: await this.userModel
+          .find()
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
       };
     }
-
-    return {
-      totalCount: await this.userModel
-        .find(filterCriteria)
-        .countDocuments()
-        .exec(),
-      entities: await this.userModel
-        .find(filterCriteria)
-        .skip(skipCriteria)
-        .limit(limitCriteria)
-        .sort(sortCriteria)
-        .exec(),
-    };
   }
 
   async getCatalog(filterCriteria?: any): Promise<any> {

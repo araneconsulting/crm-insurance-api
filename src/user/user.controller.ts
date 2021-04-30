@@ -52,7 +52,6 @@ export class UserController {
   @Post('/search')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async searchUsers(@Body() query: any): Promise<any> {
-    console.log(query.queryParams);
     return await this.userService.search(query.queryParams);
   }
 
