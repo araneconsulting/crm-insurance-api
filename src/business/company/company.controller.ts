@@ -38,6 +38,7 @@ import { Types } from 'mongoose';
 import { InsurerService } from 'insurance/insurer/insurer.service';
 import { UserCatalog } from 'shared/const/catalog/user';
 import { DateCatalog } from 'shared/const/catalog/date';
+import { States } from 'shared/const/catalog/states';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -120,6 +121,7 @@ export class CompanyController {
       insurers: await this.insurerService.getCatalog(entitiesFilter),
       roles: UserCatalog.roles,
       dateRanges: DateCatalog.ranges,
+      states: States,
     });
   }
 }

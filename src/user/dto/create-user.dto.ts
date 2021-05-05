@@ -64,6 +64,7 @@ export class CreateUserDto {
   readonly password: string;
 
   @IsOptional()
+  @IsNotEmpty()
   readonly phone: string;
 
   @IsOptional()
