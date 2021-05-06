@@ -1,48 +1,48 @@
+import { BusinessInfo } from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
+import { Communication } from 'shared/sub-documents/communication';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import { ContactInfo } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
-
-interface Insurer extends Document {
-  readonly name: string,
-  readonly email: string,
-  readonly phone: string
-  readonly liabilityCommission: number,
-  readonly cargoCommission: number,
-  readonly physicalDamageCommission: number,
-  readonly wcGlUmbCommission: number,
-  readonly createdBy?: Partial<User>;
-  readonly updatedBy?: Partial<User>;
+import { CommissionSheet } from 'business/sub-docs/commision-sheet';
+interface Customer extends Document<any> {
+  readonly business: BusinessInfo;
+  readonly commissionSheet: CommissionSheet;
   readonly company: Partial<Company>;
-
+  readonly contact: ContactInfo;
+  readonly createdBy?: Partial<User>;
+  readonly type: string; //BROKER or SINGLE
+  readonly updatedBy?: Partial<User>;
 }
 
-type InsurerModel = Model<Insurer>;
+type CustomerModel = Model<Customer>;
 
-const InsurerSchema = new Schema<any>(
+const CustomerSchema = new Schema<any>(
   {
-    name: SchemaTypes.String,
-    email: SchemaTypes.String,
-    phone: SchemaTypes.String,
-    liabilityCommission: SchemaTypes.Number,
-    cargoCommission: SchemaTypes.Number,
-    physicalDamageCommission: SchemaTypes.Number,
-    wcGlUmbCommission: SchemaTypes.Number,
+    business: { type: SchemaTypes.Map},
+    commissionSheet: { type: SchemaTypes.Map},
+    company: { type: SchemaTypes.ObjectId, ref: 'Company' },
+    contact: {type: SchemaTypes.Map,},
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
+    type: { type: SchemaTypes.String, default: 'SINGLE' },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
-    company: { type: SchemaTypes.ObjectId, ref: 'Company', required: false },
   },
   {
     timestamps: true,
     toJSON: {
-      virtuals: true
-    }
+      virtuals: true,
+    },
   },
 );
 
-InsurerSchema.plugin(mongoSoftDelete);
+CustomerSchema.plugin(mongoSoftDelete);
 
-const insurerModelFn: (conn: Connection) => InsurerModel = (conn: Connection) =>
-  conn.model<Insurer, InsurerModel>('Insurer', InsurerSchema, 'insurers');
 
-export { Insurer, InsurerSchema, insurerModelFn}
+
+const customerModelFn: (conn: Connection) => CustomerModel = (
+  conn: Connection,
+) =>
+  conn.model<Customer, CustomerModel>('Customer', CustomerSchema, 'customers');
+
+export { Customer, CustomerSchema, customerModelFn };

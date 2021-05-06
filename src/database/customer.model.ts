@@ -5,7 +5,7 @@ import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { ContactInfo } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
-interface Customer extends Document<any> {
+interface Insurer extends Document<any> {
   readonly business: BusinessInfo;
   readonly contact: ContactInfo;
   readonly communication: Communication;
@@ -15,9 +15,9 @@ interface Customer extends Document<any> {
   readonly company: Partial<Company>;
 }
 
-type CustomerModel = Model<Customer>;
+type InsurerModel = Model<Insurer>;
 
-const CustomerSchema = new Schema<any>(
+const InsurerSchema = new Schema<any>(
   {
     business: {
       type: SchemaTypes.Map,
@@ -46,13 +46,13 @@ const CustomerSchema = new Schema<any>(
   },
 );
 
-CustomerSchema.plugin(mongoSoftDelete);
+InsurerSchema.plugin(mongoSoftDelete);
 
 
 
-const customerModelFn: (conn: Connection) => CustomerModel = (
+const insurerModelFn: (conn: Connection) => InsurerModel = (
   conn: Connection,
 ) =>
-  conn.model<Customer, CustomerModel>('Customer', CustomerSchema, 'customers');
+  conn.model<Insurer, InsurerModel>('Insurer', InsurerSchema, 'insurers');
 
-export { Customer, CustomerSchema, customerModelFn };
+export { Insurer, InsurerSchema, insurerModelFn };

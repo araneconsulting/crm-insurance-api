@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { CreateInsurerDto } from './create-insurer.dto';
-import { Insurer } from 'database/insurer.model';
+import { Insurer } from 'database/insurer.model-old';
 import { INSURER_MODEL } from 'database/database.constants';
 
 @Injectable()

@@ -22,7 +22,7 @@ import { HasRoles } from '../../auth/guard/has-roles.decorator';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
 import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
-import { Insurer } from '../../database/insurer.model';
+import { Insurer } from '../../database/insurer.model-old';
 import { CreateInsurerDto } from './create-insurer.dto';
 import { InsurerService } from './insurer.service';
 import { UpdateInsurerDto } from './update-insurer.dto';
@@ -49,6 +49,14 @@ export class InsurerController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   getInsurerById(@Param('id', ParseObjectIdPipe) id: string): Observable<Insurer> {
     return this.insurerService.findById(id);
+  }
+
+  @Post('/search')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchUsers(
+    @Body() query: any,
+  ): Promise<any> {
+    return await this.insurerService.search(query.queryParams);
   }
 
   @Post('')

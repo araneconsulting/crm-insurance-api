@@ -21,7 +21,7 @@ import { CreateSaleDto } from './dto/create-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
 import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
-import { Insurer } from 'database/insurer.model';
+import { Insurer } from 'database/insurer.model-old';
 import { roundAmount } from 'shared/util/math-functions';
 import { CompanyCatalog } from 'shared/const/catalog/company';
 import { UpdateSaleDto } from './dto/update-sale.dto';

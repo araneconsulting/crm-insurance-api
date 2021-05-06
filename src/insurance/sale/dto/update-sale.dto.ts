@@ -1,6 +1,6 @@
 import { IsBoolean, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { Customer } from 'database/customer.model';
-import { Insurer } from 'database/insurer.model';
+import { Insurer } from 'database/insurer.model-old';
 import { User } from 'database/user.model';
 
 export const DEFAULT_COMMISSION = 0.1;

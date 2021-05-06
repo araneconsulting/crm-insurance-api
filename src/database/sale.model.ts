@@ -1,6 +1,6 @@
 import { Connection, Document, Model, Mongoose, Schema, SchemaType, SchemaTypes } from 'mongoose';
 import { Customer } from './customer.model';
-import { Insurer } from './insurer.model';
+import { Insurer } from './insurer.model-old';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { Company } from './company.model';

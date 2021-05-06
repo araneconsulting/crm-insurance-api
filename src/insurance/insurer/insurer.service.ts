@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { Insurer } from 'database/insurer.model';
+import { Insurer } from 'database/insurer.model-old';
 import { Model } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
@@ -99,5 +99,66 @@ export class InsurerService {
       .select('name _id')
       .sort({ name: 1 })
       .exec();
+  }
+
+  async search(queryParams?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+    
+    let type = null;
+    if (queryParams.filter.hasOwnProperty('type')) {
+      type = queryParams.filter.type;
+      delete queryParams.filter['type'];
+    }
+
+    if (
+      type ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+    ) {
+      let conditions = type
+        ? {
+            $and: [{ type: type }],
+          }
+        : {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+
+        conditions['$or'] = filterQueries;
+        
+      }
+
+      return {
+        totalCount: await this.insurerModel
+          .find(conditions)
+          .countDocuments()
+          .exec(),
+        entities: await this.insurerModel
+          .find(conditions)
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    } else {
+      return {
+        totalCount: await this.insurerModel.find().countDocuments().exec(),
+        entities: await this.insurerModel
+          .find()
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    }
   }
 }
