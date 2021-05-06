@@ -1,6 +1,5 @@
 import { BusinessInfo } from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { Communication } from 'shared/sub-documents/communication';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { ContactInfo } from 'business/sub-docs/contact-info';
