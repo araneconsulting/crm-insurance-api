@@ -22,7 +22,7 @@ import { HasRoles } from '../../auth/guard/has-roles.decorator';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
 import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
-import { Insurer } from '../../database/insurer.model-old';
+import { Insurer } from '../../database/insurer.model';
 import { CreateInsurerDto } from './create-insurer.dto';
 import { InsurerService } from './insurer.service';
 import { UpdateInsurerDto } from './update-insurer.dto';

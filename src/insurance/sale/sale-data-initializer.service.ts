@@ -9,7 +9,7 @@ import { Sale } from 'database/sale.model';
 import { INSURER_MODEL, SALE_MODEL, USER_MODEL } from 'database/database.constants';
 import { Customer } from 'database/customer.model';
 import { CUSTOMER_MODEL } from 'database/database.constants';
-import { Insurer } from 'database/insurer.model-old';
+import { Insurer } from 'database/insurer.model';
 import { User } from 'database/user.model';
 import { Observable } from 'rxjs';
 import * as moment from 'moment';

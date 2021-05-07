@@ -13,7 +13,7 @@ import {
 } from './database.constants';
 import { Company, CompanySchema } from './company.model';
 import { Customer, CustomerSchema } from './customer.model';
-import { Insurer, InsurerSchema } from './insurer.model-old';
+import { Insurer, InsurerSchema } from './insurer.model';
 import { Location, LocationSchema } from './location.model';
 import { Payroll, PayrollSchema } from './payroll.model';
 import { Sale, SaleSchema } from './sale.model';

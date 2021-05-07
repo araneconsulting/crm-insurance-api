@@ -21,7 +21,7 @@ import { CreateSaleDto } from './dto/create-sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
 import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
-import { Insurer } from 'database/insurer.model-old';
+import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
 import { CompanyCatalog } from 'shared/const/catalog/company';
 import { UpdateSaleDto } from './dto/update-sale.dto';
@@ -350,7 +350,7 @@ export class SaleService {
       );
       sale['liabilityProfit'] = insurer
         ? roundAmount(
-            (insurer.liabilityCommission / 100) * sale.liabilityCharge,
+            (insurer.commissionSheet.liabilityCommission / 100) * sale.liabilityCharge,
           )
         : 0;
     }
@@ -363,7 +363,7 @@ export class SaleService {
           insurer.id === sale.cargoInsurer.toString(),
       );
       sale['cargoProfit'] = insurer
-        ? roundAmount((insurer.cargoCommission / 100) * sale.cargoCharge)
+        ? roundAmount((insurer.commissionSheet.cargoCommission / 100) * sale.cargoCharge)
         : 0;
     }
 
@@ -376,7 +376,7 @@ export class SaleService {
       );
       sale['physicalDamageProfit'] = insurer
         ? roundAmount(
-            (insurer.physicalDamageCommission / 100) *
+            (insurer.commissionSheet.physicalDamageCommission / 100) *
               sale.physicalDamageCharge,
           )
         : 0;
@@ -390,7 +390,7 @@ export class SaleService {
           insurer.id === sale.wcGlUmbInsurer.toString(),
       );
       sale['wcGlUmbProfit'] = insurer
-        ? roundAmount((insurer.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
+        ? roundAmount((insurer.commissionSheet.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
         : 0;
     }
 

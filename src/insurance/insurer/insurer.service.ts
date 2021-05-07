@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { Insurer } from 'database/insurer.model-old';
+import { Insurer } from 'database/insurer.model';
 import { Model } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';

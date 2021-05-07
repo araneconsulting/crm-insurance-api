@@ -5,25 +5,27 @@ import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { ContactInfo } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
 import { CommissionSheet } from 'business/sub-docs/commision-sheet';
-interface Customer extends Document<any> {
+interface Insurer extends Document<any> {
   readonly business: BusinessInfo;
   readonly commissionSheet: CommissionSheet;
   readonly company: Partial<Company>;
   readonly contact: ContactInfo;
   readonly createdBy?: Partial<User>;
+  readonly subproviders?: String[];
   readonly type: string; //BROKER or SINGLE
   readonly updatedBy?: Partial<User>;
 }
 
-type CustomerModel = Model<Customer>;
+type InsurerModel = Model<Insurer>;
 
-const CustomerSchema = new Schema<any>(
+const InsurerSchema = new Schema<any>(
   {
-    business: { type: SchemaTypes.Map},
-    commissionSheet: { type: SchemaTypes.Map},
+    business: { type: SchemaTypes.Map },
+    commissionSheet: { type: SchemaTypes.Map },
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
-    contact: {type: SchemaTypes.Map,},
+    contact: { type: SchemaTypes.Map },
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
+    subproviders: { type: SchemaTypes.Array, required: false },
     type: { type: SchemaTypes.String, default: 'SINGLE' },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
   },
@@ -35,13 +37,11 @@ const CustomerSchema = new Schema<any>(
   },
 );
 
-CustomerSchema.plugin(mongoSoftDelete);
+InsurerSchema.plugin(mongoSoftDelete);
 
-
-
-const customerModelFn: (conn: Connection) => CustomerModel = (
+const insurerModelFn: (conn: Connection) => InsurerModel = (
   conn: Connection,
 ) =>
-  conn.model<Customer, CustomerModel>('Customer', CustomerSchema, 'customers');
+  conn.model<Insurer, InsurerModel>('Insurer', InsurerSchema, 'insurers');
 
-export { Customer, CustomerSchema, customerModelFn };
+export { Insurer, InsurerSchema, insurerModelFn };

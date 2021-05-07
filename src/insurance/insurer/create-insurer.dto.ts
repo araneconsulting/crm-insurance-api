@@ -1,22 +1,28 @@
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
-
-export const DEFAULT_COMMISSION = -1;
+import { BusinessInfo } from 'business/sub-docs/business-info';
+import { CommissionSheet } from 'business/sub-docs/commision-sheet';
+import { ContactInfo } from 'business/sub-docs/contact-info';
+import {
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsOptional,
+} from 'class-validator';
+import { Communication } from 'shared/sub-documents/communication';
 export class CreateInsurerDto {
+  @IsNotEmptyObject()
+  readonly business?: BusinessInfo;
+
+  @IsNotEmptyObject()
+  readonly commissionSheet?: CommissionSheet;
 
   @IsOptional()
-  readonly cargoCommission: number = DEFAULT_COMMISSION;
+  @IsNotEmptyObject()
+  readonly contact?: ContactInfo;
+
   @IsOptional()
   @IsNotEmpty()
-  readonly email: string;
-  @IsNotEmpty()
-  readonly name: string;
+  readonly subproviders?: string[];
+
   @IsOptional()
   @IsNotEmpty()
-  readonly phone: string;
-  @IsOptional()
-  readonly liabilityCommission: number = DEFAULT_COMMISSION;
-  @IsOptional()
-  readonly physicalDamageCommission: number = DEFAULT_COMMISSION;
-  @IsOptional()
-  readonly wcGlUmbCommission: number = DEFAULT_COMMISSION;
+  readonly type?: string = 'SINGLE';
 }
