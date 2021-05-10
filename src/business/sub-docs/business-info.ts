@@ -68,12 +68,6 @@ export const DEFAULT_BUSINESS_INFO = {
   logo: '',
   name: '',
   otherPhones: [],
-  manager: {
-    name: '',
-    dob: '',
-    ssn: '',
-    driverLicense: '',
-  },
   primaryPhone: '',
   primaryPhoneExtension: '',
   secondaryPhone: '',

@@ -230,12 +230,16 @@ export class SaleService {
   async save(saleDto: CreateSaleDto, user: Partial<User>): Promise<Sale> {
     console.log(saleDto.soldAt);
 
+    saleDto['createdBy'] = user.id;
+
     if (
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(user) && !isExecutive(user))
     ) {
       saleDto.seller = user.id;
-      saleDto['location'] = user.location;
+      const authUser = await this.userModel.findOne({ _id: user.id });
+      saleDto['location'] = authUser.location;
+      console.log('user.location', authUser.location);
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
       if (!seller) {
@@ -243,9 +247,11 @@ export class SaleService {
       }
       saleDto['seller'] = seller._id;
       saleDto['location'] = seller.location;
+      console.log('seller.location', seller.location);
     }
 
-    let saleData = await this.setSaleCalculations(saleDto);
+    /***/ //let saleData = await this.setSaleCalculations(saleDto);
+    const saleData = saleDto;
 
     return this.saleModel.create({
       ...saleData,
@@ -263,6 +269,9 @@ export class SaleService {
     data: UpdateSaleDto,
     user: Partial<User>,
   ): Promise<Sale> {
+
+    data['updatedBy'] = user.id;
+
     if (data.seller && !isAdmin(user) && !isExecutive(user)) {
       delete data.seller;
     }
@@ -275,7 +284,8 @@ export class SaleService {
 
     let saleDto = { ...sale['_doc'], ...data };
 
-    let saleData = await this.setSaleCalculations(saleDto);
+    /***/ //let saleData = await this.setSaleCalculations(saleDto);
+    const saleData = saleDto;
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
@@ -339,7 +349,7 @@ export class SaleService {
    * @param  {CreateSaleDto} sale
    * @returns Promise
    */
-  async setSaleCalculations(sale: CreateSaleDto): Promise<CreateSaleDto> {
+  /* async setSaleCalculations(sale: CreateSaleDto): Promise<CreateSaleDto> {
     const insurers = await this.insurerModel.find({}).exec();
     if (sale.liabilityInsurer) {
       const insurer = insurers.find(
@@ -403,5 +413,72 @@ export class SaleService {
       (sale.totalCharge || 0) - (sale.chargesPaid || 0);
 
     return sale;
+  } */
+
+
+  async search(queryParams?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+    
+    let type = null;
+    if (queryParams.filter.hasOwnProperty('type')) {
+      type = queryParams.filter.type;
+      delete queryParams.filter['type'];
+    }
+
+    if (
+      type ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+    ) {
+      let conditions = type
+        ? {
+            $and: [{ type: type }],
+          }
+        : {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+
+        conditions['$or'] = filterQueries;
+        
+      }
+
+      return {
+        totalCount: await this.saleModel
+          .find(conditions)
+          .countDocuments()
+          .exec(),
+        entities: await this.saleModel
+          .find(conditions)
+          .populate('customer', 'type contact.firstName contact.lastName business.name')
+          .populate('location', 'alias business.name')
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    } else {
+      return {
+        totalCount: await this.saleModel.find().countDocuments().exec(),
+        entities: await this.saleModel
+          .find()
+          .populate('customer', 'type contact.firstName contact.lastName business.name')
+          .populate('location', 'alias business.name')
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    }
   }
+  
 }

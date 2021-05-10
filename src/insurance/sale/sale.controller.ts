@@ -66,6 +66,14 @@ export class SaleController {
       withInsurers,
     );
   }
+  @Post('/search')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchUsers(
+    @Body() query: any,
+  ): Promise<any> {
+    return await this.saleService.search(query.queryParams);
+  }
 
   @Post('')
   @HttpCode(201)

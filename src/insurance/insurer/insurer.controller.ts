@@ -52,6 +52,7 @@ export class InsurerController {
   }
 
   @Post('/search')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async searchUsers(
     @Body() query: any,

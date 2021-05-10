@@ -17,6 +17,10 @@ export class ContactInfo extends Map<any, any> {
 
   @IsOptional()
   @IsNotEmpty()
+  readonly driverLicense: string;
+
+  @IsOptional()
+  @IsNotEmpty()
   @IsEmail()
   readonly email: string;
 
@@ -42,6 +46,10 @@ export class ContactInfo extends Map<any, any> {
 
   @IsOptional()
   @IsNotEmpty()
+  readonly ssn: string;
+
+  @IsOptional()
+  @IsNotEmpty()
   readonly timezone: string;
 
   @IsOptional()
@@ -59,12 +67,14 @@ export const DEFAULT_CONTACT_INFO = {
     zip: '',
   },
   dob: '',
+  driverLicense: '',
   email: '',
   firstName: '',
   language: '',
   lastName: '',
   mobilePhone: '',
   phone: '',
+  ssn: '',
   timezone: '',
   website: '',
 };

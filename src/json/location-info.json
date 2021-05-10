@@ -16,12 +16,6 @@
     "logo": "https://cdn.araneconsulting.com/customers/logo1.png",
     "name": "Ernest Transport",
     "otherPhones": ["+182340987654"],
-    "owner": {
-      "name": "Ernest Ford",
-      "dob": "11-10-1955",
-      "ssn": "123459352",
-      "driverLicense": "23412456"
-    },
     "primaryPhone": "+14852341245",
     "primaryPhoneExtension": "200",
     "secondaryPhone": "",

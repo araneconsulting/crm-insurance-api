@@ -32,12 +32,6 @@ const LocationSchema = new Schema<any>(
         logo: '',
         name: '',
         otherPhones: [],
-        manager: {
-          name: '',
-          dob: '',
-          ssn: '',
-          driverLicense: '',
-        },
         primaryPhone: '',
         primaryPhoneExtension: '',
         secondaryPhone: '',

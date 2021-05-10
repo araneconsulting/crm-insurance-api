@@ -1,106 +1,99 @@
-import { Connection, Document, Model, Mongoose, Schema, SchemaType, SchemaTypes } from 'mongoose';
+import {
+  Connection,
+  Document,
+  Model,
+  Schema,
+  SchemaTypes,
+} from 'mongoose';
 import { Customer } from './customer.model';
-import { Insurer } from './insurer.model';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { Company } from './company.model';
+import { SaleItem } from 'business/sub-docs/sale-item';
 
 interface Sale extends Document<any> {
-  readonly type: string, //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
-  readonly location: string,
-  readonly soldAt: string,
-  readonly customer: Partial<Customer>,
-  readonly seller: Partial<User>,
-  readonly liabilityInsurer: Partial<Insurer>,
-  readonly liabilityCharge: number,
-  readonly liabilityProfit: number,
-  readonly cargoInsurer: Partial<Insurer>,
-  readonly cargoCharge: number,
-  readonly cargoProfit: number,
-  readonly physicalDamageInsurer: Partial<Insurer>,
-  readonly physicalDamageCharge: number,
-  readonly physicalDamageProfit: number,
-  readonly wcGlUmbInsurer: Partial<Insurer>,
-  readonly wcGlUmbCharge: number,
-  readonly wcGlUmbProfit: number,
-  readonly fees: number,
-  readonly permits: number,
-  readonly tips: number,
-  readonly chargesPaid: number,
-  readonly createdBy?: Partial<User>,
-  readonly updatedBy?: Partial<User>,
-  readonly premium: number,
-  readonly amountReceivable: number,
-  readonly totalCharge: number,
-  readonly company: Partial<Company>,
+  readonly amountReceivable: number;
+  readonly chargesPaid: number;
+  readonly company: Partial<Company>;
+  readonly customer: Partial<Customer>;
+  readonly location: Location;
+  readonly items: SaleItem[]; //Contains all info about Sale
+  readonly seller: Partial<User>;
+  readonly soldAt: string;
+  readonly tips: number;
+  readonly totalCharge: number; //Sum of all sale item amounts
+  readonly type: string; //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
+
+  readonly createdBy?: Partial<User>;
+  readonly updatedBy?: Partial<User>;
+
+  //Only-insurance properties
+  readonly fees: number; //[auto-calculated] Sum of SaleItem amount where product = Fee
+  readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
+  readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
 }
 
 type SaleModel = Model<Sale>;
 
 const SaleSchema = new Schema<any>(
   {
-    type: SchemaTypes.String,
-    location: SchemaTypes.String,
-    soldAt: SchemaTypes.Date,
+    amountReceivable: { type: SchemaTypes.Number, default: 0, required: false },
+    chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
+    company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
+    location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
+    items: [{ type: SchemaTypes.Map, required: true }],
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
-    liabilityInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', required: false },
-    liabilityCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    liabilityProfit: { type: SchemaTypes.Number, default: 0, required: false },
-    cargoInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', required: false },
-    cargoCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    cargoProfit: { type: SchemaTypes.Number, default: 0, required: false },
-    physicalDamageInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', required: false },
-    physicalDamageCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    physicalDamageProfit: { type: SchemaTypes.Number, default: 0, required: false },
-    wcGlUmbInsurer: { type: SchemaTypes.ObjectId, ref: 'Insurer', required: false },
-    wcGlUmbCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    wcGlUmbProfit: { type: SchemaTypes.Number, default: 0, required: false },
+    soldAt: { type: SchemaTypes.Date, required: true },
+    tips: { type: SchemaTypes.Number, default: 0, required: false },
+    totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
+    type: SchemaTypes.String,
+
+    createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
+    updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
+
     fees: { type: SchemaTypes.Number, default: 0, required: false },
     permits: { type: SchemaTypes.Number, default: 0, required: false },
-    tips: { type: SchemaTypes.Number, default: 0, required: false },
-    chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
     premium: { type: SchemaTypes.Number, default: 0, required: false },
-    amountReceivable: { type: SchemaTypes.Number, default: 0, required: false },
-    totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
-    updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
-    company: { type: SchemaTypes.ObjectId, ref: 'Company', required: false },
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 SaleSchema.plugin(mongoSoftDelete);
 
-SaleSchema.pre('save', function () {
-
+/* SaleSchema.pre('save', function () {
   const liability = this.liabilityCharge ? this.liabilityCharge : 0;
   const cargo = this.cargoCharge ? this.cargoCharge : 0;
-  const physicalDamage = this.physicalDamageCharge ? this.physicalDamageCharge : 0;
+  const physicalDamage = this.physicalDamageCharge
+    ? this.physicalDamageCharge
+    : 0;
   const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
 
   this.set({
     premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
     amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
   });
-});
+}); */
 
-
-
-SaleSchema.pre('updateOne', function () {
+/* SaleSchema.pre('updateOne', function () {
   const liability = this.liabilityCharge ? this.liabilityCharge : 0;
   const cargo = this.cargoCharge ? this.cargoCharge : 0;
-  const physicalDamage = this.physicalDamageCharge ? this.physicalDamageCharge : 0;
+  const physicalDamage = this.physicalDamageCharge
+    ? this.physicalDamageCharge
+    : 0;
   const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
 
   this.set({
     premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
     amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
   });
-});
-
+}); */
 
 const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
   conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');
 
-export { Sale, SaleSchema, SaleModel, saleModelFn }
+export { Sale, SaleSchema, SaleModel, saleModelFn };
