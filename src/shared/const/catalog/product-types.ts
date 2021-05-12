@@ -1,4 +1,4 @@
-export const SaleTypes = [
+export const productTypes = [
   { name: 'TRUCKING', id: 'Commercial Trucking Insurance' },
   { name: 'AUTO', id: 'Auto Insurance' },
   { name: 'HOME', id: 'Homeowner Insurance' },
@@ -6,4 +6,6 @@ export const SaleTypes = [
   { name: 'COMMERCIAL', id: 'Commercial Insurance' },
   { name: 'LIFE', id: 'Life insurance' },
   { name: 'HEALTH', id: 'Health Insurance' },
+  { name: 'PERMIT', id: 'Permits' },
+
 ];

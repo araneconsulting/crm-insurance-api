@@ -16,6 +16,7 @@ interface Sale extends Document<any> {
   readonly chargesPaid: number;
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
+  readonly fees: number;
   readonly location: Location;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly seller: Partial<User>;
@@ -28,7 +29,7 @@ interface Sale extends Document<any> {
   readonly updatedBy?: Partial<User>;
 
   //Only-insurance properties
-  readonly fees: number; //[auto-calculated] Sum of SaleItem amount where product = Fee
+  
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
 }
@@ -41,6 +42,7 @@ const SaleSchema = new Schema<any>(
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
+    fees: { type: SchemaTypes.Number, default: 0, required: false },
     location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     items: [{ type: SchemaTypes.Map, required: true }],
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
@@ -52,7 +54,6 @@ const SaleSchema = new Schema<any>(
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
 
-    fees: { type: SchemaTypes.Number, default: 0, required: false },
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     premium: { type: SchemaTypes.Number, default: 0, required: false },
   },
