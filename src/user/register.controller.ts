@@ -9,7 +9,7 @@ import { MongoFilter } from 'shared/filter/mongo.filter';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 
-@Controller('register')
+/* @Controller('register')
 export class RegisterController {
     constructor(private userService: UserService) { }
 
@@ -49,4 +49,4 @@ export class RegisterController {
             })
         );
     }
-}
+} */

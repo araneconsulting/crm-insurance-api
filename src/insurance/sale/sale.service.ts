@@ -228,8 +228,6 @@ export class SaleService {
    * @returns Promise
    */
   async save(saleDto: CreateSaleDto, user: Partial<User>): Promise<Sale> {
-    console.log(saleDto.soldAt);
-
     saleDto['createdBy'] = user.id;
 
     if (
@@ -239,6 +237,7 @@ export class SaleService {
       saleDto.seller = user.id;
       const authUser = await this.userModel.findOne({ _id: user.id });
       saleDto['location'] = authUser.location;
+      saleDto['company'] = authUser.company;
       console.log('user.location', authUser.location);
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
@@ -247,11 +246,13 @@ export class SaleService {
       }
       saleDto['seller'] = seller._id;
       saleDto['location'] = seller.location;
+      saleDto['company'] = seller.company;
       console.log('seller.location', seller.location);
-    }
+    } 
+    
+    //let saleData = await this.setSaleCalculations(saleDto);
 
-    /***/ //let saleData = await this.setSaleCalculations(saleDto);
-    const saleData = saleDto;
+    /***/ const saleData = saleDto;
 
     return this.saleModel.create({
       ...saleData,
@@ -266,14 +267,13 @@ export class SaleService {
    */
   async update(
     id: string,
-    data: UpdateSaleDto,
+    saleDto: UpdateSaleDto,
     user: Partial<User>,
   ): Promise<Sale> {
+    saleDto['updatedBy'] = user.id;
 
-    data['updatedBy'] = user.id;
-
-    if (data.seller && !isAdmin(user) && !isExecutive(user)) {
-      delete data.seller;
+    if (saleDto.seller && !isAdmin(user) && !isExecutive(user)) {
+      delete saleDto.seller;
     }
 
     let sale = await this.saleModel.findById(Types.ObjectId(id)).exec();
@@ -282,14 +282,15 @@ export class SaleService {
       throw new NotFoundException(`sale:$id was not found`);
     }
 
-    let saleDto = { ...sale['_doc'], ...data };
+    let updatedSaleDto = { ...sale['_doc'], ...saleDto }; 
+    
+    //let saleData = await this.setSaleCalculations(saleDto);
 
-    /***/ //let saleData = await this.setSaleCalculations(saleDto);
-    const saleData = saleDto;
+    /***/ const saleData = updatedSaleDto;
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
-      {saleData},
+      { saleData },
       { new: true },
     );
   }
@@ -415,14 +416,13 @@ export class SaleService {
     return sale;
   } */
 
-
   async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
-    
+
     let type = null;
     if (queryParams.filter.hasOwnProperty('type')) {
       type = queryParams.filter.type;
@@ -449,7 +449,6 @@ export class SaleService {
         });
 
         conditions['$or'] = filterQueries;
-        
       }
 
       return {
@@ -459,7 +458,10 @@ export class SaleService {
           .exec(),
         entities: await this.saleModel
           .find(conditions)
-          .populate('customer', 'type contact.firstName contact.lastName business.name')
+          .populate(
+            'customer',
+            'type contact.firstName contact.lastName business.name',
+          )
           .populate('location', 'alias business.name')
           .skip(skipCriteria)
           .limit(limitCriteria)
@@ -471,7 +473,10 @@ export class SaleService {
         totalCount: await this.saleModel.find().countDocuments().exec(),
         entities: await this.saleModel
           .find()
-          .populate('customer', 'type contact.firstName contact.lastName business.name')
+          .populate(
+            'customer',
+            'type contact.firstName contact.lastName business.name',
+          )
           .populate('location', 'alias business.name')
           .skip(skipCriteria)
           .limit(limitCriteria)
@@ -480,5 +485,4 @@ export class SaleService {
       };
     }
   }
-  
 }

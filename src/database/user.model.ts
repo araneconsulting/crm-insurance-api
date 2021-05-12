@@ -34,6 +34,9 @@ interface User extends Document<any> {
   readonly supervisor: Partial<User>;
   readonly location: Partial<Location>;
 
+  readonly createdBy: Partial<User>;
+  readonly updatedBy: Partial<User>;
+
   comparePassword(password: string): Observable<boolean>;
 }
 
@@ -109,6 +112,8 @@ const UserSchema = new Schema<any>(
     employeeInfo: { type: SchemaTypes.Map, default: {} },
     supervisor: { type: SchemaTypes.ObjectId, ref: 'User' },
     location: { type: SchemaTypes.ObjectId, ref: 'Location' },
+    createdBy: { type: SchemaTypes.ObjectId, ref: 'User' },
+    updatedBy: { type: SchemaTypes.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,

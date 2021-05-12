@@ -1,7 +1,6 @@
 export const Industries = [
   { id: '', name: 'Any' },
   { id: 'stocksonly', name: 'Stocks only (ex-Funds)' },
-  { id: 'exchangetradedfund', name: 'Exchange Traded Fund' },
   { id: 'advertisingagencies', name: 'Advertising Agencies' },
   { id: 'aerospacedefense', name: 'Aerospace &amp; Defense' },
   { id: 'agriculturalinputs', name: 'Agricultural Inputs' },

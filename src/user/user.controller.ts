@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
@@ -26,6 +27,7 @@ import { ParseObjectIdPipe } from '../shared/pipe/parse-object-id.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { Request } from 'express';
 
 @Controller({ path: '/users' })
 export class UserController {
@@ -61,7 +63,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL)
   @UseFilters(MongoFilter)
-  createUser(@Body() createUserDto: CreateUserDto): Observable<User> {
+  createUser(
+    @Req() req: Request,
+    @Body() createUserDto: CreateUserDto,
+  ): Observable<User> {
     const email = createUserDto.email;
 
     return this.userService.existsByEmail(email).pipe(
@@ -75,7 +80,7 @@ export class UserController {
               if (exists) {
                 throw new ConflictException(`email:${email} exists already`);
               } else {
-                return this.userService.createUser(createUserDto);
+                return this.userService.createUser(createUserDto, req.user);
               }
             }),
           );
@@ -89,13 +94,14 @@ export class UserController {
   @HasRoles(RoleType.OWNER, RoleType.ADMIN, RoleType.LEGAL)
   @UseFilters(MongoFilter)
   updateUser(
+    @Req() req: Request,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Observable<Partial<User>> {
     return this.userService.findById(id).pipe(
       mergeMap((found) => {
         if (found) {
-          return this.userService.updateUser(id, updateUserDto);
+          return this.userService.updateUser(id, updateUserDto, req.user);
         } else {
           throw new ConflictException(`User id:${id} does not exist`);
         }

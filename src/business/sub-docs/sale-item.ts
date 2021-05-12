@@ -8,7 +8,10 @@ import {
 export class SaleItem extends Map<any, any> {
   @IsNotEmpty()
   readonly product: string;
-  //can be: Liability Insurance, Cargo Damage Insurance, WCGLUMB Insurance, Physical Damage Insurance, Vehicle Insurance, Homeowner Insurance
+  //can be: Liability Insurance, Cargo Damage Insurance, WCGLUMB Insurance, Physical Damage Insurance, Vehicle Insurance, Homeowner Insurance, Auto Insurance
+  
+  @IsNotEmpty()
+  readonly type: string; //can be: Individual, Commercial
 
   @IsNumber()
   readonly amount: string;
@@ -59,7 +62,7 @@ export const DriverData = {
   organizations: [],
 };
 
-export const TruckingData = {
+export const TruckingDetails = {
   dotNumber: '',
   drivers: [],
   premium: 0,
@@ -69,6 +72,7 @@ export const TruckingData = {
 
 export const DEFAULT_SALE_ITEM = {
   name: '',
+  type: '',
   amount: 0,
   provider: '',
   subprovider: '',
@@ -77,6 +81,7 @@ export const DEFAULT_SALE_ITEM = {
 
 export const DEFAULT_SALE_ITEM_TRUCKING = {
   product: '',
+  type: '',
   amount: 0,
   provider: '',
   subprovider: '',

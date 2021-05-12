@@ -10,7 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(USER_MODEL) 
+    @Inject(USER_MODEL)
     private userModel: UserModel,
     private sendgridService: SendgridService,
   ) {}
@@ -35,7 +35,7 @@ export class UserService {
     return from(this.userModel.exists({ id }));
   }
 
-  createUser(data: CreateUserDto): Observable<User> {
+  async createUser(data: CreateUserDto, user: Partial<User>): Promise<User> {
     // Simply here we can send a verification email to the new registered user
     // by calling SendGrid directly.
     //
@@ -68,12 +68,15 @@ export class UserService {
     //     error: error => console.log(`${error}`)
     //   });
 
+    const authUser = await this.userModel.findOne({ _id: user.id });
+
     const created = this.userModel.create({
       ...data,
-      //roles: [RoleType.SELLER]
+      createdBy: authUser.id,
+      company: authUser.company,
     });
 
-    return from(created);
+    return from(created).toPromise();
 
     // const msg = {
     //   from: 'liuver@gmail.com', // Use the email address or domain you verified above
@@ -94,10 +97,19 @@ export class UserService {
     // );
   }
 
-  updateUser(id: string, data: UpdateUserDto): Observable<User> {
-    const updateQuery = this.userModel.findOneAndUpdate({ _id: id }, data, {
-      new: true,
-    });
+  updateUser(
+    id: string,
+    data: UpdateUserDto,
+    user: Partial<User>,
+  ): Observable<User> {
+
+    const updateQuery = this.userModel.findOneAndUpdate(
+      { _id: id },
+      { ...data, updatedBy: user.id },
+      {
+        new: true,
+      },
+    );
     return from(updateQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`user:${id} was not found`)),
@@ -136,7 +148,7 @@ export class UserService {
       userQuery.populate('supervisor');
     }
 
-    if (!withPassword){
+    if (!withPassword) {
       userQuery.select('-password');
     }
 
@@ -164,7 +176,7 @@ export class UserService {
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
-    
+
     let roles = null;
     if (queryParams.filter.hasOwnProperty('roles')) {
       roles = queryParams.filter.roles;
@@ -191,7 +203,6 @@ export class UserService {
         });
 
         conditions['$or'] = filterQueries;
-        
       }
 
       return {
@@ -226,5 +237,4 @@ export class UserService {
       .sort({ name: 1 })
       .exec();
   }
-
 }
