@@ -40,6 +40,7 @@ import { UserCatalog } from 'shared/const/catalog/user';
 import { DateCatalog } from 'shared/const/catalog/date';
 import { States } from 'shared/const/catalog/states';
 import { Industries } from 'shared/const/catalog/industries';
+import { SaleTypes } from 'shared/const/catalog/sale-types';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -123,7 +124,8 @@ export class CompanyController {
       roles: UserCatalog.roles,
       dateRanges: DateCatalog.ranges,
       states: States,
-      industries: Industries
+      industries: Industries,
+      saleTypes: SaleTypes,
     });
   }
 }
