@@ -15,7 +15,7 @@ export class Commission extends Map<any, any> {
 export class CommissionSheet extends Map<any, any> {
   @IsOptional()
   @IsArray()
-  readonly commisions: Commission[];
+  readonly commissions: Commission[];
 }
 
 export const DEFAULT_BUSINESS_INFO = {
