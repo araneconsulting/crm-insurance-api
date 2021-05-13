@@ -1,11 +1,11 @@
 export const productTypes = [
-  { name: 'TRUCKING', id: 'Commercial Trucking Insurance' },
-  { name: 'AUTO', id: 'Auto Insurance' },
-  { name: 'HOME', id: 'Homeowner Insurance' },
-  { name: 'RENTAL', id: 'Rental Insurance' },
-  { name: 'COMMERCIAL', id: 'Commercial Insurance' },
-  { name: 'LIFE', id: 'Life insurance' },
-  { name: 'HEALTH', id: 'Health Insurance' },
-  { name: 'PERMIT', id: 'Permits' },
+  { id: 'TRUCKING', name: 'Commercial Trucking Insurance' },
+  { id: 'AUTO', name: 'Auto Insurance' },
+  { id: 'HOME', name: 'Homeowner Insurance' },
+  { id: 'RENTAL', name: 'Rental Insurance' },
+  { id: 'COMMERCIAL', name: 'Commercial Insurance' },
+  { id: 'LIFE', name: 'Life insurance' },
+  { id: 'HEALTH', name: 'Health Insurance' },
+  { id: 'PERMIT', name: 'Permits' },
 
 ];
