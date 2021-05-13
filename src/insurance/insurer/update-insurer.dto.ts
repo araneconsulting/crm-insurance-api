@@ -1,7 +1,8 @@
 import { BusinessInfo } from 'business/sub-docs/business-info';
-import { CommissionSheet } from 'business/sub-docs/commision-sheet';
+import { Commission } from 'business/sub-docs/commision';
 import { ContactInfo } from 'business/sub-docs/contact-info';
 import {
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNotEmptyObject,
@@ -14,9 +15,9 @@ export class UpdateInsurerDto {
   @IsNotEmptyObject()
   readonly business?: BusinessInfo;
 
+  @IsArray()
   @IsOptional()
-  @IsNotEmptyObject()
-  readonly commissionSheet?: CommissionSheet;
+  readonly commissions?: Commission[];
 
   @IsOptional()
   @IsNotEmptyObject()
@@ -24,9 +25,13 @@ export class UpdateInsurerDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly subproviders?: string[];
+  readonly subproviders?: SubProvider[];
 
   @IsOptional()
   @IsNotEmpty()
-  readonly type?: string;
+  readonly type?: string; //BROKER, INDIVIDUAL
+}
+
+export class SubProvider {
+  readonly value: string;
 }

@@ -1,21 +1,19 @@
 import {
-  IsArray,
-  IsEmail,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
+  IsPositive,
+  IsString,
 } from 'class-validator';
-import { Address } from 'shared/sub-documents/address';
 
 export class Commission extends Map<any, any> {
+  @IsString()
+  @IsNotEmpty()
   productType: string;
-  percent: number;
-}
 
-export class CommissionSheet extends Map<any, any> {
-  @IsOptional()
-  @IsArray()
-  readonly commissions: Commission[];
+  @IsNumber()
+  @IsNotEmpty()
+  @IsPositive()
+  percent: number;
 }
 
 export const DEFAULT_BUSINESS_INFO = {
