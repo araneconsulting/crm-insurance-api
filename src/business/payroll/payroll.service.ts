@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { CreatePayrollDto } from 'business/payroll/dto/create-payroll.dto';
 import { UpdatePayrollDto } from 'business/payroll/dto/update-payroll.dto';
+import { PayrollDto } from 'business/payroll/dto/payroll.dto';
 import { Payroll } from 'database/payroll.model';
 import { User } from 'database/user.model';
 import { Model } from 'mongoose';
@@ -54,35 +55,13 @@ export class PayrollService {
 
     const authUser = await this.userModel.findOne({ _id: this.req.user.id });
 
-    const payrollDto = {
+    const payrollDto: PayrollDto = {
       ...data,
       company: authUser.company,
       createdBy: { _id: authUser.id },
     };
 
-    payrollDto.payStubs.map((payStub) => {
-      payStub['totalSalary'] =
-        payStub.payRate * payStub.normalHoursWorked +
-        payStub.overtimeHoursWorked * payStub.payRate * 1.5;
-
-      payStub['totalBonus'] = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_BONUS ? cur.amount : 0);
-      }, 0);
-
-      payStub['totalDiscount'] = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_DISCOUNT ? cur.amount : 0);
-      }, 0);
-
-      payStub['totalReimbursement'] = payStub.addons.reduce(function (
-        prev,
-        cur,
-      ) {
-        return prev + (cur.type === ADDON_TYPE_REIMBURSEMENT ? cur.amount : 0);
-      },
-      0);
-
-      return payStub;
-    });
+    this.runPayrollCalculations(payrollDto);
 
     if (payrollDto.scope === ADDON_SCOPE_LOCATION && !payrollDto.location) {
       payrollDto.location = authUser.location;
@@ -99,29 +78,7 @@ export class PayrollService {
       updatedBy: { _id: authUser.id },
     };
 
-    payrollDto.payStubs.map((payStub) => {
-      payStub['totalSalary'] =
-        payStub.payRate * payStub.normalHoursWorked +
-        payStub.overtimeHoursWorked * payStub.payRate * 1.5;
-
-      payStub['totalBonus'] = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_BONUS ? cur.amount : 0);
-      }, 0);
-
-      payStub['totalDiscount'] = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_DISCOUNT ? cur.amount : 0);
-      }, 0);
-
-      payStub['totalReimbursement'] = payStub.addons.reduce(function (
-        prev,
-        cur,
-      ) {
-        return prev + (cur.type === ADDON_TYPE_REIMBURSEMENT ? cur.amount : 0);
-      },
-      0);
-
-      return payStub;
-    });
+    this.runPayrollCalculations(payrollDto);
 
     return from(
       this.payrollModel
@@ -192,5 +149,31 @@ export class PayrollService {
           .exec(),
       };
     }
+  }
+
+  private runPayrollCalculations(payrollDto: PayrollDto) {
+    payrollDto.payStubs.map((payStub) => {
+      payStub['totalSalary'] =
+        payStub.payRate * payStub.normalHoursWorked +
+        payStub.overtimeHoursWorked * payStub.payRate * 1.5;
+
+      payStub['totalBonus'] = payStub.addons.reduce(function (prev, cur) {
+        return prev + (cur.type === ADDON_TYPE_BONUS ? cur.amount : 0);
+      }, 0);
+
+      payStub['totalDiscount'] = payStub.addons.reduce(function (prev, cur) {
+        return prev + (cur.type === ADDON_TYPE_DISCOUNT ? cur.amount : 0);
+      }, 0);
+
+      payStub['totalReimbursement'] = payStub.addons.reduce(function (
+        prev,
+        cur,
+      ) {
+        return prev + (cur.type === ADDON_TYPE_REIMBURSEMENT ? cur.amount : 0);
+      },
+      0);
+
+      return payStub;
+    });
   }
 }
