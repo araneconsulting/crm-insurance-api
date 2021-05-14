@@ -51,7 +51,6 @@ export class ReportController {
 
     const response = {
       metrics: await this.reportService.getSalesMetrics(
-        user,
         startDate,
         endDate,
         filterField ? filterField.toLowerCase() : null,
@@ -65,7 +64,6 @@ export class ReportController {
 
     if (Boolean(withSales)) {
       response['sales'] = await this.reportService.getAllSales(
-        user,
         startDate,
         endDate,
         filterField ? filterField.toLowerCase() : null,

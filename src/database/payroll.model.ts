@@ -25,7 +25,7 @@ const PayrollSchema = new Schema<any>(
     payExecutedAt: { type: SchemaTypes.Date },
     payPeriodStartedAt: { type: SchemaTypes.Date },
     payPeriodEndedAt: { type: SchemaTypes.Date },
-    payStubs: [{ type: SchemaTypes.ObjectId, ref: 'PayStub', required: false, default: [] }],
+    payStubs: [{ type: SchemaTypes.Map, required: false, default: [] }],
     scope: { type: SchemaTypes.String }, //can be Company (C), Location (L), Individual (I)
   },
   {

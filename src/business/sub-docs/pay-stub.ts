@@ -6,4 +6,8 @@ interface PayStub extends Map<any,any> {
     readonly normalHoursWorked: number;
     readonly overtimeHoursWorked: number;
     readonly payRate: number;
+    readonly totalSalary: number; //auto-calculated
+    readonly totalBonus: number; //auto-calculated
+    readonly totalDiscount: number; //auto-calculated
+    readonly totalReimbursement: number; //auto-calculated
   }

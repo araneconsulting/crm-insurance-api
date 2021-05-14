@@ -1,8 +1,6 @@
 import {
-  IsAlphanumeric,
   IsArray,
-  IsEmail,
-IsNotEmpty,
+  IsNotEmpty,
   IsOptional,
   Matches,
   MaxLength,
@@ -15,6 +13,7 @@ import { Communication } from 'shared/sub-documents/communication';
 import { RoleType } from 'shared/enum/role-type.enum';
 import { EmailSettings } from './email-settings';
 import { EmployeeInfo } from 'business/sub-docs/employee-info';
+import { Location } from 'database/location.model';
 
 export class UpdateUserDto {
   @IsOptional()

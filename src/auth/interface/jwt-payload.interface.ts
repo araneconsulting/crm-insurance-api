@@ -1,4 +1,5 @@
 import { Company } from "database/company.model";
+import { Location } from "database/location.model";
 import { RoleType } from "../../shared/enum/role-type.enum";
 
 export interface JwtPayload {
@@ -11,4 +12,5 @@ export interface JwtPayload {
     readonly roles: RoleType[];
     readonly username: string;
     readonly company: Partial<Company>;
+    readonly location: Partial<Location>;
   }

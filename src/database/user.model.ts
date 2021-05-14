@@ -9,6 +9,7 @@ import { Company } from './company.model';
 import { EmailSettings } from 'user/dto/email-settings';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { EmployeeInfo } from 'business/sub-docs/employee-info';
+import { Location } from './location.model';
 
 interface User extends Document<any> {
   readonly address: Address;

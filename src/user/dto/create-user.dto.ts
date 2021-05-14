@@ -10,6 +10,7 @@ IsNotEmptyObject,
   MinLength,
 } from 'class-validator';
 import { Company } from 'database/company.model';
+import { Location } from 'database/location.model';
 import { User } from 'database/user.model';
 import { Address } from 'shared/sub-documents/address';
 import { Communication } from 'shared/sub-documents/communication';

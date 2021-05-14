@@ -43,9 +43,8 @@ export class SaleController {
     @Query('end_date') endDate?: string,
     @Query('type') type?: string,
   ): Promise<any> {
-    const user: Partial<User> = req.user;
     return res.json(
-      await this.saleService.findAll(user, startDate, endDate, type),
+      await this.saleService.findAll(startDate, endDate, type),
     );
   }
 
@@ -80,7 +79,7 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async createSale(@Req() req: Request, @Body() sale: any): Promise<Sale> {
-    return await this.saleService.save(sale, req.user);
+    return await this.saleService.save(sale);
   }
 
   @Put(':id')
@@ -92,7 +91,7 @@ export class SaleController {
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() sale: UpdateSaleDto,
   ): Promise<Sale> {
-    return await this.saleService.update(id, sale, req.user);
+    return await this.saleService.update(id, sale);
   }
 
   @Delete(':id')

@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   Scope,
   UseFilters,
   UseGuards,
@@ -24,6 +25,7 @@ import { PayrollService } from './payroll.service';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 import { CreatePayrollDto } from 'business/payroll/dto/create-payroll.dto';
 import { UpdatePayrollDto } from 'business/payroll/dto/update-payroll.dto';
+import { Request } from 'express';
 
 @Controller({ path: 'payrolls', scope: Scope.REQUEST })
 export class PayrollController {
@@ -56,7 +58,9 @@ export class PayrollController {
   @HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
-  async createPayroll(@Body() payroll: CreatePayrollDto): Promise<Payroll> {
+  async createPayroll(
+    @Req() req: Request,
+    @Body() payroll: CreatePayrollDto): Promise<Payroll> {
     return await this.payrollService.save(payroll);
   }
 

@@ -19,7 +19,6 @@ export class DashboardService {
     dataCriteria: string,
     groupingCriteria: string,
     aggregation: string,
-    user: Partial<User>,
     startDate?: string,
     endDate?: string,
     location?: string,

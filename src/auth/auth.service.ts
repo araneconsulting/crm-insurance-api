@@ -15,7 +15,6 @@ export class AuthService {
   ) {}
 
   validateUser(email: string, pass: string): Observable<User> {
-    console.log(email);
 
     return this.userService.findByEmail(email).pipe(
       //if user is not found, convert it into an EMPTY.
@@ -39,6 +38,7 @@ export class AuthService {
           lastName,
           phone,
           company,
+          location,
         } = user;
         return user.comparePassword(pass).pipe(
           map((m) => {
@@ -52,6 +52,7 @@ export class AuthService {
                 lastName,
                 phone,
                 company,
+                location,
               } as User;
             } else {
               // The same reason above.
@@ -66,7 +67,7 @@ export class AuthService {
     );
   }
 
-  // If `LocalStrateg#validateUser` return a `Observable`, the `request.user` is
+  // If `LocalStrategy#validateUser` return a `Observable`, the `request.user` is
   // bound to a `Observable<Partial<User>>`, not a `Partial<User>`.
   //
   // I would like use the current `Promise` for this case, thus it will get
@@ -83,6 +84,7 @@ export class AuthService {
       email: user.email,
       phone: user.phone,
       company: user.company,
+      location: user.location,
     };
     
     return from(this.jwtService.signAsync(payload)).pipe(

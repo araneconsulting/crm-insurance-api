@@ -6,4 +6,4 @@ interface PayAddon extends Map<any,any> {
     readonly endedAt: string;
     readonly startedAt: string;
     readonly type: string; // can be: bonus (B), discount (D), reimbursement (R), etc
-  }
+  } 

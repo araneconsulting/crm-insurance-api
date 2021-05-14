@@ -36,14 +36,12 @@ export class SaleService {
   ) {}
 
   /**
-   * @param  {Partial<User>} user
    * @param  {string} startDate?
    * @param  {string} endDate?
    * @param  {string} type?
    * @returns Promise
    */
   async findAll(
-    user: Partial<User>,
     startDate?: string,
     endDate?: string,
     type?: string,
@@ -56,8 +54,8 @@ export class SaleService {
       filterConditions['type'] = type;
     }
 
-    if (!isAdmin(user) && !isExecutive(user)) {
-      filterConditions['seller'] = Types.ObjectId(user.id);
+    if (!isAdmin(this.req.user) && !isExecutive(this.req.user)) {
+      filterConditions['seller'] = Types.ObjectId(this.req.user.id);
     }
 
     const query = this.saleModel.aggregate();
@@ -224,18 +222,17 @@ export class SaleService {
 
   /**
    * @param  {CreateSaleDto} saleDto
-   * @param  {Partial<User>} user
    * @returns Promise
    */
-  async save(saleDto: CreateSaleDto, user: Partial<User>): Promise<Sale> {
-    saleDto['createdBy'] = user.id;
+  async save(saleDto: CreateSaleDto): Promise<Sale> {
+    saleDto['createdBy'] = this.req.user.id;
 
     if (
       !saleDto.seller ||
-      (saleDto.seller && !isAdmin(user) && !isExecutive(user))
+      (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
     ) {
-      saleDto.seller = user.id;
-      const authUser = await this.userModel.findOne({ _id: user.id });
+      saleDto.seller = this.req.user.id;
+      const authUser = await this.userModel.findOne({ _id: this.req.user.id });
       saleDto['location'] = authUser.location;
       saleDto['company'] = authUser.company;
       console.log('user.location', authUser.location);
@@ -248,8 +245,8 @@ export class SaleService {
       saleDto['location'] = seller.location;
       saleDto['company'] = seller.company;
       console.log('seller.location', seller.location);
-    } 
-    
+    }
+
     //let saleData = await this.setSaleCalculations(saleDto);
 
     /***/ const saleData = saleDto;
@@ -262,17 +259,16 @@ export class SaleService {
   /**
    * @param  {string} id
    * @param  {UpdateSaleDto} data
-   * @param  {Partial<User>} user
    * @returns Promise
    */
-  async update(
-    id: string,
-    saleDto: UpdateSaleDto,
-    user: Partial<User>,
-  ): Promise<Sale> {
-    saleDto['updatedBy'] = user.id;
+  async update(id: string, saleDto: UpdateSaleDto): Promise<Sale> {
+    saleDto['updatedBy'] = this.req.user.id;
 
-    if (saleDto.seller && !isAdmin(user) && !isExecutive(user)) {
+    if (
+      saleDto.seller &&
+      !isAdmin(this.req.user) &&
+      !isExecutive(this.req.user)
+    ) {
       delete saleDto.seller;
     }
 
@@ -282,8 +278,8 @@ export class SaleService {
       throw new NotFoundException(`sale:$id was not found`);
     }
 
-    let updatedSaleDto = { ...sale['_doc'], ...saleDto }; 
-    
+    let updatedSaleDto = { ...sale['_doc'], ...saleDto };
+
     //let saleData = await this.setSaleCalculations(saleDto);
 
     /***/ const saleData = updatedSaleDto;

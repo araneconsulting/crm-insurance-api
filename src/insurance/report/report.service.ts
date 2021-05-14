@@ -21,6 +21,8 @@ import {
 } from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
 import { CompanyCatalog } from '../../shared/const/catalog/company';
+import { REQUEST } from '@nestjs/core';
+import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
@@ -28,10 +30,10 @@ export class ReportService {
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
+    @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
   async getSalesMetrics(
-    user: Partial<User>,
     startDate?: string,
     endDate?: string,
     filterField?: string,
@@ -121,7 +123,6 @@ export class ReportService {
   }
 
   async getAllSales(
-    user: Partial<User>,
     startDate?: string,
     endDate?: string,
     filterField?: string,
@@ -365,7 +366,6 @@ export class ReportService {
       .toISOString();
 
     let employeeMetrics = await this.getSalesMetrics(
-      user,
       startDate,
       endDate,
       null,
@@ -469,7 +469,6 @@ export class ReportService {
       .toISOString();
 
     let employeeMetrics = await this.getSalesMetrics(
-      user,
       startDate,
       endDate,
       null,

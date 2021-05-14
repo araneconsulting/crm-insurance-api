@@ -1,4 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
 import { EMPTY, from, Observable, of, throwError } from 'rxjs';
 import { mergeMap, tap, throwIfEmpty, catchError } from 'rxjs/operators';
 import { USER_MODEL } from '../database/database.constants';
@@ -10,8 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(USER_MODEL)
-    private userModel: UserModel,
+    @Inject(USER_MODEL) private userModel: UserModel,
     private sendgridService: SendgridService,
   ) {}
 
@@ -35,7 +36,7 @@ export class UserService {
     return from(this.userModel.exists({ id }));
   }
 
-  async createUser(data: CreateUserDto, user: Partial<User>): Promise<User> {
+  async createUser(data: CreateUserDto, user:Partial<User>): Promise<User> {
     // Simply here we can send a verification email to the new registered user
     // by calling SendGrid directly.
     //
@@ -100,9 +101,8 @@ export class UserService {
   updateUser(
     id: string,
     data: UpdateUserDto,
-    user: Partial<User>,
+    user: Partial<User>
   ): Observable<User> {
-
     const updateQuery = this.userModel.findOneAndUpdate(
       { _id: id },
       { ...data, updatedBy: user.id },
