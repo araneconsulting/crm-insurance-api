@@ -85,4 +85,11 @@ export class PayrollController {
   ): Promise<Payroll> {
     return await this.payrollService.deleteById(id);
   }
+
+  @Post('/search')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchPayrolls(@Body() query: any): Promise<any> {
+    return await this.payrollService.search(query.queryParams);
+  }
 }

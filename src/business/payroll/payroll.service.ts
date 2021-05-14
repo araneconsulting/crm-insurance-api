@@ -147,4 +147,50 @@ export class PayrollService {
   deleteAll(): Promise<any> {
     return this.payrollModel.deleteMany({}).exec();
   }
+
+  async search(queryParams?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+      let conditions = {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+        conditions['$or'] = filterQueries;
+      }
+
+      return {
+        totalCount: await this.payrollModel
+          .find(conditions)
+          .countDocuments()
+          .exec(),
+        entities: await this.payrollModel
+          .find(conditions)
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    } else {
+      return {
+        totalCount: await this.payrollModel.find().countDocuments().exec(),
+        entities: await this.payrollModel
+          .find()
+          .skip(skipCriteria)
+          .limit(limitCriteria)
+          .sort(sortCriteria)
+          .exec(),
+      };
+    }
+  }
 }
