@@ -101,14 +101,6 @@ export class InsurerService {
     return from(this.insurerModel.deleteMany({}).exec());
   }
 
-  async getCatalog(filterCriteria: any): Promise<any> {
-    return await this.insurerModel
-      .find(filterCriteria)
-      .select('business.name type _id')
-      .sort({ "business.name": 1 })
-      .exec();
-  }
-
   async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
@@ -167,5 +159,13 @@ export class InsurerService {
           .exec(),
       };
     }
+  }
+
+  async getCatalog(filterCriteria: any): Promise<any> {
+    return await this.insurerModel
+      .find(filterCriteria)
+      .select('business.name type _id subproviders')
+      .sort({ "business.name": 1 })
+      .exec();
   }
 }
