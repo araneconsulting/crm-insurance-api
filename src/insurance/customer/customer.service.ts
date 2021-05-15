@@ -34,6 +34,7 @@ export class CustomerService {
     return this.customerModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
     });
   }
 
@@ -42,7 +43,11 @@ export class CustomerService {
       this.customerModel
         .findOneAndUpdate(
           { _id: id },
-          { ...data, updatedBy: { _id: this.req.user.id } },
+          {
+            ...data,
+            updatedBy: { _id: this.req.user.id },
+            company: { _id: this.req.user.company },
+          },
           { new: true },
         )
         .exec(),
@@ -73,7 +78,7 @@ export class CustomerService {
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
-    
+
     let type = null;
     if (queryParams.filter.hasOwnProperty('type')) {
       type = queryParams.filter.type;
@@ -100,7 +105,6 @@ export class CustomerService {
         });
 
         conditions['$or'] = filterQueries;
-        
       }
 
       return {

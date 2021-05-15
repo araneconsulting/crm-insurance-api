@@ -14,15 +14,17 @@ export class InsurerService {
   constructor(
     @Inject(INSURER_MODEL) private insurerModel: Model<Insurer>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
-  ) { }
+  ) {}
 
   findAll(keyword?: string, skip = 0, limit = 0): Observable<Insurer[]> {
     if (keyword) {
       return from(
         this.insurerModel
           .find({
-            $or: [{ name: { $regex: '.*' + keyword + '.*' } },
-            { email: { $regex: '.*' + keyword + '.*' } }, ]
+            $or: [
+              { name: { $regex: '.*' + keyword + '.*' } },
+              { email: { $regex: '.*' + keyword + '.*' } },
+            ],
           })
           .skip(skip)
           .limit(limit)
@@ -41,9 +43,11 @@ export class InsurerService {
   }
 
   save(data: CreateInsurerDto): Observable<Insurer> {
+    console.log(this.req.user);
     const createInsurer = this.insurerModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
     });
     return from(createInsurer);
   }
@@ -53,7 +57,11 @@ export class InsurerService {
       this.insurerModel
         .findOneAndUpdate(
           { _id: id },
-          { ...data, updatedBy: { _id: this.req.user.id } },
+          {
+            ...data,
+            updatedBy: { _id: this.req.user.id },
+            company: { _id: this.req.user.company },
+          },
           { new: true },
         )
         .exec(),
@@ -107,7 +115,7 @@ export class InsurerService {
       queryParams.sortOrder === 'desc' ? -1 : 1;
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
-    
+
     let type = null;
     if (queryParams.filter.hasOwnProperty('type')) {
       type = queryParams.filter.type;
@@ -134,7 +142,6 @@ export class InsurerService {
         });
 
         conditions['$or'] = filterQueries;
-        
       }
 
       return {

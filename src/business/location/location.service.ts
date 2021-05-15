@@ -46,6 +46,7 @@ export class LocationService {
     return this.locationModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
     });
   }
 
@@ -54,7 +55,11 @@ export class LocationService {
       this.locationModel
         .findOneAndUpdate(
           { _id: id },
-          { ...data, updatedBy: { _id: this.req.user.id } },
+          {
+            ...data,
+            updatedBy: { _id: this.req.user.id },
+            company: { _id: this.req.user.company },
+          },
           { new: true },
         )
         .exec(),

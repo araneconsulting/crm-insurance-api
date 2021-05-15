@@ -217,7 +217,7 @@ export class SaleService {
    * @returns Promise
    */
   async save(saleDto: CreateSaleDto): Promise<Sale> {
-    saleDto['createdBy'] = this.req.user.id;
+   
 
     if (
       !saleDto.seller ||
@@ -226,7 +226,6 @@ export class SaleService {
       saleDto.seller = this.req.user.id;
       const authUser = await this.userModel.findOne({ _id: this.req.user.id });
       saleDto['location'] = authUser.location;
-      saleDto['company'] = authUser.company;
       console.log('user.location', authUser.location);
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
@@ -235,8 +234,6 @@ export class SaleService {
       }
       saleDto['seller'] = seller._id;
       saleDto['location'] = seller.location;
-      saleDto['company'] = seller.company;
-      console.log('seller.location', seller.location);
     }
 
     //let saleData = await this.setSaleCalculations(saleDto);
@@ -245,6 +242,8 @@ export class SaleService {
 
     return this.saleModel.create({
       ...saleData,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
     });
   }
 
@@ -278,7 +277,11 @@ export class SaleService {
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
-      { saleData },
+      { 
+        ...saleData,
+        updatedBy: { _id: this.req.user.id },
+        company: { _id: this.req.user.company },
+      },
       { new: true },
     );
   }
