@@ -104,8 +104,8 @@ export class InsurerService {
   async getCatalog(filterCriteria: any): Promise<any> {
     return await this.insurerModel
       .find(filterCriteria)
-      .select('name _id')
-      .sort({ name: 1 })
+      .select('business.name _id')
+      .sort({ "business.name": 1 })
       .exec();
   }
 
