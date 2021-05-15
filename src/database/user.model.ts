@@ -1,7 +1,7 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from 'rxjs';
-import { ADMIN_ROLES, SELLER_ROLES, SUPER_ADMIN_ROLES } from 'shared/const/project-constants';
+import { ADMIN_ROLES, EXECUTIVE_ROLES, SELLER_ROLES, SUPER_ADMIN_ROLES } from 'shared/const/project-constants';
 import { Communication } from 'shared/sub-documents/communication';
 import { Address } from 'shared/sub-documents/address';
 import { RoleType } from '../shared/enum/role-type.enum';
@@ -158,11 +158,11 @@ function comparePasswordMethod(password: string): Observable<boolean> {
 
 UserSchema.methods.comparePassword = comparePasswordMethod;
 
-function nameGetHook(): string {
+function fullNameGetHook(): string {
   return `${this.firstName} ${this.lastName}`;
 }
 
-UserSchema.virtual('name').get(nameGetHook);
+UserSchema.virtual('fullname').get(fullNameGetHook);
 
 function isAdminGetHook(): boolean {
   return ADMIN_ROLES.includes(this.roles[0]);
@@ -175,6 +175,12 @@ function isSuperAdminGetHook(): boolean {
 }
 
 UserSchema.virtual('isSuperAdmin').get(isSuperAdminGetHook);
+
+function isExecutiveGetHook(): boolean {
+  return EXECUTIVE_ROLES.includes(this.roles[0]);
+}
+
+UserSchema.virtual('isExecutive').get(isExecutiveGetHook);
 
 function isSellerGetHook(): boolean {
   return SELLER_ROLES.includes(this.roles[0]);
@@ -196,8 +202,9 @@ export {
   UserModel,
   UserSchema,
   preSaveHook,
-  nameGetHook,
+  fullNameGetHook,
   isAdminGetHook,
+  isExecutiveGetHook,
   isSuperAdminGetHook,
   isSellerGetHook,
   comparePasswordMethod,
