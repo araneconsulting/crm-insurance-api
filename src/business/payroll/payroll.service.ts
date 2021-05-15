@@ -10,6 +10,7 @@ import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import { PAYROLL_MODEL, USER_MODEL } from '../../database/database.constants';
+import { ReportService } from 'insurance/report/report.service';
 
 const ADDON_TYPE_DISCOUNT = 'DISCOUNT';
 const ADDON_TYPE_BONUS = 'BONUS';
@@ -22,6 +23,7 @@ export class PayrollService {
     @Inject(PAYROLL_MODEL) private payrollModel: Model<Payroll>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
+    private reportService: ReportService,
   ) {}
 
   findAll(keyword?: string, skip = 0, limit = 0): Promise<Payroll[]> {
@@ -45,13 +47,12 @@ export class PayrollService {
     return from(this.payrollModel.findOne({ _id: id }).exec())
       .pipe(
         mergeMap((p) => (p ? of(p) : EMPTY)),
-        throwIfEmpty(() => new NotFoundException(`payroll:$id was not found`)),
+        throwIfEmpty(() => new NotFoundException(`Payroll:$id was not found`)),
       )
       .toPromise();
   }
 
   async save(data: CreatePayrollDto): Promise<Payroll> {
-    console.log(this.req.user);
 
     const authUser = await this.userModel.findOne({ _id: this.req.user.id });
 
@@ -61,7 +62,7 @@ export class PayrollService {
       createdBy: { _id: authUser.id },
     };
 
-    this.runPayrollCalculations(payrollDto);
+    await this.runPayrollCalculations(payrollDto);
 
     if (payrollDto.scope === ADDON_SCOPE_LOCATION && !payrollDto.location) {
       payrollDto.location = authUser.location;
@@ -78,7 +79,7 @@ export class PayrollService {
       updatedBy: { _id: authUser.id },
     };
 
-    this.runPayrollCalculations(payrollDto);
+    await this.runPayrollCalculations(payrollDto);
 
     return from(
       this.payrollModel
@@ -151,7 +152,14 @@ export class PayrollService {
     }
   }
 
-  private runPayrollCalculations(payrollDto: PayrollDto) {
+  private async runPayrollCalculations(payrollDto: PayrollDto) {
+    const salaryReport = await this.reportService.getSalaryReportByDates(
+      this.req.user,
+      payrollDto.payPeriodStartedAt,
+      payrollDto.payPeriodEndedAt,
+      null,
+    );
+    //console.log(salaryReport);
     payrollDto.payStubs.map((payStub) => {
       payStub['totalSalary'] =
         payStub.payRate * payStub.normalHoursWorked +

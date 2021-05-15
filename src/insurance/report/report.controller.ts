@@ -98,7 +98,6 @@ export class ReportController {
         month,
         year,
         seller,
-        location,
       ),
     };
 

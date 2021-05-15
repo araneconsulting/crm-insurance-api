@@ -7,6 +7,7 @@ import {
   SALE_MODEL,
   USER_MODEL,
   CUSTOMER_MODEL,
+  LOCATION_MODEL,
 } from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-functions';
 import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
@@ -23,13 +24,16 @@ import { roundAmount } from 'shared/util/math-functions';
 import { CompanyCatalog } from '../../shared/const/catalog/company';
 import { REQUEST } from '@nestjs/core';
 import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
+import { Location } from 'database/location.model';
 
+const GROUP_BY_SELLER = 'SELLER';
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
+    @Inject(LOCATION_MODEL) private locationModel: Model<Location>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
@@ -45,7 +49,7 @@ export class ReportService {
   ): Promise<any> {
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
-    let location: string = null;
+    let location: Partial<Location> = null;
 
     const filterConditions = {
       soldAt: getDateMatchExpressionByDates(startDate, endDate),
@@ -69,8 +73,11 @@ export class ReportService {
         break;
 
       case 'location':
-        location = filterValue;
-        filterConditions['location'] = location;
+        location = await this.locationModel.findById(filterValue).exec();
+        if (!location) {
+          throw new NotFoundException(`Location: ${filterValue} not found`);
+        }
+        filterConditions['location'] = Types.ObjectId(location.id);
         break;
     }
 
@@ -118,6 +125,8 @@ export class ReportService {
     }
 
     query.group(groupExpression);
+
+    console.log(JSON.stringify(query));
 
     return query;
   }
@@ -234,17 +243,9 @@ export class ReportService {
       .append([
         {
           $project: {
+            items: '$items',
             soldAt: '$soldAt',
-            liabilityCharge: '$liabilityCharge',
-            liabilityProfit: '$liabilityProfit',
-            cargoCharge: '$cargoCharge',
-            cargoProfit: '$cargoProfit',
-            physicalDamageCharge: '$physicalDamageCharge',
-            physicalDamageProfit: '$physicalDamageProfit',
-            wcGlUmbCharge: '$wcGlUmbCharge',
-            wcGlUmbProfit: '$wcGlUmbProfit',
             fees: '$fees',
-            permits: '$permits',
             tips: '$tips',
             chargesPaid: '$chargesPaid',
             premium: '$premium',
@@ -270,7 +271,7 @@ export class ReportService {
             customerName: {
               $function: {
                 body: function (customer) {
-                  return customer ? customer.company || customer.name : '';
+                  return customer.type === 'BUSINESS' ? customer.business.name : customer.contact.firstName + customer.contact.lastName;
                 },
                 args: ['$customer'],
                 lang: 'js',
@@ -316,7 +317,7 @@ export class ReportService {
           id: '$seller._id',
           firstName: '$seller.firstName',
           lastName: '$seller.lastName',
-          location: '$location',
+          location: '$location.name',
           roles: '$seller.roles',
         };
 
@@ -331,8 +332,9 @@ export class ReportService {
       case GroupingCriteria.CUSTOMER:
         idExpression = {
           id: '$customer._id',
-          name: '$customer.name',
-          company: '$customer.company',
+          firstName: '$customer.contact.firstName',
+          lastName: '$customer.contact.lastName',
+          company: '$customer.business.name',
         };
 
         fields.map(
@@ -345,7 +347,8 @@ export class ReportService {
 
       case GroupingCriteria.LOCATION:
         idExpression = {
-          location: '$location',
+          id: '$location._id',
+          name: '$location.business.name',
         };
     }
     return idExpression;
@@ -356,7 +359,6 @@ export class ReportService {
     month: number,
     year: number,
     seller?: string,
-    location?: string,
   ): Promise<any> {
     const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'month')
@@ -365,16 +367,29 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
+    return this.getSalaryReportByDates(user, startDate, endDate, seller)
+  }
+
+
+  async getSalaryReportByDates(
+    user: Partial<User>,
+    startDate: string,
+    endDate: string,
+    seller?: string,
+  ): Promise<any> {
+    
     let employeeMetrics = await this.getSalesMetrics(
-      startDate,
-      endDate,
+      moment(startDate).toISOString(),
+      moment(endDate).toISOString(),
       null,
       null,
-      'SELLER',
+      GROUP_BY_SELLER,
       [],
       ['premium', 'tips'],
       true,
     );
+
+    console.log("Metrics ",employeeMetrics);
 
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
@@ -454,6 +469,7 @@ export class ReportService {
 
     return payroll;
   }
+
 
   async getProfitsReport(
     user: Partial<User>,

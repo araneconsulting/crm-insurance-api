@@ -233,17 +233,9 @@ export class ReportService {
       .append([
         {
           $project: {
+            items: '$items',
             soldAt: '$soldAt',
-            liabilityCharge: '$liabilityCharge',
-            liabilityProfit: '$liabilityProfit',
-            cargoCharge: '$cargoCharge',
-            cargoProfit: '$cargoProfit',
-            physicalDamageCharge: '$physicalDamageCharge',
-            physicalDamageProfit: '$physicalDamageProfit',
-            wcGlUmbCharge: '$wcGlUmbCharge',
-            wcGlUmbProfit: '$wcGlUmbProfit',
             fees: '$fees',
-            permits: '$permits',
             tips: '$tips',
             chargesPaid: '$chargesPaid',
             premium: '$premium',
@@ -269,7 +261,7 @@ export class ReportService {
             customerName: {
               $function: {
                 body: function (customer) {
-                  return customer ? customer.company || customer.name : '';
+                  return customer.type === 'BUSINESS' ? customer.business.name : customer.contact.firstName + customer.contact.lastName;
                 },
                 args: ['$customer'],
                 lang: 'js',
@@ -330,8 +322,9 @@ export class ReportService {
       case GroupingCriteria.CUSTOMER:
         idExpression = {
           id: '$customer._id',
-          name: '$customer.name',
-          company: '$customer.company',
+          firstName: '$customer.contact.firstName',
+          lastName: '$customer.contact.lastName',
+          company: '$customer.business.name',
         };
 
         fields.map(

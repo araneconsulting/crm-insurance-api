@@ -7,4 +7,5 @@ export const LOCATION_MODEL = 'LOCATION_MODEL';
 export const PAYROLL_MODEL = 'PAYROLL_MODEL';
 export const SALE_MODEL = 'SALE_MODEL';
 export const USER_MODEL = 'USER_MODEL';
+export const REPORT_SERVICE = 'REPORT_SERVICE';
 export const _MODEL = '_MODEL';

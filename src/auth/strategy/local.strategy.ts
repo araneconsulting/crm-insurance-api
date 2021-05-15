@@ -34,8 +34,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       .validateUser(email, password)
       .toPromise();
 
-      console.log(user)
-
     if (!user) {
       throw new UnauthorizedException();
     }

@@ -126,18 +126,10 @@ export class SaleService {
       .append([
         {
           $project: {
+            items: '$items',
             type: '$type',
             soldAt: '$soldAt',
-            liabilityCharge: { $round: ['$liabilityCharge', 2] },
-            liabilityProfit: { $round: ['$liabilityProfit', 2] },
-            cargoCharge: { $round: ['$cargoCharge', 2] },
-            cargoProfit: { $round: ['$cargoProfit', 2] },
-            physicalDamageCharge: { $round: ['$physicalDamageCharge', 2] },
-            physicalDamageProfit: { $round: ['$physicalDamageProfit', 2] },
-            wcGlUmbCharge: { $round: ['$wcGlUmbCharge', 2] },
-            wcGlUmbProfit: { $round: ['$wcGlUmbProfit', 2] },
             fees: { $round: ['$fees', 2] },
-            permits: { $round: ['$permits', 2] },
             tips: { $round: ['$tips', 2] },
             chargesPaid: { $round: ['$chargesPaid', 2] },
             premium: { $round: ['$premium', 2] },
@@ -161,7 +153,7 @@ export class SaleService {
             customerName: {
               $function: {
                 body: function (customer) {
-                  return customer ? customer.company || customer.name : '';
+                  return customer.type === 'BUSINESS' ? customer.business.name : customer.contact.firstName + customer.contact.lastName;
                 },
                 args: ['$customer'],
                 lang: 'js',
