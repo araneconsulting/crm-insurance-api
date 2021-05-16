@@ -106,27 +106,28 @@ export class SaleService {
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
-
-            customerName: {
-              $function: {
-                body: function (customer:any) {
-                  return customer ? customer.type === 'BUSINESS' ? customer.business.name : `${customer.contact.firstName}  ${customer.contact.lastName}`: "N/A";
-                },
-                args: ['$customer'],
-                lang: 'js',
-              },
-            },
-
             locationName: {
               $function: {
-                body: function (location:any) {
-                  return location ? location.business.name : "N/A";
+                body: function (location: any) {
+                  return location ? location.business.name : 'N/A';
                 },
                 args: ['$location'],
                 lang: 'js',
               },
             },
-            
+            customerName: {
+              $function: {
+                body: function (customer: any) {
+                  return customer
+                    ? customer.type === 'BUSINESS'
+                      ? customer.business.name
+                      : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                    : 'N/A';
+                },
+                args: ['$customer'],
+                lang: 'js',
+              },
+            },
             createdBy: '$createdBy',
             updatedBy: '$updatedBy',
             seller: 1,

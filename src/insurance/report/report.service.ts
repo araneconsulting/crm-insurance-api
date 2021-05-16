@@ -126,8 +126,6 @@ export class ReportService {
 
     query.group(groupExpression);
 
-    console.log(JSON.stringify(query));
-
     return query;
   }
 
@@ -198,47 +196,15 @@ export class ReportService {
       })
       .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
 
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
+      query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
       .lookup({
-        from: 'insurers',
-        localField: 'liabilityInsurer',
+        from: 'locations',
+        localField: 'location',
         foreignField: '_id',
-        as: 'liabilityInsurer',
+        as: 'location',
       })
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'cargoInsurer',
-        foreignField: '_id',
-        as: 'cargoInsurer',
-      })
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'insurers',
-        localField: 'physicalDamageInsurer',
-        foreignField: '_id',
-        as: 'physicalDamageInsurer',
-      })
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'wcGlUmbInsurer',
-        foreignField: '_id',
-        as: 'wcGlUmbInsurer',
-      })
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
 
       .append([
         {
@@ -258,36 +224,29 @@ export class ReportService {
             },
             locationName: {
               $function: {
-                body: function (seller, CompanyCatalog) {
-                  location = CompanyCatalog.locations.find(
-                    ({ id }) => id === seller.location,
-                  );
-                  return location ? location['name'] : '';
+                body: function (location: any) {
+                  return location ? location.business.name : 'N/A';
                 },
-                args: ['$seller', CompanyCatalog],
+                args: ['$location'],
                 lang: 'js',
               },
             },
             customerName: {
               $function: {
-                body: function (customer) {
-                  return customer.type === 'BUSINESS' ? customer.business.name : customer.contact.firstName + customer.contact.lastName;
+                body: function (customer: any) {
+                  return customer
+                    ? customer.type === 'BUSINESS'
+                      ? customer.business.name
+                      : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                    : 'N/A';
                 },
                 args: ['$customer'],
                 lang: 'js',
               },
             },
-            insurerNames: {
-              $concat: [
-                { $ifNull: ['$liabilityInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$cargoInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$physicalDamageInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$wcGlUmbInsurer.name', ''] },
-              ],
-            },
+            seller: 1,
+            customer: 1,
+            location: 1,
           },
         },
       ])
@@ -367,9 +326,8 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
-    return this.getSalaryReportByDates(user, startDate, endDate, seller)
+    return this.getSalaryReportByDates(user, startDate, endDate, seller);
   }
-
 
   async getSalaryReportByDates(
     user: Partial<User>,
@@ -377,7 +335,6 @@ export class ReportService {
     endDate: string,
     seller?: string,
   ): Promise<any> {
-    
     let employeeMetrics = await this.getSalesMetrics(
       moment(startDate).toISOString(),
       moment(endDate).toISOString(),
@@ -389,7 +346,7 @@ export class ReportService {
       true,
     );
 
-    console.log("Metrics ",employeeMetrics);
+    console.log('Metrics ', employeeMetrics);
 
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
@@ -469,7 +426,6 @@ export class ReportService {
 
     return payroll;
   }
-
 
   async getProfitsReport(
     user: Partial<User>,

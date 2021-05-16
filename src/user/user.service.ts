@@ -158,14 +158,6 @@ export class UserService {
     );
   }
 
-  /* findAll(withSales = false): Observable<User[]> {
-    const userQuery = this.userModel.find();
-    if (withSales) {
-      userQuery.populate('sales');
-    }
-    return from(userQuery.exec());
-  } */
-
   async findAll(skip = 0, limit = 0): Promise<User[]> {
     return this.userModel.find().skip(skip).limit(limit).exec();
   }

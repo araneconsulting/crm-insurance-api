@@ -248,20 +248,21 @@ export class ReportService {
             },
             locationName: {
               $function: {
-                body: function (seller, CompanyCatalog) {
-                  location = CompanyCatalog.locations.find(
-                    ({ id }) => id === seller.location,
-                  );
-                  return location ? location['name'] : '';
+                body: function (location: any) {
+                  return location ? location.business.name : 'N/A';
                 },
-                args: ['$seller', CompanyCatalog],
+                args: ['$location'],
                 lang: 'js',
               },
             },
             customerName: {
               $function: {
-                body: function (customer) {
-                  return customer.type === 'BUSINESS' ? customer.business.name : customer.contact.firstName + customer.contact.lastName;
+                body: function (customer: any) {
+                  return customer
+                    ? customer.type === 'BUSINESS'
+                      ? customer.business.name
+                      : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                    : 'N/A';
                 },
                 args: ['$customer'],
                 lang: 'js',

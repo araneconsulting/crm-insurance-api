@@ -50,7 +50,7 @@ export class ReportController {
       : [];
 
     const response = {
-      metrics: await this.reportService.getSalesMetrics(
+       metrics: await this.reportService.getSalesMetrics(
         startDate,
         endDate,
         filterField ? filterField.toLowerCase() : null,
@@ -59,7 +59,7 @@ export class ReportController {
         groupByFieldsArray,
         fieldsArray,
         Boolean(withCount),
-      ),
+      ), 
     };
 
     if (Boolean(withSales)) {
