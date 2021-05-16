@@ -79,49 +79,17 @@ export class SaleService {
         foreignField: '_id',
         as: 'customer',
       })
-      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
 
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
       .lookup({
-        from: 'insurers',
-        localField: 'liabilityInsurer',
+        from: 'locations',
+        localField: 'location',
         foreignField: '_id',
-        as: 'liabilityInsurer',
+        as: 'location',
       })
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'cargoInsurer',
-        foreignField: '_id',
-        as: 'cargoInsurer',
-      })
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'insurers',
-        localField: 'physicalDamageInsurer',
-        foreignField: '_id',
-        as: 'physicalDamageInsurer',
-      })
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'wcGlUmbInsurer',
-        foreignField: '_id',
-        as: 'wcGlUmbInsurer',
-      })
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
 
       .append([
         {
@@ -138,36 +106,32 @@ export class SaleService {
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
-            locationName: {
-              $function: {
-                body: function (seller, CompanyCatalog) {
-                  location = CompanyCatalog.locations.find(
-                    ({ id }) => id === seller.location,
-                  );
-                  return location ? location['name'] : '';
-                },
-                args: ['$seller', CompanyCatalog],
-                lang: 'js',
-              },
-            },
+
             customerName: {
               $function: {
-                body: function (customer) {
-                  return customer.type === 'BUSINESS' ? customer.business.name : customer.contact.firstName + customer.contact.lastName;
+                body: function (customer:any) {
+                  return customer ? customer.type === 'BUSINESS' ? customer.business.name : `${customer.contact.firstName}  ${customer.contact.lastName}`: "N/A";
                 },
                 args: ['$customer'],
                 lang: 'js',
               },
             },
-            location: '$location',
+
+            locationName: {
+              $function: {
+                body: function (location:any) {
+                  return location ? location.business.name : "N/A";
+                },
+                args: ['$location'],
+                lang: 'js',
+              },
+            },
+            
             createdBy: '$createdBy',
             updatedBy: '$updatedBy',
             seller: 1,
             customer: 1,
-            liabilityInsurer: 1,
-            cargoInsurer: 1,
-            physicalDamageInsurer: 1,
-            wcGlUmbInsurer: 1,
+            location: 1,
           },
         },
       ])
@@ -217,8 +181,6 @@ export class SaleService {
    * @returns Promise
    */
   async save(saleDto: CreateSaleDto): Promise<Sale> {
-   
-
     if (
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
@@ -226,7 +188,6 @@ export class SaleService {
       saleDto.seller = this.req.user.id;
       const authUser = await this.userModel.findOne({ _id: this.req.user.id });
       saleDto['location'] = authUser.location;
-      console.log('user.location', authUser.location);
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
       if (!seller) {
@@ -277,7 +238,7 @@ export class SaleService {
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
-      { 
+      {
         ...saleData,
         updatedBy: { _id: this.req.user.id },
         company: { _id: this.req.user.company },

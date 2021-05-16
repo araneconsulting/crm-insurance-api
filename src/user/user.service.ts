@@ -167,7 +167,7 @@ export class UserService {
   } */
 
   async findAll(skip = 0, limit = 0): Promise<User[]> {
-    return this.userModel.find({}).skip(skip).limit(limit).exec();
+    return this.userModel.find().skip(skip).limit(limit).exec();
   }
 
   async search(queryParams?: any): Promise<any> {
