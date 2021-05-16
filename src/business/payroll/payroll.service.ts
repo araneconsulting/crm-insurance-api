@@ -159,7 +159,7 @@ export class PayrollService {
       payrollDto.payPeriodEndedAt,
       null,
     );
-    //console.log(salaryReport);
+    console.log(salaryReport);
     payrollDto.payStubs.map((payStub) => {
       payStub['totalSalary'] =
         payStub.payRate * payStub.normalHoursWorked +
