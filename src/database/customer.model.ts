@@ -1,9 +1,9 @@
-import { BusinessInfo } from 'business/sub-docs/business-info';
+import { BusinessInfo, BusinessInfoSchema } from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { Communication } from 'shared/sub-documents/communication';
+import { Communication, CommunicationSchema } from 'shared/sub-documents/communication';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { ContactInfo } from 'business/sub-docs/contact-info';
+import { ContactInfo, ContactInfoSchema } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
 interface Customer extends Document<any> {
   readonly business: BusinessInfo;
@@ -20,13 +20,13 @@ type CustomerModel = Model<Customer>;
 const CustomerSchema = new Schema<any>(
   {
     business: {
-      type: SchemaTypes.Map,
+      type: BusinessInfoSchema,
     },
     contact: {
-      type: SchemaTypes.Map,
+      type: ContactInfoSchema,
     },
     communication: {
-      type: SchemaTypes.Map,
+      type: CommunicationSchema,
       default: {
         email: true,
         sms: true,

@@ -1,14 +1,25 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { from, Observable } from 'rxjs';
-import { ADMIN_ROLES, EXECUTIVE_ROLES, SELLER_ROLES, SUPER_ADMIN_ROLES } from 'shared/const/project-constants';
-import { Communication } from 'shared/sub-documents/communication';
-import { Address } from 'shared/sub-documents/address';
+import {
+  ADMIN_ROLES,
+  EXECUTIVE_ROLES,
+  SELLER_ROLES,
+  SUPER_ADMIN_ROLES,
+} from 'shared/const/project-constants';
+import {
+  Communication,
+  CommunicationSchema,
+} from 'shared/sub-documents/communication';
+import { Address, AddressSchema } from 'shared/sub-documents/address';
 import { RoleType } from '../shared/enum/role-type.enum';
 import { Company } from './company.model';
 import { EmailSettings } from 'user/dto/email-settings';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { EmployeeInfo } from 'business/sub-docs/employee-info';
+import {
+  EmployeeInfo,
+  EmployeeInfoSchema,
+} from 'business/sub-docs/employee-info';
 import { Location } from './location.model';
 
 interface User extends Document<any> {
@@ -46,7 +57,7 @@ type UserModel = Model<User>;
 const UserSchema = new Schema<any>(
   {
     address: {
-      type: SchemaTypes.Map,
+      type: AddressSchema,
       default: {
         address2: '',
         address1: '',
@@ -58,7 +69,7 @@ const UserSchema = new Schema<any>(
     },
     dob: { type: SchemaTypes.Date },
     communication: {
-      type: SchemaTypes.Map,
+      type: CommunicationSchema,
       default: {
         email: true,
         sms: true,
@@ -72,7 +83,17 @@ const UserSchema = new Schema<any>(
       dropDups: true,
     },
     emailSettings: {
-      type: SchemaTypes.Map,
+      type: {
+        emailNotification: SchemaTypes.Boolean,
+        sendCopyToPersonalEmail: SchemaTypes.Boolean,
+        activityRelatesEmail: {
+          youHaveNewNotifications: SchemaTypes.Boolean,
+          youAreSentADirectMessage: SchemaTypes.Boolean,
+          locationTargetReached: SchemaTypes.Boolean,
+          newTeamMember: SchemaTypes.Boolean,
+          employeeTargetReached: SchemaTypes.Boolean,
+        },
+      },
       default: {
         emailNotification: true,
         sendCopyToPersonalEmail: false,
@@ -98,7 +119,6 @@ const UserSchema = new Schema<any>(
     },
     phone: { type: SchemaTypes.String, required: false },
     roles: [{ type: SchemaTypes.String }],
-    startedAt: { type: SchemaTypes.Date },
     timezone: { type: SchemaTypes.String, default: 'CDT' },
     username: {
       type: SchemaTypes.String,
@@ -110,7 +130,7 @@ const UserSchema = new Schema<any>(
 
     //EMPLOYEE DATA
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
-    employeeInfo: { type: SchemaTypes.Map, default: {} },
+    employeeInfo: { type: EmployeeInfoSchema, default: {} },
     supervisor: { type: SchemaTypes.ObjectId, ref: 'User' },
     location: { type: SchemaTypes.ObjectId, ref: 'Location' },
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User' },

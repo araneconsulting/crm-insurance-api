@@ -1,7 +1,8 @@
 import { IsArray, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
-import { Address } from 'shared/sub-documents/address';
+import { Schema, SchemaTypes } from 'mongoose';
+import { Address, AddressSchema } from 'shared/sub-documents/address';
 
-export class BusinessInfo extends Map<any, any> {
+export class BusinessInfo {
   @IsOptional()
   readonly address: Address;
 
@@ -52,6 +53,22 @@ export class BusinessInfo extends Map<any, any> {
   @IsNotEmpty()
   readonly website: string;
 }
+
+export const BusinessInfoSchema = new Schema<any>({
+  address: AddressSchema,
+  email: { type: SchemaTypes.String },
+  fax: { type: SchemaTypes.String },
+  industry: { type: SchemaTypes.String },
+  logo: { type: SchemaTypes.String },
+  name: { type: SchemaTypes.String },
+  otherPhones: { type: SchemaTypes.String },
+  primaryPhone: { type: SchemaTypes.String },
+  primaryPhoneExtension: { type: SchemaTypes.String },
+  secondaryPhone: { type: SchemaTypes.String },
+  secondaryPhoneExtension: { type: SchemaTypes.String },
+  sector: { type: SchemaTypes.String },
+  website: { type: SchemaTypes.String },
+});
 
 export const DEFAULT_BUSINESS_INFO = {
   address: {

@@ -1,10 +1,10 @@
-import { BusinessInfo } from 'business/sub-docs/business-info';
+import { BusinessInfo, BusinessInfoSchema } from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { ContactInfo } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
-import { Commission } from 'business/sub-docs/commision';
+import { Commission, CommissionSchema } from 'business/sub-docs/commision';
 import { SubProvider } from 'insurance/insurer/update-insurer.dto';
 interface Insurer extends Document<any> {
   readonly business: BusinessInfo;
@@ -21,15 +21,10 @@ type InsurerModel = Model<Insurer>;
 
 const InsurerSchema = new Schema<any>(
   {
-    business: { type: SchemaTypes.Map },
-    commissions: [
-      {
-        productType: SchemaTypes.String,
-        percent: SchemaTypes.Number,
-      },
-    ],
+    business: { type: BusinessInfoSchema },
+    commissions: [CommissionSchema],
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
-    contact: { type: SchemaTypes.Map },
+    contact: ContactInfoSchema,
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     subproviders: [
       {

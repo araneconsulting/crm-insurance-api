@@ -25,6 +25,8 @@ import { REQUEST } from '@nestjs/core';
 import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
 import { Location } from 'database/location.model';
 import { bonusByRole } from 'shared/vl17-specific/salary/mexico-bonus';
+import { Address } from 'shared/sub-documents/address';
+import { BusinessInfo } from 'business/sub-docs/business-info';
 
 const GROUP_BY_SELLER = 'SELLER';
 @Injectable({ scope: Scope.REQUEST })
@@ -194,9 +196,9 @@ export class ReportService {
         foreignField: '_id',
         as: 'customer',
       })
-      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
 
-      query
+    query
       .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
       .lookup({
         from: 'locations',
@@ -342,7 +344,7 @@ export class ReportService {
       null,
       GROUP_BY_SELLER,
       [],
-      ['premium', 'tips'],
+      ['totalCharge', 'tips', 'permits', 'fees'],
       true,
     );
 
@@ -351,8 +353,10 @@ export class ReportService {
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
-      result['premium'] = roundAmount(metric.premium);
-      result['tips'] = metric.tips;
+      result['totalCharge'] = roundAmount(metric.totalCharge);
+      result['tips'] = roundAmount(metric.tips);
+      result['permits'] = roundAmount(metric.permits);
+      result['fees'] = roundAmount(metric.fees);
 
       return result;
     });
@@ -360,22 +364,32 @@ export class ReportService {
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.premium,
+            (accumulator, item) => accumulator + item.totalCharge,
             0,
           )
         : 0;
+
+    console.log(officeTotalSales);
 
     let allUsers = [];
 
     if (sellerId) {
       try {
-        const user: any = await this.userModel.findOne({ _id: sellerId }).populate('location').exec();
+        const user: any = await this.userModel
+          .findOne({ _id: sellerId })
+          .populate('location')
+          .exec();
         const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
 
         const result = {
           //...user._doc,
-          premium: userMetrics ? userMetrics.premium : 0,
+          roles: user.roles,
+          permits: userMetrics ? userMetrics.permits : 0,
+          fees: userMetrics ? userMetrics.fees : 0,
           tips: userMetrics ? userMetrics.tips : 0,
+          location: user.location ? user.location : null,
+          locationId: user.location ? user.location.id : null,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
           sellerName: user.firstName + ' ' + user.lastName,
         };
 
@@ -384,16 +398,30 @@ export class ReportService {
         throw new NotFoundException('User not found');
       }
     } else {
-      const users: any[] = await this.userModel.find({}).populate('location').exec();
+      const users: any[] = await this.userModel
+        .find({})
+        .populate('location')
+        .exec();
+
       allUsers = users
-        .filter((user) => !isAdmin(user)) //&& !isExecutive(user))
+        .filter((user) => !isAdmin(user) && !isExecutive(user))
         .map((user) => {
           const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
+          const business =
+            typeof user.location !== 'undefined'
+              ? user.location.business
+              : null;
+
           const result = {
             //...user._doc,
-            premium: userMetrics ? userMetrics.premium : 0,
+            roles: user.roles,
+            permits: userMetrics ? userMetrics.permits : 0,
+            fees: userMetrics ? userMetrics.fees : 0,
             tips: userMetrics ? userMetrics.tips : 0,
+            location: user.location ? user.location : null,
+            locationId: user.location ? user.location.id : null,
+            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
             sellerName: user.firstName + ' ' + user.lastName,
           };
 
@@ -401,17 +429,34 @@ export class ReportService {
         });
     }
 
+    console.log('all users metrics: ', allUsers);
+
     const userFilteredByLocation =
-      !isAdmin(user) //&& isExecutive(user)
-        ? allUsers.filter((employee) => employee.location === user.location)
+      !isAdmin(user) && isExecutive(user)
+        ? allUsers.filter((employee) => {
+            //console.log(user.location, employee.locationId, employee.location);
+            return employee.locationId === user.location;
+          })
         : allUsers;
 
-
     const payroll = userFilteredByLocation.map((employeeInfo) => {
+      console.log('location: ', employeeInfo.location);
+      console.log('location.business: ', employeeInfo.location.business);
+      console.log(
+        'location.business.address: ',
+        employeeInfo.location.business.address,
+      );
+      console.log(
+        'location.business.address.country: ',
+        employeeInfo.location.business.address.country,
+      );
+
       employeeInfo['bonus'] = bonusByRole(
         getPrimaryRole(employeeInfo),
-        user.location,
-        employeeInfo.premium,
+        employeeInfo.location.business
+          ? employeeInfo.location.business.address.country
+          : 'N/A',
+        employeeInfo.totalCharge,
         employeeInfo.permits,
         employeeInfo.fees,
         employeeInfo.tips,
@@ -425,7 +470,7 @@ export class ReportService {
       return employeeInfo;
     });
 
-    console.log(payroll);
+    //console.log(payroll);
     return payroll;
   }
 
@@ -450,7 +495,7 @@ export class ReportService {
       'SELLER',
       [],
       [
-        'premium',
+        'totalCharge',
         'permits',
         'fees',
         'tips',
@@ -464,7 +509,7 @@ export class ReportService {
 
     employeeMetrics = employeeMetrics.map((metric) => {
       const result = metric._id;
-      result['premium'] = roundAmount(metric.premium);
+      result['totalCharge'] = roundAmount(metric.totalCharge);
       result['tips'] = roundAmount(metric.tips);
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
@@ -479,7 +524,7 @@ export class ReportService {
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.premium,
+            (accumulator, item) => accumulator + item.totalCharge,
             0,
           )
         : 0;
@@ -504,7 +549,7 @@ export class ReportService {
 
         const result = {
           ...user._doc,
-          premium: userMetrics ? userMetrics.premium : 0,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           fees: userMetrics ? userMetrics.fees : 0,
           permits: userMetrics ? userMetrics.permits : 0,
@@ -520,7 +565,7 @@ export class ReportService {
         result['bonus'] = bonusByRole(
           getPrimaryRole(user),
           user.location,
-          result.premium,
+          result.totalCharge,
           result.permits,
           result.fees,
           result.tips,

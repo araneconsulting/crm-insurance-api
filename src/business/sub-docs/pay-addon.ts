@@ -1,4 +1,4 @@
-interface PayAddon extends Map<any,any> {
+interface PayAddon {
     readonly amount: number;
     readonly category: string; //can be: Year's End bonus
     readonly description: string; //can be: Year's End Bonus for 2021

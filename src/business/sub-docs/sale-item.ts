@@ -1,15 +1,20 @@
 import { IsNotEmpty, IsNumber, IsObject, IsOptional } from 'class-validator';
+import { Schema, SchemaTypes } from 'mongoose';
 
-export class SaleItem extends Map<any, any> {
+export class SaleItem {
+  @IsNumber()
+  amount: number;
+
+  @IsOptional()
+  @IsObject()
+  details: any;
+
   @IsNotEmpty()
   product: string;
   //can be: TRUCKING_LIABILITY, TRUCKING_WCGLUMB, TRUCKING_CARGO, TRUCKING_PHYSICAL_DAMAGE, TRUCKING_PERMIT,  AUTO_LIABILITY_FULL, AUTO_LIABILITY_GENERAL...
 
-  @IsNotEmpty()
-  type: string; //can be:
-
   @IsNumber()
-  amount: number;
+  profits: number; //Auto calculated (commission % of amount)
 
   @IsNotEmpty()
   provider: string; //Provider (Insurer) ID
@@ -17,21 +22,28 @@ export class SaleItem extends Map<any, any> {
   @IsOptional()
   subprovider: string; //Broker subprovider name (ej: Progressive)
 
-  @IsNumber()
-  profits: number; //Auto calculated (commission % of amount)
-
-  @IsOptional()
-  @IsObject()
-  details: any;
+  @IsNotEmpty()
+  type: string; //can be:
 }
 
+export const SaleItemSchema = new Schema<any>({
+  amount: { type: SchemaTypes.Number },
+  details: { type: SchemaTypes.Map },
+  product: { type: SchemaTypes.String },
+  profits: { type: SchemaTypes.Number },
+  provider: { type: SchemaTypes.ObjectId, ref: 'Insurer' },
+  subprovider: { type: SchemaTypes.String },
+  type: { type: SchemaTypes.String },
+});
+
 export const DEFAULT_SALE_ITEM = {
-  name: '',
-  type: '',
   amount: 0,
+  details: '',
+  product: '',
+  profits: 0,
   provider: '',
   subprovider: '',
-  profits: 0,
+  type: '',
 };
 
 export const DEFAULT_SALE_ITEM_TRUCKING = {

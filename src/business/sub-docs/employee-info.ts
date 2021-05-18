@@ -1,7 +1,13 @@
-import { IsBoolean, IsBooleanString, IsDateString, IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
+import { Schema, SchemaTypes } from 'mongoose';
 
-export class EmployeeInfo extends Map<any, any> {
-
+export class EmployeeInfo {
   @IsOptional()
   @IsDateString()
   readonly endedAt: string;
@@ -45,5 +51,19 @@ export class EmployeeInfo extends Map<any, any> {
   @IsOptional()
   @IsNumber()
   readonly hourlyRate: number;
-  
 }
+
+export const EmployeeInfoSchema = new Schema<any>({
+  productType: { type: SchemaTypes.String },
+  endedAt: { type: SchemaTypes.String },
+  position: { type: SchemaTypes.String },
+  payFrequency: { type: SchemaTypes.String },
+  payRate: { type: SchemaTypes.Number },
+  overtimeAuthorized: { type: SchemaTypes.Boolean },
+  overtimePayRate: { type: SchemaTypes.Number },
+  salaryFormula: { type: SchemaTypes.String },
+  startedAt: { type: SchemaTypes.Date },
+  workPrimaryPhone: { type: SchemaTypes.String },
+  workPrimaryPhoneExtension: { type: SchemaTypes.String },
+  hourlyRate: { type: SchemaTypes.Number },
+});

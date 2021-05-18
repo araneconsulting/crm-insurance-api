@@ -1,11 +1,7 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsPositive,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { Schema, SchemaTypes } from 'mongoose';
 
-export class Commission extends Map<any, any> {
+export class Commission {
   @IsString()
   @IsNotEmpty()
   productType: string;
@@ -15,6 +11,11 @@ export class Commission extends Map<any, any> {
   @IsPositive()
   percent: number;
 }
+
+export const CommissionSchema = new Schema<any>({
+  productType: { type: SchemaTypes.String },
+  percent: { type: SchemaTypes.Number },
+});
 
 export const DEFAULT_BUSINESS_INFO = {
   commissions: [
@@ -26,5 +27,5 @@ export const DEFAULT_BUSINESS_INFO = {
     { productType: 'LIFE', percent: 0 },
     { productType: 'HEALTH', percent: 0 },
     { productType: 'PERMIT', percent: 0 },
-  ]
+  ],
 };

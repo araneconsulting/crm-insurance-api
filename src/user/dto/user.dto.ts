@@ -8,7 +8,7 @@ import { Communication } from 'shared/sub-documents/communication';
 import { RoleType } from '../../shared/enum/role-type.enum';
 import { EmailSettings } from './email-settings';
 
-export class UserDto extends Map<any, any> {
+export class UserDto {
   @IsOptional()
   @IsNotEmpty()
   readonly address: Address;

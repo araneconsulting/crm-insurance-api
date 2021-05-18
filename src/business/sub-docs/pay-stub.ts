@@ -1,6 +1,6 @@
 import { User } from "database/user.model";
 
-interface PayStub extends Map<any,any> {
+interface PayStub {
     readonly addons: PayAddon[];  
     readonly employee: Partial<User>;
     readonly normalHoursWorked: number;

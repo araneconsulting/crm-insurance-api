@@ -1,4 +1,4 @@
-export class ActivityRelatesEmailDto extends Map<any, any> {
+export class ActivityRelatesEmailDto {
   readonly companyMilestoneReached: boolean;
   readonly employeeMilestoneReached: boolean;
   readonly locationMilestoneReached: boolean;

@@ -3,7 +3,7 @@ import { Company } from './company.model';
 import { Location } from './location.model';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { PayStub } from './pay-stub.model';
+import { PayStub, PayStubSchema } from './pay-stub.model';
 interface Payroll extends Document<any> {
   readonly executedBy: Partial<User>;
   readonly company: Partial<Company>;
@@ -25,7 +25,7 @@ const PayrollSchema = new Schema<any>(
     payExecutedAt: { type: SchemaTypes.Date },
     payPeriodStartedAt: { type: SchemaTypes.Date },
     payPeriodEndedAt: { type: SchemaTypes.Date },
-    payStubs: [{ type: SchemaTypes.Map, required: false, default: [] }],
+    payStubs: [{ type: PayStubSchema, required: false, default: [] }],
     scope: { type: SchemaTypes.String }, //can be Company (C), Location (L), Individual (I)
   },
   {

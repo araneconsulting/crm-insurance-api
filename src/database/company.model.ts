@@ -1,7 +1,7 @@
 import { IsPhoneNumber } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { Address } from 'shared/sub-documents/address';
+import { Address, AddressSchema } from 'shared/sub-documents/address';
 
 interface Company extends Document<any> {
   readonly address: Address;
@@ -26,7 +26,7 @@ type CompanyModel = Model<Company>;
 const CompanySchema = new Schema<any>(
   {
     address: {
-      type: SchemaTypes.Map,
+      type: AddressSchema,
       default: {
         address2: '',
         address1: '',

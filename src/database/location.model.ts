@@ -1,4 +1,7 @@
-import { BusinessInfo } from 'business/sub-docs/business-info';
+import {
+  BusinessInfo,
+  BusinessInfoSchema,
+} from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { Company } from './company.model';
@@ -16,8 +19,8 @@ const LocationSchema = new Schema<any>(
   {
     alias: { type: SchemaTypes.String },
     business: {
-      type: SchemaTypes.Map,
-      default: {
+      type: BusinessInfoSchema,
+       default: {
         address: {
           address1: '',
           address2: '',
@@ -39,7 +42,7 @@ const LocationSchema = new Schema<any>(
         sector: '', // can be: Financial, Technology, Healthcare, etc
         startedAt: '',
         type: '',
-        website: '',
+        website: '', 
       },
     },
     payFrequency: { type: SchemaTypes.String },

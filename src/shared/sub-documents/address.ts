@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
+import { Schema, SchemaTypes } from 'mongoose';
 
-export class Address extends Map<any, any> {
+export class Address {
   @IsNotEmpty()
   readonly address1: string;
 
@@ -24,3 +25,13 @@ export class Address extends Map<any, any> {
   @IsNotEmpty()
   readonly zip: string;
 }
+
+export const AddressSchema = new Schema<any>({
+  address1: { type: SchemaTypes.String },
+  address2: { type: SchemaTypes.String },
+  city: { type: SchemaTypes.String },
+  county: { type: SchemaTypes.String },
+  state: { type: SchemaTypes.String },
+  country: { type: SchemaTypes.String },
+  zip: { type: SchemaTypes.String },
+});

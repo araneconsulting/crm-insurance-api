@@ -188,48 +188,6 @@ export class ReportService {
       })
       .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
 
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'liabilityInsurer',
-        foreignField: '_id',
-        as: 'liabilityInsurer',
-      })
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'cargoInsurer',
-        foreignField: '_id',
-        as: 'cargoInsurer',
-      })
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'insurers',
-        localField: 'physicalDamageInsurer',
-        foreignField: '_id',
-        as: 'physicalDamageInsurer',
-      })
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'wcGlUmbInsurer',
-        foreignField: '_id',
-        as: 'wcGlUmbInsurer',
-      })
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
-
       .append([
         {
           $project: {
@@ -267,18 +225,7 @@ export class ReportService {
                 args: ['$customer'],
                 lang: 'js',
               },
-            },
-            insurerNames: {
-              $concat: [
-                { $ifNull: ['$liabilityInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$cargoInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$physicalDamageInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$wcGlUmbInsurer.name', ''] },
-              ],
-            },
+            },            
           },
         },
       ])
@@ -366,14 +313,14 @@ export class ReportService {
       null,
       'SELLER',
       [],
-      ['premium', 'tips'],
+      ['totalCharge', 'tips'],
       true,
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
-      result['premium'] = roundAmount(metric.premium);
+      result['totalCharge'] = roundAmount(metric.totalCharge);
       result['tips'] = metric.tips;
 
       return result;
@@ -382,7 +329,7 @@ export class ReportService {
     const officeTotalCompanies =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.premium,
+            (accumulator, item) => accumulator + item.totalCharge,
             0,
           )
         : 0;
@@ -396,7 +343,7 @@ export class ReportService {
 
         const result = {
           ...user._doc,
-          premium: userMetrics ? userMetrics.premium : 0,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           sellerName: user.firstName + ' ' + user.lastName,
         };
@@ -414,7 +361,7 @@ export class ReportService {
 
           const result = {
             ...user._doc,
-            premium: userMetrics ? userMetrics.premium : 0,
+            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
             tips: userMetrics ? userMetrics.tips : 0,
             sellerName: user.firstName + ' ' + user.lastName,
           };
@@ -432,7 +379,7 @@ export class ReportService {
       employeeInfo['bonus'] = bonusByRole(
         getPrimaryRole(employeeInfo),
         user.location.toString(),
-        employeeInfo.premium,
+        employeeInfo.totalCharge,
         employeeInfo.permits,
         employeeInfo.fees,
         employeeInfo.tips,
@@ -471,7 +418,7 @@ export class ReportService {
       'SELLER',
       [],
       [
-        'premium',
+        'totalCharge',
         'permits',
         'fees',
         'tips',
@@ -485,7 +432,7 @@ export class ReportService {
 
     employeeMetrics = employeeMetrics.map((metric) => {
       const result = metric._id;
-      result['premium'] = roundAmount(metric.premium);
+      result['totalCharge'] = roundAmount(metric.totalCharge);
       result['tips'] = roundAmount(metric.tips);
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
@@ -500,7 +447,7 @@ export class ReportService {
     const officeTotalCompanies =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.premium,
+            (accumulator, item) => accumulator + item.totalCharge,
             0,
           )
         : 0;
@@ -525,7 +472,7 @@ export class ReportService {
 
         const result = {
           ...user._doc,
-          premium: userMetrics ? userMetrics.premium : 0,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           fees: userMetrics ? userMetrics.fees : 0,
           permits: userMetrics ? userMetrics.permits : 0,
@@ -541,7 +488,7 @@ export class ReportService {
         result['bonus'] = bonusByRole(
           getPrimaryRole(user),
           user.location,
-          result.premium,
+          result.totalCharge,
           result.permits,
           result.fees,
           result.tips,

@@ -1,12 +1,9 @@
-import {
-  IsEmail,
-IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
-import { Address } from 'shared/sub-documents/address';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { Schema, SchemaTypes } from 'mongoose';
+import { Address, AddressSchema } from 'shared/sub-documents/address';
 import { Communication } from 'shared/sub-documents/communication';
 
-export class ContactInfo extends Map<any, any> {
+export class ContactInfo {
   @IsOptional()
   @IsNotEmpty()
   readonly address: Address;
@@ -56,6 +53,21 @@ export class ContactInfo extends Map<any, any> {
   @IsNotEmpty()
   readonly website: string;
 }
+
+export const ContactInfoSchema = new Schema<any>({
+  address: AddressSchema,
+  dob: { type: SchemaTypes.Date },
+  driverLicense: { type: SchemaTypes.String },
+  email: { type: SchemaTypes.String },
+  firstName: { type: SchemaTypes.String },
+  language: { type: SchemaTypes.String },
+  lastName: { type: SchemaTypes.String },
+  mobilePhone: { type: SchemaTypes.String },
+  phone: { type: SchemaTypes.String },
+  ssn: { type: SchemaTypes.String },
+  timezone: { type: SchemaTypes.String },
+  website: { type: SchemaTypes.String },
+});
 
 export const DEFAULT_CONTACT_INFO = {
   address: {
