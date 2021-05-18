@@ -1,3 +1,4 @@
+import { SaleItem } from 'business/sub-docs/sale-item';
 import {
   IsBoolean,
   IsDateString,
@@ -40,5 +41,5 @@ export class UpdateSaleDto {
   premium: number;
 
   @IsObject()
-  items: [];
+  items: SaleItem[];
 }

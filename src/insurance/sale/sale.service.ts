@@ -18,13 +18,15 @@ import {
   USER_MODEL,
 } from '../../database/database.constants';
 import { CreateSaleDto } from './dto/create-sale.dto';
+import { SaleDto } from './dto/sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
 import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
-import { CompanyCatalog } from 'shared/const/catalog/company';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { SaleItem } from 'business/sub-docs/sale-item';
+import { TruckingDetails } from 'business/sub-docs/trucking.details';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
@@ -164,13 +166,6 @@ export class SaleService {
       saleQuery.populate('customer');
     }
 
-    if (withInsurers) {
-      saleQuery.populate('liabilityInsurer');
-      saleQuery.populate('cargoInsurer');
-      saleQuery.populate('physicalDamageInsurer');
-      saleQuery.populate('wcGlUmbInsurer');
-    }
-
     return from(saleQuery.exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
@@ -181,7 +176,9 @@ export class SaleService {
    * @param  {CreateSaleDto} saleDto
    * @returns Promise
    */
-  async save(saleDto: CreateSaleDto): Promise<Sale> {
+  async save(createSaleDto: CreateSaleDto): Promise<Sale> {
+    let saleDto: Partial<SaleDto> = { ...createSaleDto };
+
     if (
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
@@ -198,9 +195,8 @@ export class SaleService {
       saleDto['location'] = seller.location;
     }
 
-    //let saleData = await this.setSaleCalculations(saleDto);
-
-    /***/ const saleData = saleDto;
+    const insurers = await this.insurerModel.find({}).exec();
+    let saleData = await this.setSaleCalculations(saleDto, insurers);
 
     return this.saleModel.create({
       ...saleData,
@@ -214,8 +210,10 @@ export class SaleService {
    * @param  {UpdateSaleDto} data
    * @returns Promise
    */
-  async update(id: string, saleDto: UpdateSaleDto): Promise<Sale> {
-    saleDto['updatedBy'] = this.req.user.id;
+  async update(id: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
+    let saleDto: Partial<SaleDto> = { ...updateSaleDto };
+
+    saleDto.updatedBy = this.req.user.id;
 
     if (
       saleDto.seller &&
@@ -231,18 +229,20 @@ export class SaleService {
       throw new NotFoundException(`sale:$id was not found`);
     }
 
-    let updatedSaleDto = { ...sale['_doc'], ...saleDto };
+    saleDto = {
+      ...sale['_doc'],
+      ...saleDto,
+      updatedBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    };
 
-    //let saleData = await this.setSaleCalculations(saleDto);
-
-    /***/ const saleData = updatedSaleDto;
+    const insurers = await this.insurerModel.find({}).exec();
+    let saleData: any = await this.setSaleCalculations(saleDto, insurers);
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
       {
         ...saleData,
-        updatedBy: { _id: this.req.user.id },
-        company: { _id: this.req.user.company },
       },
       { new: true },
     );
@@ -299,75 +299,85 @@ export class SaleService {
     } else return { $lte: new Date() };
   }
 
-  /**
-   * @param  {CreateSaleDto} sale
-   * @returns Promise
-   */
-  /* async setSaleCalculations(sale: CreateSaleDto): Promise<CreateSaleDto> {
-    const insurers = await this.insurerModel.find({}).exec();
-    if (sale.liabilityInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.liabilityInsurer &&
-          sale.liabilityInsurer !== '' &&
-          insurer.id === sale.liabilityInsurer.toString(),
-      );
-      sale['liabilityProfit'] = insurer
-        ? roundAmount(
-            (insurer.commissionSheet.liabilityCommission / 100) * sale.liabilityCharge,
-          )
-        : 0;
+  async setSaleCalculations(
+    saleDto: Partial<SaleDto>,
+    providers: Insurer[],
+  ): Promise<Partial<SaleDto>> {
+    let sale: Partial<SaleDto> = { ...saleDto };
+    let items: SaleItem[] = sale.items;
+
+    if (items) {
+      let premium = 0;
+      let calcTotalCharge = !sale.totalCharge || sale.totalCharge === -1;
+      let totalCharge = 0;
+      let profits = 0;
+      let permits = 0;
+
+      sale.items.map((item) => {
+        //calculate total premium
+        if (item.product !== 'TRUCKING_PERMIT') {
+          if (item.details) {
+            const details: Partial<TruckingDetails> = item.details;
+            //Calculate premium
+            premium += details.premium ? item.details.premium : 0;
+          }
+        } else {
+          permits += item.amount;
+        }
+
+        //calculate total charge (aka total down payment)
+        if (calcTotalCharge) {
+          totalCharge += item.amount ? item.amount : 0;
+        }
+
+        //calculate item profits and sale total profits
+        if (item.provider) {
+          const provider = providers.find(
+            (provider) =>
+              item.provider &&
+              item.provider !== '' &&
+              provider.id === item.provider.toString(),
+          );
+
+          if (!provider) {
+            throw new ConflictException(
+              'Sale Item ' + `${item.provider}` + ' provider not found',
+            );
+          }
+
+          let commision = provider.commissions.find((productType) => sale.type);
+
+          if (commision) {
+            item.profits = roundAmount((commision.percent / 100) * item.amount);
+            profits += item.profits;
+          } else {
+            throw new ConflictException(
+              'Provider $item.provider commissions missing.',
+            );
+          }
+        } else {
+          throw new ConflictException(
+            'Sale Item provider not found :$item.provider.',
+          );
+        }
+      });
+
+      sale.premium = premium || 0;
+      sale.profits = profits || 0;
+      sale.permits = permits || 0;
+
+      console.log('totalCharge', totalCharge);
+
+      if (calcTotalCharge) {
+        sale.totalCharge = totalCharge;
+      }
+      sale.totalCharge =
+        sale.totalCharge + (sale.tips || 0) + sale.permits + (sale.fees || 0);
+
+      sale.amountReceivable = sale.totalCharge - sale.chargesPaid;
     }
-
-    if (sale.cargoInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.cargoInsurer &&
-          sale.cargoInsurer !== '' &&
-          insurer.id === sale.cargoInsurer.toString(),
-      );
-      sale['cargoProfit'] = insurer
-        ? roundAmount((insurer.commissionSheet.cargoCommission / 100) * sale.cargoCharge)
-        : 0;
-    }
-
-    if (sale.physicalDamageInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.physicalDamageInsurer &&
-          sale.physicalDamageInsurer !== '' &&
-          insurer.id === sale.physicalDamageInsurer.toString(),
-      );
-      sale['physicalDamageProfit'] = insurer
-        ? roundAmount(
-            (insurer.commissionSheet.physicalDamageCommission / 100) *
-              sale.physicalDamageCharge,
-          )
-        : 0;
-    }
-
-    if (sale.wcGlUmbInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.wcGlUmbInsurer &&
-          sale.wcGlUmbInsurer !== '' &&
-          insurer.id === sale.wcGlUmbInsurer.toString(),
-      );
-      sale['wcGlUmbProfit'] = insurer
-        ? roundAmount((insurer.commissionSheet.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
-        : 0;
-    }
-
-    sale['premium'] =
-      (sale.liabilityCharge || 0) +
-      (sale.cargoCharge || 0) +
-      (sale.physicalDamageCharge || 0) +
-      (sale.wcGlUmbCharge || 0);
-    sale['amountReceivable'] =
-      (sale.totalCharge || 0) - (sale.chargesPaid || 0);
-
     return sale;
-  } */
+  }
 
   async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};

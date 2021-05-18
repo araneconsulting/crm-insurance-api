@@ -13,7 +13,6 @@ import * as DateFactory from 'shared/util/date-functions';
 import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
 import { COMPANY, METRICS } from 'shared/const/project-constants';
 import * as moment from 'moment';
-import { bonusByRole } from '../../shared/util/salary-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import {
   getPrimaryRole,
@@ -25,6 +24,7 @@ import { CompanyCatalog } from '../../shared/const/catalog/company';
 import { REQUEST } from '@nestjs/core';
 import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
 import { Location } from 'database/location.model';
+import { bonusByRole } from 'shared/vl17-specific/salary/mexico-bonus';
 
 const GROUP_BY_SELLER = 'SELLER';
 @Injectable({ scope: Scope.REQUEST })
@@ -333,7 +333,7 @@ export class ReportService {
     user: Partial<User>,
     startDate: string,
     endDate: string,
-    seller?: string,
+    sellerId?: string,
   ): Promise<any> {
     let employeeMetrics = await this.getSalesMetrics(
       moment(startDate).toISOString(),
@@ -367,13 +367,13 @@ export class ReportService {
 
     let allUsers = [];
 
-    if (seller) {
+    if (sellerId) {
       try {
-        const user: any = await this.userModel.findOne({ _id: seller }).exec();
+        const user: any = await this.userModel.findOne({ _id: sellerId }).populate('location').exec();
         const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
 
         const result = {
-          ...user._doc,
+          //...user._doc,
           premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           sellerName: user.firstName + ' ' + user.lastName,
@@ -384,14 +384,14 @@ export class ReportService {
         throw new NotFoundException('User not found');
       }
     } else {
-      const users: any[] = await this.userModel.find({}).exec();
+      const users: any[] = await this.userModel.find({}).populate('location').exec();
       allUsers = users
-        .filter((user) => !isAdmin(user) && !isExecutive(user))
+        .filter((user) => !isAdmin(user)) //&& !isExecutive(user))
         .map((user) => {
           const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
           const result = {
-            ...user._doc,
+            //...user._doc,
             premium: userMetrics ? userMetrics.premium : 0,
             tips: userMetrics ? userMetrics.tips : 0,
             sellerName: user.firstName + ' ' + user.lastName,
@@ -402,14 +402,15 @@ export class ReportService {
     }
 
     const userFilteredByLocation =
-      isExecutive(user) && !isAdmin(user)
+      !isAdmin(user) //&& isExecutive(user)
         ? allUsers.filter((employee) => employee.location === user.location)
         : allUsers;
+
 
     const payroll = userFilteredByLocation.map((employeeInfo) => {
       employeeInfo['bonus'] = bonusByRole(
         getPrimaryRole(employeeInfo),
-        user.location.toString(),
+        user.location,
         employeeInfo.premium,
         employeeInfo.permits,
         employeeInfo.fees,
@@ -424,6 +425,7 @@ export class ReportService {
       return employeeInfo;
     });
 
+    console.log(payroll);
     return payroll;
   }
 

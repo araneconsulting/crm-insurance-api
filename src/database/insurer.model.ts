@@ -8,7 +8,7 @@ import { Commission } from 'business/sub-docs/commision';
 import { SubProvider } from 'insurance/insurer/update-insurer.dto';
 interface Insurer extends Document<any> {
   readonly business: BusinessInfo;
-  readonly commisions: Commission[];
+  readonly commissions: Commission[];
   readonly company: Partial<Company>;
   readonly contact: ContactInfo;
   readonly createdBy?: Partial<User>;
@@ -22,11 +22,20 @@ type InsurerModel = Model<Insurer>;
 const InsurerSchema = new Schema<any>(
   {
     business: { type: SchemaTypes.Map },
-    commissions: [{ type: SchemaTypes.Map }],
+    commissions: [
+      {
+        productType: SchemaTypes.String,
+        percent: SchemaTypes.Number,
+      },
+    ],
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },
     contact: { type: SchemaTypes.Map },
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
-    subproviders: [{ type: SchemaTypes.Map, required: false }],
+    subproviders: [
+      {
+        value: SchemaTypes.String,
+      },
+    ],
     type: { type: SchemaTypes.String, default: 'SINGLE' },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
   },

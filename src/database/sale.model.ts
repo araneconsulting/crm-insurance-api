@@ -20,7 +20,7 @@ interface Sale extends Document<any> {
   readonly location: Location;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly seller: Partial<User>;
-  readonly soldAt: Date;
+  readonly soldAt: string;
   readonly tips: number;
   readonly totalCharge: number; //Sum of all sale item amounts
   readonly type: string; //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
@@ -32,6 +32,7 @@ interface Sale extends Document<any> {
   
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
+  readonly profits: number; //[auto-calculated] Sum of al SaleItem profits;
 }
 
 type SaleModel = Model<Sale>;
@@ -56,6 +57,7 @@ const SaleSchema = new Schema<any>(
 
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     premium: { type: SchemaTypes.Number, default: 0, required: false },
+    profits: { type: SchemaTypes.Number, default: 0, required: false },
   },
   {
     timestamps: true,
@@ -65,6 +67,34 @@ const SaleSchema = new Schema<any>(
 );
 
 SaleSchema.plugin(mongoSoftDelete);
+
+/* SaleSchema.pre('save', function () {
+  const liability = this.liabilityCharge ? this.liabilityCharge : 0;
+  const cargo = this.cargoCharge ? this.cargoCharge : 0;
+  const physicalDamage = this.physicalDamageCharge
+    ? this.physicalDamageCharge
+    : 0;
+  const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
+
+  this.set({
+    premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
+    amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
+  });
+}); */
+
+/* SaleSchema.pre('updateOne', function () {
+  const liability = this.liabilityCharge ? this.liabilityCharge : 0;
+  const cargo = this.cargoCharge ? this.cargoCharge : 0;
+  const physicalDamage = this.physicalDamageCharge
+    ? this.physicalDamageCharge
+    : 0;
+  const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
+
+  this.set({
+    premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
+    amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
+  });
+}); */
 
 const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
   conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');

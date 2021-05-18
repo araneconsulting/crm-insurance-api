@@ -55,7 +55,7 @@ export class PayrollController {
 
   @Post()
   @HttpCode(201)
-  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  //@HasRoles(RoleType.SUPER,RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async createPayroll(
