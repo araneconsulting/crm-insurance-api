@@ -1,5 +1,6 @@
 import { SaleItem } from 'business/sub-docs/sale-item';
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsMongoId,
@@ -40,6 +41,6 @@ export class UpdateSaleDto {
   @IsNotEmpty()
   premium: number;
 
-  @IsObject()
+  @IsArray()
   items: SaleItem[];
 }
