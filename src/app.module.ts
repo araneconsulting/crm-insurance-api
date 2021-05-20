@@ -15,13 +15,11 @@ import { DashboardModule } from 'insurance/dashboard/dashboard.module';
 import { CompanyModule } from 'business/company/company.module';
 import { LocationModule } from 'business/location/location.module';
 import { PayrollModule } from 'business/payroll/payroll.module';
-import { AuthService } from 'auth/auth.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({cache: true,}),
     AuthModule,
-    PayrollModule,
     ReportModule,
     SaleModule,
     DatabaseModule,
@@ -32,6 +30,7 @@ import { AuthService } from 'auth/auth.service';
     LocationModule,
     UserModule,
     SendgridModule,
+    PayrollModule,
     LoggerModule.forRoot(),    
   ],
   controllers: [AppController],

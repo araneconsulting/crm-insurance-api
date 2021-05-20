@@ -314,6 +314,7 @@ export class SaleService {
       let permits = 0;
 
       sale.items.map((item) => {
+
         //calculate total premium
         if (item.product !== 'TRUCKING_PERMIT') {
           if (item.details) {

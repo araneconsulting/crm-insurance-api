@@ -2,7 +2,7 @@ import { BusinessInfo, BusinessInfoSchema } from 'business/sub-docs/business-inf
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { ContactInfo } from 'business/sub-docs/contact-info';
+import { ContactInfo, ContactInfoSchema } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
 import { Commission, CommissionSchema } from 'business/sub-docs/commision';
 import { SubProvider } from 'insurance/insurer/update-insurer.dto';

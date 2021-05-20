@@ -3,7 +3,9 @@ import { Company } from './company.model';
 import { Location } from './location.model';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
-import { PayStub, PayStubSchema } from './pay-stub.model';
+import { PayStub, PayStubSchema } from 'business/sub-docs/pay-stub';
+
+
 interface Payroll extends Document<any> {
   readonly executedBy: Partial<User>;
   readonly company: Partial<Company>;

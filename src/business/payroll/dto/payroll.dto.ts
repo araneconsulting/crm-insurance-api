@@ -1,6 +1,6 @@
+import { PayStub } from 'business/sub-docs/pay-stub';
 import { Company } from 'database/company.model';
 import { Location } from 'database/location.model';
-import { PayStub } from 'database/pay-stub.model';
 import { User } from 'database/user.model';
 
 export class PayrollDto {

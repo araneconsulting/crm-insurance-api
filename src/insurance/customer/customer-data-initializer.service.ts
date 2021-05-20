@@ -24,7 +24,7 @@ export class CustomerDataInitializerService
   ) { }
 
   async onModuleInit(): Promise<void> {
-    console.log('(InsuranceModule) is initialized...');
+    console.log('(CustomerModule) is initialized...');
     //await this.customerModel.deleteMany({});
     //await this.customerModel.insertMany(this.customerData).then((r) => console.log(r));
   }

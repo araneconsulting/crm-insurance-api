@@ -33,7 +33,7 @@ export class PayrollController {
 
   @Get()
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  @HasRoles(RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllPayrolls(
     @Query('q') keyword?: string,
@@ -45,7 +45,7 @@ export class PayrollController {
 
   @Get(':id')
   @HttpCode(200)
-  //@HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  @HasRoles(RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getPayrollById(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -55,7 +55,7 @@ export class PayrollController {
 
   @Post()
   @HttpCode(201)
-  //@HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  @HasRoles(RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async createPayroll(
@@ -66,7 +66,7 @@ export class PayrollController {
 
   @Put(':id')
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  @HasRoles(RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters( MongoFilter)
   async updatePayroll(
@@ -77,7 +77,7 @@ export class PayrollController {
   }
 
   @Delete(':id')
-  @HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  @HasRoles(RoleType.ADMIN)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async deletePayrollById(

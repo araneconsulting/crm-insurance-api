@@ -348,8 +348,6 @@ export class ReportService {
       true,
     );
 
-    console.log('Metrics ', employeeMetrics);
-
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
@@ -368,8 +366,6 @@ export class ReportService {
             0,
           )
         : 0;
-
-    console.log(officeTotalSales);
 
     let allUsers = [];
 
@@ -408,13 +404,9 @@ export class ReportService {
         .map((user) => {
           const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
 
-          const business =
-            typeof user.location !== 'undefined'
-              ? user.location.business
-              : null;
-
           const result = {
             //...user._doc,
+            id: user.id,                        
             roles: user.roles,
             permits: userMetrics ? userMetrics.permits : 0,
             fees: userMetrics ? userMetrics.fees : 0,
@@ -429,48 +421,33 @@ export class ReportService {
         });
     }
 
-    console.log('all users metrics: ', allUsers);
+    
 
     const userFilteredByLocation =
       !isAdmin(user) && isExecutive(user)
         ? allUsers.filter((employee) => {
-            //console.log(user.location, employee.locationId, employee.location);
             return employee.locationId === user.location;
           })
         : allUsers;
 
     const payroll = userFilteredByLocation.map((employeeInfo) => {
-      console.log('location: ', employeeInfo.location);
-      console.log('location.business: ', employeeInfo.location.business);
-      console.log(
-        'location.business.address: ',
-        employeeInfo.location.business.address,
-      );
-      console.log(
-        'location.business.address.country: ',
-        employeeInfo.location.business.address.country,
-      );
-
-      employeeInfo['bonus'] = bonusByRole(
-        getPrimaryRole(employeeInfo),
-        employeeInfo.location.business
-          ? employeeInfo.location.business.address.country
-          : 'N/A',
-        employeeInfo.totalCharge,
-        employeeInfo.permits,
-        employeeInfo.fees,
-        employeeInfo.tips,
-        employeeMetrics.length,
-        officeTotalSales,
-      );
-      employeeInfo['total'] = roundAmount(
-        employeeInfo.baseSalary + employeeInfo.bonus,
-      );
-
-      return employeeInfo;
+      if (employeeInfo.location) {
+        employeeInfo['bonus'] = bonusByRole(
+          getPrimaryRole(employeeInfo),
+          employeeInfo.location.business
+            ? employeeInfo.location.business.address.country
+            : 'N/A',
+          employeeInfo.totalCharge,
+          employeeInfo.permits,
+          employeeInfo.fees,
+          employeeInfo.tips,
+          employeeMetrics.length,
+          officeTotalSales,
+        );
+        return employeeInfo;
+      }
     });
 
-    //console.log(payroll);
     return payroll;
   }
 

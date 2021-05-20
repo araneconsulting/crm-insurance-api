@@ -1,7 +1,6 @@
+import { PayStub } from 'business/sub-docs/pay-stub';
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { Company } from 'database/company.model';
 import { Location } from 'database/location.model';
-import { PayStub } from 'database/pay-stub.model';
 export class CreatePayrollDto {
 
   @IsOptional()
