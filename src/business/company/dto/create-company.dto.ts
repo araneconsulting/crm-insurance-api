@@ -1,60 +1,63 @@
+import { BusinessInfo } from 'business/sub-docs/business-info';
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Address } from 'shared/sub-documents/address';
 export class CreateCompanyDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly address: Address;
+  address: Address;
 
   @IsNotEmpty()
   @IsEmail()
-  readonly email: string;
+  email: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly fax: string;
+  fax: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
+  industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
 
   @IsOptional()
   @IsNotEmpty()
-  readonly logo: string;
+  logo: string;
 
   @IsNotEmpty()
-  readonly name: string;
+  name: string;
 
   @IsOptional()
-  readonly otherPhones: string[]; // delimited by-comma string
+  otherPhones: string[]; // delimited by-comma string
   
   @IsOptional()
-  readonly primaryPhone: string;
+  primaryPhone: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly primaryPhoneExtension: string;
+  primaryPhoneExtension: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly secondaryPhone: string;
+  secondaryPhone: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly secondaryPhoneExtension: string;
+  secondaryPhoneExtension: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly sector: string; // can be: Financial, Technology, Healthcare, etc
+  sector: string; // can be: Financial, Technology, Healthcare, etc
 
   @IsOptional()
   @IsNotEmpty()
-  readonly startedAt: string;
+  startedAt: string;
 
   @IsNotEmpty()
-  readonly type: string; // headquarter (H), point of sale (P), office (O)
+  type: string; // LLC, S Corp, C Corp
 
   @IsOptional()
   @IsNotEmpty()
-  readonly website: string;
+  website: string;
+
+  financerCompanies: BusinessInfo[];
 }
