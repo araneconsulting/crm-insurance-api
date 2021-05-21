@@ -21,7 +21,7 @@ interface Sale extends Document<any> {
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
   readonly fees: number;
-  readonly location: Location;
+  readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly seller: Partial<User>;
   readonly soldAt: string;

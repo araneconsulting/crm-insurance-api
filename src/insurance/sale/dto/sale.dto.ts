@@ -13,7 +13,7 @@ export class SaleDto {
   company: Partial<Company>;
   customer: Partial<Customer>;
   fees: number;
-  location?: Location;
+  location?: Partial<Location>;
   items: SaleItem[]; //Contains all info about Sale
   seller: Partial<User>;
   soldAt: string;
