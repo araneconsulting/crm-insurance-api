@@ -1,7 +1,15 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 import { Schema, SchemaTypes } from 'mongoose';
+import { nanoid } from 'nanoid';
 
 export class Commission {
+  code?: string;
+
   @IsString()
   @IsNotEmpty()
   productType: string;
@@ -13,6 +21,7 @@ export class Commission {
 }
 
 export const CommissionSchema = new Schema<any>({
+  code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   productType: { type: SchemaTypes.String },
   percent: { type: SchemaTypes.Number },
 });

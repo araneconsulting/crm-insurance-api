@@ -3,6 +3,7 @@ import {
   Date,
   Document,
   Model,
+  ObjectId,
   Schema,
   SchemaTypes,
 } from 'mongoose';
@@ -33,6 +34,8 @@ interface Sale extends Document<any> {
   readonly endorsementReference: Partial<Sale>; 
   readonly policyEffectiveAt: string;
   readonly nextRenewalAt: string;
+  readonly monthlyPayment: number;
+  readonly financerCompany: ObjectId; //id del subdocumento de la financiera dentro de la compañia
 
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
@@ -67,6 +70,8 @@ const SaleSchema = new Schema<any>(
     endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
     policyEffectiveAt: { type: SchemaTypes.Date },
     nextRenewalAt: { type: SchemaTypes.Date },
+    monthlyPayment: { type: SchemaTypes.Number },
+    financerCompany: { type: SchemaTypes.ObjectId, ref: 'BusinessInfo' },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },

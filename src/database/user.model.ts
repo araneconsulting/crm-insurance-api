@@ -21,8 +21,10 @@ import {
   EmployeeInfoSchema,
 } from 'business/sub-docs/employee-info';
 import { Location } from './location.model';
+import { nanoid } from 'nanoid';
 
 interface User extends Document<any> {
+  readonly code: string;
   readonly address: Address;
   readonly dob: string;
   readonly communication: Communication;
@@ -56,6 +58,7 @@ type UserModel = Model<User>;
 
 const UserSchema = new Schema<any>(
   {
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     address: {
       type: AddressSchema,
       default: {

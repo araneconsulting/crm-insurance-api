@@ -6,8 +6,12 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Schema, SchemaTypes } from 'mongoose';
+import { nanoid } from 'nanoid';
 
 export class EmployeeInfo {
+
+  code: string;
+
   @IsOptional()
   @IsDateString()
   readonly endedAt: string;
@@ -54,6 +58,7 @@ export class EmployeeInfo {
 }
 
 export const EmployeeInfoSchema = new Schema<any>({
+  code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   productType: { type: SchemaTypes.String },
   endedAt: { type: SchemaTypes.String },
   position: { type: SchemaTypes.String },

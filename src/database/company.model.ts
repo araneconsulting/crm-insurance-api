@@ -1,12 +1,16 @@
+import { BusinessInfo, BusinessInfoSchema } from 'business/sub-docs/business-info';
 import { IsPhoneNumber } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import { nanoid } from 'nanoid';
 import { Address, AddressSchema } from 'shared/sub-documents/address';
 
 interface Company extends Document<any> {
+  readonly code: string;
   readonly address: Address;
   readonly email: string;
   readonly fax: string;
+  readonly financerCompanies: BusinessInfo[];
   readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
   readonly logo: string;
   readonly name: string;
@@ -25,6 +29,7 @@ type CompanyModel = Model<Company>;
 
 const CompanySchema = new Schema<any>(
   {
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     address: {
       type: AddressSchema,
       default: {
@@ -43,6 +48,7 @@ const CompanySchema = new Schema<any>(
       dropDups: true,
     },
     fax: { type: SchemaTypes.String },
+    financerCompanies: [BusinessInfoSchema],
     industry: { type: SchemaTypes.String },
     logo: { type: SchemaTypes.String },
     name: {

@@ -4,9 +4,11 @@ import {
 } from 'business/sub-docs/business-info';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import { nanoid } from 'nanoid';
 import { Company } from './company.model';
 
 interface Location extends Document<any> {
+  readonly code: string;
   readonly alias: string;
   readonly business: BusinessInfo;
   readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
@@ -17,6 +19,7 @@ type LocationModel = Model<Location>;
 
 const LocationSchema = new Schema<any>(
   {
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     alias: { type: SchemaTypes.String },
     business: {
       type: BusinessInfoSchema,

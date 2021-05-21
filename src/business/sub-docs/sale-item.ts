@@ -1,7 +1,11 @@
 import { IsNotEmpty, IsNumber, IsObject, IsOptional } from 'class-validator';
 import { Schema, SchemaTypes } from 'mongoose';
+import { nanoid } from 'nanoid';
 
 export class SaleItem {
+
+  code?: string;
+
   @IsNumber()
   amount: number;
 
@@ -27,6 +31,7 @@ export class SaleItem {
 }
 
 export const SaleItemSchema = new Schema<any>({
+  code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   amount: { type: SchemaTypes.Number },
   details: { type: SchemaTypes.Map },
   product: { type: SchemaTypes.String },

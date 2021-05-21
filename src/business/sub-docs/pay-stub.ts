@@ -1,8 +1,10 @@
 import { User } from 'database/user.model';
 import { Schema, SchemaTypes } from 'mongoose';
+import { nanoid } from 'nanoid';
 import { PayAddon, PayAddonSchema } from './pay-addon';
 
 export class PayStub {
+  code?: string;
   addons: PayAddon[];
   employee: Partial<User>;
   normalHoursWorked: number;
@@ -20,6 +22,7 @@ export class PayStub {
 }
 
 export const PayStubSchema = new Schema<any>({
+  code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   addons: [{ type: PayAddonSchema }],
   employee: [{ type: SchemaTypes.ObjectId, ref: 'User' }],
   normalHoursWorked: SchemaTypes.Number,

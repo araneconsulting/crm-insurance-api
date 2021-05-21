@@ -5,7 +5,9 @@ import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { ContactInfo, ContactInfoSchema } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
+import { nanoid } from 'nanoid';
 interface Customer extends Document<any> {
+  readonly code: string;
   readonly business: BusinessInfo;
   readonly contact: ContactInfo;
   readonly communication: Communication;
@@ -19,6 +21,7 @@ type CustomerModel = Model<Customer>;
 
 const CustomerSchema = new Schema<any>(
   {
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     business: {
       type: BusinessInfoSchema,
     },

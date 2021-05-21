@@ -1,9 +1,13 @@
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Schema, SchemaTypes } from 'mongoose';
+import { nanoid } from 'nanoid';
 import { Address, AddressSchema } from 'shared/sub-documents/address';
 import { Communication } from 'shared/sub-documents/communication';
 
 export class ContactInfo {
+
+  code?: string;
+
   @IsOptional()
   @IsNotEmpty()
   readonly address: Address;
@@ -55,6 +59,7 @@ export class ContactInfo {
 }
 
 export const ContactInfoSchema = new Schema<any>({
+  code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   address: AddressSchema,
   dob: { type: SchemaTypes.Date },
   driverLicense: { type: SchemaTypes.String },

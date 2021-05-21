@@ -6,7 +6,9 @@ import { ContactInfo, ContactInfoSchema } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
 import { Commission, CommissionSchema } from 'business/sub-docs/commision';
 import { SubProvider } from 'insurance/insurer/update-insurer.dto';
+import { nanoid } from 'nanoid';
 interface Insurer extends Document<any> {
+  readonly code: string;
   readonly business: BusinessInfo;
   readonly commissions: Commission[];
   readonly company: Partial<Company>;
@@ -21,6 +23,7 @@ type InsurerModel = Model<Insurer>;
 
 const InsurerSchema = new Schema<any>(
   {
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     business: { type: BusinessInfoSchema },
     commissions: [CommissionSchema],
     company: { type: SchemaTypes.ObjectId, ref: 'Company' },

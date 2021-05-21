@@ -1,60 +1,64 @@
 import { IsArray, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Schema, SchemaTypes } from 'mongoose';
+import { nanoid } from 'nanoid';
 import { Address, AddressSchema } from 'shared/sub-documents/address';
 
 export class BusinessInfo {
+  code?: string;
+
   @IsOptional()
-  readonly address: Address;
+  address: Address;
 
   @IsEmail()
   @IsNotEmpty()
-  readonly email: string;
+  email: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly fax: string;
+  fax: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
+  industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
 
   @IsOptional()
   @IsNotEmpty()
-  readonly logo: string;
+  logo: string;
 
   @IsNotEmpty()
-  readonly name: string;
+  name: string;
 
   @IsOptional()
   @IsArray()
-  readonly otherPhones: string[]; // delimited by-comma string
+  otherPhones: string[]; // delimited by-comma string
 
   @IsOptional()
   @IsNotEmpty()
-  readonly primaryPhone: string;
+  primaryPhone: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly primaryPhoneExtension: string;
+  primaryPhoneExtension: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly secondaryPhone: string;
+  secondaryPhone: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly secondaryPhoneExtension: string;
+  secondaryPhoneExtension: string;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly sector: string; // can be: Financial, Technology, Healthcare, etc
+  sector: string; // can be: Financial, Technology, Healthcare, etc
 
   @IsOptional()
   @IsNotEmpty()
-  readonly website: string;
+  website: string;
 }
 
 export const BusinessInfoSchema = new Schema<any>({
+  code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   address: AddressSchema,
   email: { type: SchemaTypes.String },
   fax: { type: SchemaTypes.String },
