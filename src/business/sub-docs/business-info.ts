@@ -61,7 +61,7 @@ export const BusinessInfoSchema = new Schema<any>({
   industry: { type: SchemaTypes.String },
   logo: { type: SchemaTypes.String },
   name: { type: SchemaTypes.String },
-  otherPhones: { type: SchemaTypes.String },
+  otherPhones: [{ type: SchemaTypes.String }],
   primaryPhone: { type: SchemaTypes.String },
   primaryPhoneExtension: { type: SchemaTypes.String },
   secondaryPhone: { type: SchemaTypes.String },

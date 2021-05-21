@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
+import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 
 export const DEFAULT_COMMISSION = 0.1;
@@ -43,4 +44,21 @@ export class UpdateSaleDto {
 
   @IsArray()
   items: SaleItem[];
+
+  @IsOptional()
+  isRenewal: boolean; 
+  
+  @IsOptional()
+  @IsMongoId()
+  renewalReference: Partial<Sale>; 
+
+  @IsOptional()
+  isEndorsement: boolean; 
+
+  @IsOptional()
+  @IsMongoId()
+  endorsementReference: Partial<Sale>; 
+  
+  @IsOptional()
+  policyEffectiveAt: string; 
 }

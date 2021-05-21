@@ -2,6 +2,7 @@ import { SaleItem } from 'business/sub-docs/sale-item';
 import { IsArray, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Customer } from 'database/customer.model';
 import { Location } from 'database/location.model';
+import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 export class CreateSaleDto {
 
@@ -47,6 +48,23 @@ export class CreateSaleDto {
 
   @IsArray()
   items: SaleItem[];
+
+  @IsOptional()
+  isRenewal: boolean; 
+  
+  @IsOptional()
+  @IsMongoId()
+  renewalReference: Partial<Sale>; 
+
+  @IsOptional()
+  isEndorsement: boolean; 
+
+  @IsOptional()
+  @IsMongoId()
+  endorsementReference: Partial<Sale>; 
+  
+  @IsOptional()
+  policyEffectiveAt: string; 
 
   
 }

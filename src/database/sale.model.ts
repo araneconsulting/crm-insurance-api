@@ -1,11 +1,20 @@
-import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
+import {
+  Connection,
+  Date,
+  Document,
+  Model,
+  Schema,
+  SchemaTypes,
+} from 'mongoose';
 import { Customer } from './customer.model';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { Company } from './company.model';
 import { SaleItem, SaleItemSchema } from 'business/sub-docs/sale-item';
+import { nanoid } from 'nanoid';
 
 interface Sale extends Document<any> {
+  readonly code: string;
   readonly amountReceivable: number;
   readonly chargesPaid: number;
   readonly company: Partial<Company>;
@@ -17,7 +26,13 @@ interface Sale extends Document<any> {
   readonly soldAt: string;
   readonly tips: number;
   readonly totalCharge: number; //Sum of all sale item amounts
-  readonly type: string; //Commercial Truck, Auto, Homeowner, Rental, Commercial, Life, Health, etc
+  readonly type: string; 
+  readonly isRenewal: boolean; 
+  readonly renewalReference: Partial<Sale>; 
+  readonly isEndorsement: boolean; 
+  readonly endorsementReference: Partial<Sale>; 
+  readonly policyEffectiveAt: string;
+  readonly nextRenewalAt: string;
 
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
@@ -33,6 +48,7 @@ type SaleModel = Model<Sale>;
 
 const SaleSchema = new Schema<any>(
   {
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     amountReceivable: { type: SchemaTypes.Number, default: 0, required: false },
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
@@ -44,7 +60,13 @@ const SaleSchema = new Schema<any>(
     soldAt: { type: SchemaTypes.Date, required: true },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    type: SchemaTypes.String,
+    type:  { type: SchemaTypes.String },
+    isRenewal: { type: SchemaTypes.Boolean, default: false },
+    renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
+    isEndorsement: { type: SchemaTypes.Boolean, default: false },
+    endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
+    policyEffectiveAt: { type: SchemaTypes.Date },
+    nextRenewalAt: { type: SchemaTypes.Date },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
@@ -61,34 +83,6 @@ const SaleSchema = new Schema<any>(
 );
 
 SaleSchema.plugin(mongoSoftDelete);
-
-/* SaleSchema.pre('save', function () {
-  const liability = this.liabilityCharge ? this.liabilityCharge : 0;
-  const cargo = this.cargoCharge ? this.cargoCharge : 0;
-  const physicalDamage = this.physicalDamageCharge
-    ? this.physicalDamageCharge
-    : 0;
-  const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
-
-  this.set({
-    premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
-    amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
-  });
-}); */
-
-/* SaleSchema.pre('updateOne', function () {
-  const liability = this.liabilityCharge ? this.liabilityCharge : 0;
-  const cargo = this.cargoCharge ? this.cargoCharge : 0;
-  const physicalDamage = this.physicalDamageCharge
-    ? this.physicalDamageCharge
-    : 0;
-  const wcGlUmb = this.wcGlUmbCharge ? this.wcGlUmbCharge : 0;
-
-  this.set({
-    premium: Number((liability + physicalDamage + cargo + wcGlUmb).toFixed(2)),
-    amountReceivable: Number((this.totalCharge - this.chargesPaid).toFixed(2)),
-  });
-}); */
 
 const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
   conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');
