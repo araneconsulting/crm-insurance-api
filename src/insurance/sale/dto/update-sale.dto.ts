@@ -61,4 +61,22 @@ export class UpdateSaleDto {
   
   @IsOptional()
   policyEffectiveAt: string; 
+
+  @IsOptional()
+  customer: Partial<Customer>;
+
+  @IsOptional()
+  fees: number;
+
+  @IsOptional()
+  totalCharge: number; //Sum of all sale item amounts
+
+  @IsOptional()
+  nextRenewalAt: string;
+
+  @IsOptional()
+  monthlyPayment: number;
+
+  @IsOptional()
+  financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
 }

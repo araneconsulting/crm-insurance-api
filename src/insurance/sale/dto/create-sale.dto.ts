@@ -66,5 +66,15 @@ export class CreateSaleDto {
   @IsOptional()
   policyEffectiveAt: string; 
 
+  @IsNumber()
+  fees: number;
+
+  nextRenewalAt: string;
+  
+  @IsNumber()
+  monthlyPayment: number;
+
+  @IsString()
+  financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
   
 }

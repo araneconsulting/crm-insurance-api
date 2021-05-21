@@ -1,74 +1,39 @@
 import { SaleItem } from 'business/sub-docs/sale-item';
 import { IsArray, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Company } from 'database/company.model';
 import { Customer } from 'database/customer.model';
 import { Location } from 'database/location.model';
+import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 export class SaleDto {
 
-  @IsOptional()
-  @IsNumber()
-  @IsNotEmpty()
+  code: string;
   amountReceivable: number;
-
-  @IsOptional()
-  @IsString()
-  @IsNotEmpty()
-  type: string;
-
-  @IsOptional()
-  @IsDateString() 
-  @IsNotEmpty()
-  soldAt: string;
-  
-  @IsNotEmpty()
-  @IsMongoId()
-  customer: Partial<Customer>;
-  
-  @IsOptional()
-  @IsNotEmpty()
-  seller: Partial<User>;
-
-  @IsNotEmpty()
-  @IsMongoId()
-  location: Partial<Location>;
-
-  @IsOptional()
-  @IsNumber()
-  @IsNotEmpty()
-  tips: number;
-
-  @IsOptional()
-  @IsNumber()
-  @IsNotEmpty()
-  totalCharge: number;
-
-  @IsOptional()
-  @IsNumber()
-  @IsNotEmpty()
   chargesPaid: number;
-
-  @IsOptional()
-  premium: number;
-
-  @IsOptional()
-  permits: number;
-
-  @IsOptional()
+  company: Partial<Company>;
+  customer: Partial<Customer>;
   fees: number;
+  location?: Location;
+  items: SaleItem[]; //Contains all info about Sale
+  seller: Partial<User>;
+  soldAt: string;
+  tips: number;
+  totalCharge: number; //Sum of all sale item amounts
+  type: string; 
+  isRenewal: boolean; 
+  renewalReference?: Partial<Sale>; 
+  isEndorsement: boolean; 
+  endorsementReference?: Partial<Sale>; 
+  policyEffectiveAt?: string;
+  nextRenewalAt?: string;
+  monthlyPayment?: number;
+  financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
 
-  @IsOptional()
-  profits: number;
+  createdBy?: Partial<User>;
+  updatedBy?: Partial<User>;
 
-  @IsArray()
-  items: SaleItem[];
-
-  @IsOptional()
-  @IsMongoId()
-  createdBy: Partial<User>;
-
-  @IsOptional()
-  @IsMongoId()
-  updatedBy: Partial<User>;
-
+  permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
+  premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
+  profits: number; //[auto-calculated] Sum of al SaleItem profits;
 
 }

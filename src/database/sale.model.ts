@@ -35,7 +35,7 @@ interface Sale extends Document<any> {
   readonly policyEffectiveAt: string;
   readonly nextRenewalAt: string;
   readonly monthlyPayment: number;
-  readonly financerCompany: ObjectId; //id del subdocumento de la financiera dentro de la compañia
+  readonly financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
 
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
