@@ -70,16 +70,6 @@ export class InsurerService {
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`insurer:$id was not found`)),
     );
-    // const filter = { _id: id };
-    // const update = { ...data, updatedBy: { _id: this.req.user.id } };
-    // return from(this.insurerModel.findOne(filter).exec()).pipe(
-    //   mergeMap((insurer) => (insurer ? of(insurer) : EMPTY)),
-    //   throwIfEmpty(() => new NotFoundException(`insurer:$id was not found`)),
-    //   switchMap((p, i) => {
-    //     return from(this.insurerModel.updateOne(filter, update).exec());
-    //   }),
-    //   map((res) => res.nModified),
-    // );
   }
 
   deleteById(id: string): Observable<Insurer> {
@@ -87,15 +77,6 @@ export class InsurerService {
       mergeMap((p) => (p ? of(p) : EMPTY)),
       throwIfEmpty(() => new NotFoundException(`insurer:$id was not found`)),
     );
-    // const filter = { _id: id };
-    // return from(this.insurerModel.findOne(filter).exec()).pipe(
-    //   mergeMap((insurer) => (insurer ? of(insurer) : EMPTY)),
-    //   throwIfEmpty(() => new NotFoundException(`insurer:$id was not found`)),
-    //   switchMap((p, i) => {
-    //     return from(this.insurerModel.deleteOne(filter).exec());
-    //   }),
-    //   map((res) => res.deletedCount),
-    // );
   }
 
   deleteAll(): Observable<any> {
@@ -115,11 +96,13 @@ export class InsurerService {
       delete queryParams.filter['type'];
     }
 
+    let conditions = null;
+
     if (
       type ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      let conditions = type
+      conditions = type
         ? {
             $and: [{ type: type }],
           }
@@ -136,30 +119,23 @@ export class InsurerService {
 
         conditions['$or'] = filterQueries;
       }
-
-      return {
-        totalCount: await this.insurerModel
-          .find(conditions)
-          .countDocuments()
-          .exec(),
-        entities: await this.insurerModel
-          .find(conditions)
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    } else {
-      return {
-        totalCount: await this.insurerModel.find().countDocuments().exec(),
-        entities: await this.insurerModel
-          .find()
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
     }
+
+    const documentsQuery = conditions
+      ? this.insurerModel.find(conditions)
+      : this.insurerModel.find();
+
+    let entities = await documentsQuery
+      .skip(skipCriteria)
+      .limit(limitCriteria)
+      .sort(sortCriteria)
+      .select('business.name business.email business.fax business.primaryPhone type _id subproviders')
+      .exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
   }
 
   async getCatalog(filterCriteria: any): Promise<any> {

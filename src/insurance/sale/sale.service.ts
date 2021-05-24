@@ -183,9 +183,9 @@ export class SaleService {
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
     ) {
+      console.log('getting seller: ', this.req.user);
       saleDto.seller = this.req.user.id;
-      const authUser = await this.userModel.findOne({ _id: this.req.user.id });
-      saleDto['location'] = authUser.location;
+      saleDto['location'] = this.req.user.location;
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
       if (!seller) {
@@ -314,13 +314,12 @@ export class SaleService {
       let permits = 0;
 
       sale.items.map((item) => {
-
         //calculate total premium
         if (item.product !== 'TRUCKING_PERMIT') {
           if (item.details) {
             const details: Partial<TruckingDetails> = item.details;
             //Calculate premium
-            premium += details.premium ? item.details.premium : 0;
+            premium += details.premium ? parseFloat(item.details.premium) : 0;
           }
         } else {
           permits += item.amount;
@@ -363,19 +362,21 @@ export class SaleService {
         }
       });
 
-      sale.premium = premium || 0;
-      sale.profits = profits || 0;
-      sale.permits = permits || 0;
+      sale.profits = roundAmount(profits || 0);
+      sale.premium = roundAmount(premium || 0);
+      sale.permits = roundAmount(permits || 0);
+      totalCharge = roundAmount(totalCharge || 0);
 
       console.log('totalCharge', totalCharge);
 
       if (calcTotalCharge) {
         sale.totalCharge = totalCharge;
       }
-      sale.totalCharge =
-        sale.totalCharge + (sale.tips || 0) + sale.permits + (sale.fees || 0);
+      sale.totalCharge = roundAmount(
+        sale.totalCharge + sale.tips + sale.permits + sale.fees,
+      );
 
-      sale.amountReceivable = sale.totalCharge - sale.chargesPaid;
+      sale.amountReceivable = roundAmount(sale.totalCharge - sale.chargesPaid);
     }
     return sale;
   }
@@ -393,11 +394,12 @@ export class SaleService {
       delete queryParams.filter['type'];
     }
 
+    let conditions = null;
     if (
       type ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      let conditions = type
+      conditions = type
         ? {
             $and: [{ type: type }],
           }
@@ -414,39 +416,27 @@ export class SaleService {
 
         conditions['$or'] = filterQueries;
       }
-
-      return {
-        totalCount: await this.saleModel
-          .find(conditions)
-          .countDocuments()
-          .exec(),
-        entities: await this.saleModel
-          .find(conditions)
-          .populate(
-            'customer',
-            'type contact.firstName contact.lastName business.name',
-          )
-          .populate('location', 'alias business.name')
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    } else {
-      return {
-        totalCount: await this.saleModel.find().countDocuments().exec(),
-        entities: await this.saleModel
-          .find()
-          .populate(
-            'customer',
-            'type contact.firstName contact.lastName business.name',
-          )
-          .populate('location', 'alias business.name')
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
     }
+
+    const documentsQuery = conditions
+      ? this.saleModel.find(conditions)
+      : this.saleModel.find();
+
+    let entities = await documentsQuery
+      .populate(
+        'customer',
+        'type contact.firstName contact.lastName business.name',
+      )
+      .populate('location', 'alias business.name')
+      .populate('seller', 'firstName lastName fullName roles')
+      .skip(skipCriteria)
+      .limit(limitCriteria)
+      .sort(sortCriteria)
+      .exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
   }
 }

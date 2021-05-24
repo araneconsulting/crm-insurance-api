@@ -175,11 +175,13 @@ export class UserService {
       delete queryParams.filter['roles'];
     }
 
+    let conditions = null;
+
     if (
       roles ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      let conditions = roles
+      conditions = roles
         ? {
             $and: [{ roles: roles }],
           }
@@ -196,30 +198,23 @@ export class UserService {
 
         conditions['$or'] = filterQueries;
       }
+    } 
 
-      return {
-        totalCount: await this.userModel
-          .find(conditions)
-          .countDocuments()
-          .exec(),
-        entities: await this.userModel
-          .find(conditions)
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    } else {
-      return {
-        totalCount: await this.userModel.find().countDocuments().exec(),
-        entities: await this.userModel
-          .find()
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    }
+    const documentsQuery = conditions
+      ? this.userModel.find(conditions)
+      : this.userModel.find();
+
+    let entities = await documentsQuery
+      .populate('location', 'alias business.name')
+      .skip(skipCriteria)
+      .limit(limitCriteria)
+      .sort(sortCriteria)
+      .exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
   }
 
   async getCatalog(filterCriteria?: any): Promise<any> {

@@ -185,7 +185,7 @@ function fullNameGetHook(): string {
   return `${this.firstName} ${this.lastName}`;
 }
 
-UserSchema.virtual('fullname').get(fullNameGetHook);
+UserSchema.virtual('fullName').get(fullNameGetHook);
 
 function isAdminGetHook(): boolean {
   return ADMIN_ROLES.includes(this.roles[0]);

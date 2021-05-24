@@ -135,7 +135,7 @@ export class CustomerService {
   async getCatalog(filterCriteria: any): Promise<any> {
     return await this.customerModel
       .find(filterCriteria)
-      .select('business.name contact.firstName contact.lastName type _id')
+      .select('name business.name contact.firstName contact.lastName type _id')
       .sort({ name: 1 })
       .exec();
   }
