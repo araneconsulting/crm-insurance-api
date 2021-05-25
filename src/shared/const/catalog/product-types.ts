@@ -6,7 +6,7 @@ export const productTypes = [
       { id: 'TRUCKING_LIABILITY', name: 'General Liability' },
       { id: 'TRUCKING_PHYSICAL_DAMAGE', name: 'Physical Damage' },
       { id: 'TRUCKING_WCGLUMB', name: 'WC/GL/Umbrella' },
-      { id: 'TRUCKING_CARGO', name: 'Cargo Damage' },
+      { id: 'TRUCKING_CARGO', name: 'Damage Cargo' },
       { id: 'TRUCKING_PERMIT', name: 'Permit' },
     ],
   },

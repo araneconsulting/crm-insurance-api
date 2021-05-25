@@ -183,7 +183,6 @@ export class SaleService {
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
     ) {
-      console.log('getting seller: ', this.req.user);
       saleDto.seller = this.req.user.id;
       saleDto['location'] = this.req.user.location;
     } else {
@@ -367,8 +366,6 @@ export class SaleService {
       sale.permits = roundAmount(permits || 0);
       totalCharge = roundAmount(totalCharge || 0);
 
-      console.log('totalCharge', totalCharge);
-
       if (calcTotalCharge) {
         sale.totalCharge = totalCharge;
       }
@@ -418,21 +415,87 @@ export class SaleService {
       }
     }
 
-    const documentsQuery = conditions
-      ? this.saleModel.find(conditions)
-      : this.saleModel.find();
+    const query = this.saleModel.aggregate();
 
-    let entities = await documentsQuery
-      .populate(
-        'customer',
-        'type contact.firstName contact.lastName business.name',
-      )
-      .populate('location', 'alias business.name')
-      .populate('seller', 'firstName lastName fullName roles')
-      .skip(skipCriteria)
-      .limit(limitCriteria)
-      .sort(sortCriteria)
-      .exec();
+    query
+      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'users',
+        localField: 'seller',
+        foreignField: '_id',
+        as: 'seller',
+      })
+      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
+
+    query
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'customers',
+        localField: 'customer',
+        foreignField: '_id',
+        as: 'customer',
+      })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
+
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: 'location',
+      })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+
+    if (conditions) {
+      query.match(conditions);
+    }
+
+    query.append([
+      {
+        $project: {
+          
+          type: '$type',
+          soldAt: '$soldAt',
+          totalCharge: { $round: ['$totalCharge', 2] },
+          sellerName: {
+            $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+          },
+          locationName: {
+            $function: {
+              body: function (location: any) {
+                return location ? location.business.name : 'N/A';
+              },
+              args: ['$location'],
+              lang: 'js',
+            },
+          },
+          customerName: {
+            $function: {
+              body: function (customer: any) {
+                return customer
+                  ? customer.type === 'BUSINESS'
+                    ? customer.business.name
+                    : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                  : 'N/A';
+              },
+              args: ['$customer'],
+              lang: 'js',
+            },
+          },
+          code: '$code'
+          //createdBy: '$createdBy',
+          //updatedBy: '$updatedBy',
+          //seller: 1,
+          //customer: 1,
+          //location: 1,
+        },
+      },
+    ]);
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
 
     return {
       entities: entities,
