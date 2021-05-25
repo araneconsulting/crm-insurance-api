@@ -72,7 +72,7 @@ export class CustomerService {
     return this.customerModel.deleteMany({}).exec();
   }
 
-  async search(queryParams?: any): Promise<any> {
+  async searchOld(queryParams?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
@@ -138,5 +138,110 @@ export class CustomerService {
       .select('name business.name contact.firstName contact.lastName type _id')
       .sort({ name: 1 })
       .exec();
+  }
+
+  async search(queryParams?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    let type = null;
+    if (queryParams.filter.hasOwnProperty('type')) {
+      type = queryParams.filter.type;
+      delete queryParams.filter['type'];
+    }
+
+    let conditions = null;
+    if (
+      type ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+    ) {
+      conditions = type
+        ? {
+            $and: [{ type: type }],
+          }
+        : {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+
+        conditions['$or'] = filterQueries;
+      }
+    }
+
+    const query = this.customerModel.aggregate();
+
+    if (conditions) {
+      query.match(conditions);
+    }
+
+    query.append([
+      {
+        $project: {
+          type: '$type',
+          fax: '$business.fax',
+          name: {
+            $function: {
+              body: function (business: any, contact: any, type: any) {
+                return type === 'BUSINESS'
+                  ? business.name
+                  : `${contact.firstName}  ${contact.lastName}`;
+              },
+              args: ['$business', '$contact', '$type'],
+              lang: 'js',
+            },
+          },
+          email: {
+            $function: {
+              body: function (business: any, contact: any, type: any) {
+                return type === 'BUSINESS' ? business.email : contact.email;
+              },
+              args: ['$business', '$contact', '$type'],
+              lang: 'js',
+            },
+          },
+          phone: {
+            $function: {
+              body: function (business: any, contact: any, type: any) {
+                return type === 'BUSINESS'
+                  ? `${business.primaryPhone} ext.${business.primaryPhoneExtension}`
+                  : contact.phone || contact.mobilePhone;
+              },
+              args: ['$business', '$contact', '$type'],
+              lang: 'js',
+            },
+          },
+          state: {
+            $function: {
+              body: function (business: any, contact: any, type: any) {
+                return type === 'BUSINESS'
+                  ? business.address.state
+                  : contact.address.state;
+              },
+              args: ['$business', '$contact', '$type'],
+              lang: 'js',
+            },
+          },
+          code: '$code',
+        },
+      },
+    ]);
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
   }
 }

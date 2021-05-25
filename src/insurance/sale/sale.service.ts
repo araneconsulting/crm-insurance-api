@@ -484,11 +484,6 @@ export class SaleService {
             },
           },
           code: '$code'
-          //createdBy: '$createdBy',
-          //updatedBy: '$updatedBy',
-          //seller: 1,
-          //customer: 1,
-          //location: 1,
         },
       },
     ]);
