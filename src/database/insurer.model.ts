@@ -4,9 +4,10 @@ import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { ContactInfo, ContactInfoSchema } from 'business/sub-docs/contact-info';
 import { Company } from './company.model';
-import { Commission, CommissionSchema } from 'business/sub-docs/commision';
+
 import { SubProvider } from 'insurance/insurer/update-insurer.dto';
 import { nanoid } from 'nanoid';
+import { Commission, CommissionSchema } from 'business/sub-docs/commission';
 interface Insurer extends Document<any> {
   readonly code: string;
   readonly business: BusinessInfo;

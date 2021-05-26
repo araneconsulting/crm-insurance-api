@@ -66,9 +66,6 @@ export class UpdateSaleDto {
   customer: Partial<Customer>;
 
   @IsOptional()
-  fees: number;
-
-  @IsOptional()
   totalCharge: number; //Sum of all sale item amounts
 
   @IsOptional()

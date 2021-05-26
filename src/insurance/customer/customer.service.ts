@@ -186,6 +186,7 @@ export class CustomerService {
     query.append([
       {
         $project: {
+          id: '$_id',
           type: '$type',
           fax: '$business.fax',
           name: {

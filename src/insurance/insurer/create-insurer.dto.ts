@@ -1,5 +1,5 @@
 import { BusinessInfo } from 'business/sub-docs/business-info';
-import { Commission } from 'business/sub-docs/commision';
+import { Commission } from 'business/sub-docs/commission';
 import { ContactInfo } from 'business/sub-docs/contact-info';
 import {
   IsArray,

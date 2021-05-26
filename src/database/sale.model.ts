@@ -13,6 +13,7 @@ import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { Company } from './company.model';
 import { SaleItem, SaleItemSchema } from 'business/sub-docs/sale-item';
 import { nanoid } from 'nanoid';
+import { Location } from './location.model';
 
 interface Sale extends Document<any> {
   readonly code: string;
@@ -20,7 +21,6 @@ interface Sale extends Document<any> {
   readonly chargesPaid: number;
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
-  readonly fees: number;
   readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly seller: Partial<User>;
@@ -41,7 +41,7 @@ interface Sale extends Document<any> {
   readonly updatedBy?: Partial<User>;
 
   //Only-insurance properties
-
+  readonly fees: number;
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   readonly profits: number; //[auto-calculated] Sum of al SaleItem profits;
@@ -56,11 +56,10 @@ const SaleSchema = new Schema<any>(
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
-    fees: { type: SchemaTypes.Number, default: 0, required: false },
     location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     items: [{ type: SaleItemSchema, required: true }],
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
-    soldAt: { type: SchemaTypes.Date, required: true },
+    soldAt: { type: SchemaTypes.Date, required: false, default: new Date() },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
     type:  { type: SchemaTypes.String },
@@ -76,6 +75,7 @@ const SaleSchema = new Schema<any>(
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
 
+    fees: { type: SchemaTypes.Number, default: 0, required: false },
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     premium: { type: SchemaTypes.Number, default: 0, required: false },
     profits: { type: SchemaTypes.Number, default: 0, required: false },

@@ -11,8 +11,7 @@ export class SaleDto {
   amountReceivable: number;
   chargesPaid: number;
   company: Partial<Company>;
-  customer: Partial<Customer>;
-  fees: number;
+  customer: Partial<Customer>; 
   location?: Partial<Location>;
   items: SaleItem[]; //Contains all info about Sale
   seller: Partial<User>;
@@ -31,7 +30,8 @@ export class SaleDto {
 
   createdBy?: Partial<User>;
   updatedBy?: Partial<User>;
-
+  
+  fees: number; //[auto-calculated] Sum of SaleItem amount where product = Fee
   permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   profits: number; //[auto-calculated] Sum of al SaleItem profits;

@@ -43,9 +43,7 @@ export class SaleController {
     @Query('end_date') endDate?: string,
     @Query('type') type?: string,
   ): Promise<any> {
-    return res.json(
-      await this.saleService.findAll(startDate, endDate, type),
-    );
+    return res.json(await this.saleService.findAll(startDate, endDate, type));
   }
 
   @Get(':id')
@@ -68,9 +66,7 @@ export class SaleController {
   @Post('/search')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async searchUsers(
-    @Body() query: any,
-  ): Promise<any> {
+  async searchUsers(@Body() query: any): Promise<any> {
     return await this.saleService.search(query.queryParams);
   }
 
@@ -80,6 +76,18 @@ export class SaleController {
   @UseFilters(MongoFilter)
   async createSale(@Req() req: Request, @Body() sale: any): Promise<Sale> {
     return await this.saleService.save(sale);
+  }
+
+  @Post(':id/endorse')
+  @HttpCode(201)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(MongoFilter)
+  async endorseSale(
+    @Req() req: Request,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() sale: any,
+  ): Promise<Sale> {
+    return await this.saleService.endorse(id, sale);
   }
 
   @Put(':id')

@@ -19,14 +19,13 @@ import {
 } from '../../database/database.constants';
 import { CreateSaleDto } from './dto/create-sale.dto';
 import { SaleDto } from './dto/sale.dto';
-import * as DateFactory from 'shared/util/date-functions';
 import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
-import { roundAmount } from 'shared/util/math-functions';
 import { UpdateSaleDto } from './dto/update-sale.dto';
-import { SaleItem } from 'business/sub-docs/sale-item';
-import { TruckingDetails } from 'business/sub-docs/trucking.details';
+import { EndorseSaleDto } from './dto/endorse-sale.dto';
+import { setSaleCalculations } from './sale.utils';
+import * as moment from 'moment';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
@@ -195,7 +194,7 @@ export class SaleService {
     }
 
     const insurers = await this.insurerModel.find({}).exec();
-    let saleData = await this.setSaleCalculations(saleDto, insurers);
+    let saleData = await setSaleCalculations(saleDto, insurers);
 
     return this.saleModel.create({
       ...saleData,
@@ -236,7 +235,7 @@ export class SaleService {
     };
 
     const insurers = await this.insurerModel.find({}).exec();
-    let saleData: any = await this.setSaleCalculations(saleDto, insurers);
+    let saleData: any = await setSaleCalculations(saleDto, insurers);
 
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(id) },
@@ -264,118 +263,6 @@ export class SaleService {
 
   deleteAll(): Observable<any> {
     return from(this.saleModel.deleteMany({}).exec());
-  }
-
-  /**
-   * @param  {string} dateRange
-   */
-  getDateMatchExpressionByRange(dateRange: string): any {
-    //Set filtering conditions
-    const dates = DateFactory.dateRangeByName(dateRange);
-
-    return dateRange
-      ? {
-          $gte: new Date(dates.start + 'T00:00:00.000Z'),
-          $lte: new Date(dates.end + 'T23:59:59.999Z'),
-        }
-      : { $lte: new Date() };
-  }
-
-  /**
-   * @param  {string} startDate?
-   * @param  {string} endDate?
-   */
-  getDateMatchExpressionByDates(startDate?: string, endDate?: string): Object {
-    if (startDate && endDate) {
-      return {
-        $gte: new Date(startDate + 'T00:00:00.000Z'),
-        $lte: new Date(endDate + 'T23:59:59.999Z'),
-      };
-    } else if (startDate) {
-      return { $gte: new Date(startDate + 'T00:00:00.000Z') };
-    } else if (endDate) {
-      return { $lte: new Date(endDate + 'T23:59:59.999Z') };
-    } else return { $lte: new Date() };
-  }
-
-  async setSaleCalculations(
-    saleDto: Partial<SaleDto>,
-    providers: Insurer[],
-  ): Promise<Partial<SaleDto>> {
-    let sale: Partial<SaleDto> = { ...saleDto };
-    let items: SaleItem[] = sale.items;
-
-    if (items) {
-      let premium = 0;
-      let calcTotalCharge = !sale.totalCharge || sale.totalCharge === -1;
-      let totalCharge = 0;
-      let profits = 0;
-      let permits = 0;
-
-      sale.items.map((item) => {
-        //calculate total premium
-        if (item.product !== 'TRUCKING_PERMIT') {
-          if (item.details) {
-            const details: Partial<TruckingDetails> = item.details;
-            //Calculate premium
-            premium += details.premium ? parseFloat(item.details.premium) : 0;
-          }
-        } else {
-          permits += item.amount;
-        }
-
-        //calculate total charge (aka total down payment)
-        if (calcTotalCharge) {
-          totalCharge += item.amount ? item.amount : 0;
-        }
-
-        //calculate item profits and sale total profits
-        if (item.provider) {
-          const provider = providers.find(
-            (provider) =>
-              item.provider &&
-              item.provider !== '' &&
-              provider.id === item.provider.toString(),
-          );
-
-          if (!provider) {
-            throw new ConflictException(
-              'Sale Item ' + `${item.provider}` + ' provider not found',
-            );
-          }
-
-          let commision = provider.commissions.find((productType) => sale.type);
-
-          if (commision) {
-            item.profits = roundAmount((commision.percent / 100) * item.amount);
-            profits += item.profits;
-          } else {
-            throw new ConflictException(
-              'Provider $item.provider commissions missing.',
-            );
-          }
-        } else {
-          throw new ConflictException(
-            'Sale Item provider not found :$item.provider.',
-          );
-        }
-      });
-
-      sale.profits = roundAmount(profits || 0);
-      sale.premium = roundAmount(premium || 0);
-      sale.permits = roundAmount(permits || 0);
-      totalCharge = roundAmount(totalCharge || 0);
-
-      if (calcTotalCharge) {
-        sale.totalCharge = totalCharge;
-      }
-      sale.totalCharge = roundAmount(
-        sale.totalCharge + sale.tips + sale.permits + sale.fees,
-      );
-
-      sale.amountReceivable = roundAmount(sale.totalCharge - sale.chargesPaid);
-    }
-    return sale;
   }
 
   async search(queryParams?: any): Promise<any> {
@@ -454,7 +341,7 @@ export class SaleService {
     query.append([
       {
         $project: {
-          
+          id: '$_id',
           type: '$type',
           soldAt: '$soldAt',
           totalCharge: { $round: ['$totalCharge', 2] },
@@ -483,7 +370,7 @@ export class SaleService {
               lang: 'js',
             },
           },
-          code: '$code'
+          code: '$code',
         },
       },
     ]);
@@ -496,5 +383,48 @@ export class SaleService {
       entities: entities,
       totalCount: entities.length,
     };
+  }
+
+  /**
+   * @param  {EndorseSaleDto} endorseSaleDto
+   * @returns Promise
+   */
+  async endorse(id: String, endorseSaleDto: EndorseSaleDto): Promise<Sale> {
+
+    //Store new endorsement with mandatory fields
+
+    let saleDto: Partial<SaleDto> = { ...endorseSaleDto };
+
+    const insurers = await this.insurerModel.find({}).exec();
+    let saleData = await setSaleCalculations(saleDto, insurers);
+    saleData.soldAt = moment().toISOString();
+
+    return this.saleModel.create({
+      ...saleData,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    });
+
+
+    //Update old sale with new items and recalculated fields
+
+    /* const endorsedSale: Partial<Sale> = await this.saleModel
+      .findOne({ _id: id })
+      .exec();
+
+    if (!endorsedSale) {
+      throw new NotFoundException(`Endorsed sale ${id} not found`);
+    }
+
+    let saleDto: Partial<SaleDto> = { ...endorsedSale, ...endorseSaleDto };
+
+    const insurers = await this.insurerModel.find({}).exec();
+    let saleData = await this.setSaleCalculations(saleDto, insurers);
+
+    return this.saleModel.create({
+      ...saleData,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    }); */
   }
 }

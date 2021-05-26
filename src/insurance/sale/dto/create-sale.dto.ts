@@ -1,5 +1,5 @@
 import { SaleItem } from 'business/sub-docs/sale-item';
-import { IsArray, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDate, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Customer } from 'database/customer.model';
 import { Location } from 'database/location.model';
 import { Sale } from 'database/sale.model';
@@ -65,9 +65,6 @@ export class CreateSaleDto {
   
   @IsOptional()
   policyEffectiveAt: string; 
-
-  @IsNumber()
-  fees: number;
 
   nextRenewalAt: string;
   
