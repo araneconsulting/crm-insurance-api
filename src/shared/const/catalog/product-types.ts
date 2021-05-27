@@ -8,7 +8,7 @@ export const productTypes = [
       { id: 'WCGLUMB', name: 'WC/GL/Umbrella' },
       { id: 'CARGO', name: 'Damage Cargo' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -19,7 +19,7 @@ export const productTypes = [
       { id: 'LIABILITY_GENERAL', name: 'General Liability' },
       { id: 'GAP', name: 'GAP' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -28,7 +28,7 @@ export const productTypes = [
     products: [
       { id: 'FLOOD', name: 'Flood Coverage' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -37,7 +37,7 @@ export const productTypes = [
     products: [
       { id: 'ELECTRONICS', name: 'Electronics' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -46,7 +46,7 @@ export const productTypes = [
     products: [
       { id: 'FLOOD', name: 'Flood Coverage' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -55,7 +55,7 @@ export const productTypes = [
     products: [
       { id: 'LIABILITY_BASIC', name: 'Basic Liability' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -64,7 +64,7 @@ export const productTypes = [
     products: [
       { id: 'LIABILITY_BASIC', name: 'Basic Liability' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
   {
@@ -73,7 +73,7 @@ export const productTypes = [
     products: [
       { id: 'COMPANY', name: 'Company Permit' },
       { id: 'PERMIT', name: 'Permit' },
-      { id: 'FEE', name: 'Permit' },
+      { id: 'FEE', name: 'Fee' },
     ],
   },
 ];
