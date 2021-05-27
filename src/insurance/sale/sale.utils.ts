@@ -24,7 +24,7 @@ export async function setSaleCalculations(
 
     const totalChargeItemized = !sale.totalCharge || sale.totalCharge === -1;
 
-    sale.items.map((item) => {
+    sale.items.map((item:SaleItem) => {
       switch (item.product) {
         case 'PERMIT':
           permits += item.amount;
@@ -41,7 +41,7 @@ export async function setSaleCalculations(
 
           //calculate total charge (aka total down payment)
           if (totalChargeItemized) {
-            totalCharge += item.amount || 0;
+            totalCharge = totalCharge + item.amount;
           }
 
           //calculate item profits and sale total profits
@@ -84,7 +84,7 @@ export async function setSaleCalculations(
     sale.permits = roundAmount(permits || 0);
 
     if (totalChargeItemized) {
-      sale.totalCharge = totalCharge = roundAmount(totalCharge || 0);
+      sale.totalCharge = roundAmount(totalCharge || 0);
     }
 
     sale.amountReceivable = roundAmount(sale.totalCharge - sale.chargesPaid);

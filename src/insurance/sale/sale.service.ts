@@ -26,6 +26,7 @@ import { UpdateSaleDto } from './dto/update-sale.dto';
 import { EndorseSaleDto } from './dto/endorse-sale.dto';
 import { setSaleCalculations } from './sale.utils';
 import * as moment from 'moment';
+import { SaleItem } from 'business/sub-docs/sale-item';
 
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
@@ -278,16 +279,18 @@ export class SaleService {
       delete queryParams.filter['type'];
     }
 
-    let conditions = null;
+    let conditions = {};
+
+    conditions = { $and: [{ deleted: false }] };
     if (
       type ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      conditions = type
-        ? {
-            $and: [{ type: type }],
-          }
-        : {};
+      if (type) {
+        conditions = {
+          $and: [{ type: type }, { deleted: false }],
+        };
+      }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
         const filterQueries = Object.keys(queryParams.filter).map((key) => {
@@ -344,6 +347,7 @@ export class SaleService {
           id: '$_id',
           type: '$type',
           soldAt: '$soldAt',
+          deleted: '$deleted',
           totalCharge: { $round: ['$totalCharge', 2] },
           sellerName: {
             $concat: ['$seller.firstName', ' ', '$seller.lastName'],
@@ -389,42 +393,69 @@ export class SaleService {
    * @param  {EndorseSaleDto} endorseSaleDto
    * @returns Promise
    */
-  async endorse(id: String, endorseSaleDto: EndorseSaleDto): Promise<Sale> {
-
+  async endorse(id: string, endorseSaleDto: EndorseSaleDto): Promise<any> {
     //Store new endorsement with mandatory fields
 
     let saleDto: Partial<SaleDto> = { ...endorseSaleDto };
 
     const insurers = await this.insurerModel.find({}).exec();
-    let saleData = await setSaleCalculations(saleDto, insurers);
-    saleData.soldAt = moment().toISOString();
 
-    return this.saleModel.create({
-      ...saleData,
-      createdBy: { _id: this.req.user.id },
-      company: { _id: this.req.user.company },
-    });
-
-
-    //Update old sale with new items and recalculated fields
-
-    /* const endorsedSale: Partial<Sale> = await this.saleModel
-      .findOne({ _id: id })
+    const originalSale: Partial<Sale> = await this.saleModel
+      .findOne({ _id: saleDto.endorsementReference })
       .exec();
 
-    if (!endorsedSale) {
-      throw new NotFoundException(`Endorsed sale ${id} not found`);
+    if (!originalSale) {
+      throw new NotFoundException(
+        `Cannot find endorsed sale: ${saleDto.endorsementReference}`,
+      );
     }
 
-    let saleDto: Partial<SaleDto> = { ...endorsedSale, ...endorseSaleDto };
+    let endorsedItems = saleDto.items;
 
-    const insurers = await this.insurerModel.find({}).exec();
-    let saleData = await this.setSaleCalculations(saleDto, insurers);
+    if (saleDto.items && originalSale.items) {
+      let newEndorsedItems: SaleItem[] = saleDto.items.map((item) => {
+        let originalMatchingItem = originalSale.items.find(
+          (originalItem) => originalItem.product === item.product,
+        );
+        if (originalMatchingItem) {
+          //replace item with difference to original
+          item.amount = item.amount - originalMatchingItem.amount;
+          return { ...item };
+        } else {
+          return item;
+        }
+      });
+      saleDto.items = newEndorsedItems;
+    }
 
-    return this.saleModel.create({
-      ...saleData,
-      createdBy: { _id: this.req.user.id },
-      company: { _id: this.req.user.company },
-    }); */
+    let saleData = await setSaleCalculations(saleDto, insurers);
+
+    let result = {
+      endorsement: await this.saleModel.create({
+        ...saleData,
+        soldAt: moment().toISOString(),
+        createdBy: { _id: this.req.user.id },
+        company: { _id: this.req.user.company },
+      }),
+    };
+
+    let newOriginal = {
+      ...originalSale['_doc'],
+      items: endorsedItems,
+      updatedBy: this.req.user.id,
+    };
+
+    console.log(newOriginal);
+    let newOriginalData: any = await setSaleCalculations(newOriginal, insurers);
+
+    result['endorsed'] = await this.saleModel.findOneAndUpdate(
+      { _id: saleDto.endorsementReference },
+      {
+        ...newOriginalData,
+      },
+      { new: true },
+    );
+
+    return result;
   }
 }
