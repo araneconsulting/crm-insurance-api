@@ -13,6 +13,9 @@ export class SaleItem {
   @IsObject()
   details: any;
 
+  @IsNumber()
+  premium: number;
+
   @IsNotEmpty()
   product: string;
   //can be: TRUCKING_LIABILITY, TRUCKING_WCGLUMB, TRUCKING_CARGO, TRUCKING_PHYSICAL_DAMAGE, PERMIT,  AUTO_LIABILITY_FULL, AUTO_LIABILITY_GENERAL...
@@ -34,6 +37,7 @@ export const SaleItemSchema = new Schema<any>({
   code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   amount: { type: SchemaTypes.Number },
   details: { type: SchemaTypes.Map },
+  premium: { type: SchemaTypes.Number },
   product: { type: SchemaTypes.String },
   profits: { type: SchemaTypes.Number },
   provider: { type: SchemaTypes.ObjectId, ref: 'Insurer' },
@@ -45,6 +49,7 @@ export const DEFAULT_SALE_ITEM = {
   amount: 0,
   details: '',
   product: '',
+  premium: 0,
   profits: 0,
   provider: '',
   subprovider: '',
@@ -57,11 +62,11 @@ export const DEFAULT_SALE_ITEM_TRUCKING = {
   amount: 0,
   provider: '',
   subprovider: '',
+  premium: 0,
   profits: 0,
   details: {
     dotNumber: '',
     drivers: [],
-    premium: 0,
     vehicles: [],
     vinNumbers: [],
   },

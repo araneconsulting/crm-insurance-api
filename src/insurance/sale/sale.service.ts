@@ -8,7 +8,7 @@ import {
 import { REQUEST } from '@nestjs/core';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Model, Types } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
@@ -105,6 +105,7 @@ export class SaleService {
             premium: { $round: ['$premium', 2] },
             amountReceivable: { $round: ['$amountReceivable', 2] },
             totalCharge: { $round: ['$totalCharge', 2] },
+            totalInsurance: { $round: ['$totalInsurance', 2] },
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
@@ -266,6 +267,14 @@ export class SaleService {
     return from(this.saleModel.deleteMany({}).exec());
   }
 
+    /**
+   * @returns Observable
+   */
+
+     async batchDelete(ids: string[]): Promise<any> {
+      return await from(this.saleModel.deleteMany({id: { $in: ids}}).exec());
+    }
+
   async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
@@ -349,6 +358,7 @@ export class SaleService {
           soldAt: '$soldAt',
           deleted: '$deleted',
           totalCharge: { $round: ['$totalCharge', 2] },
+          totalInsurance: { $round: ['$totalInsurance', 2] },
           sellerName: {
             $concat: ['$seller.firstName', ' ', '$seller.lastName'],
           },

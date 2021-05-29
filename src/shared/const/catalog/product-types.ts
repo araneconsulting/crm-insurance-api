@@ -1,7 +1,7 @@
 export const productTypes = [
   {
     id: 'TRUCKING',
-    name: 'Commercial Trucking Insurance',
+    name: 'Commercial Trucking',
     products: [
       { id: 'LIABILITY', name: 'General Liability' },
       { id: 'PHYSICAL_DAMAGE', name: 'Physical Damage' },
@@ -13,7 +13,7 @@ export const productTypes = [
   },
   {
     id: 'AUTO',
-    name: 'Auto Insurance',
+    name: 'Auto',
     products: [
       { id: 'LIABILITY_FULL', name: 'Full Coverage Liability' },
       { id: 'LIABILITY_GENERAL', name: 'General Liability' },
@@ -24,7 +24,7 @@ export const productTypes = [
   },
   {
     id: 'HOME',
-    name: 'Homeowner Insurance',
+    name: 'Homeowner',
     products: [
       { id: 'FLOOD', name: 'Flood Coverage' },
       { id: 'PERMIT', name: 'Permit' },
@@ -33,7 +33,7 @@ export const productTypes = [
   },
   {
     id: 'RENTAL',
-    name: 'Rental Insurance',
+    name: 'Rental',
     products: [
       { id: 'ELECTRONICS', name: 'Electronics' },
       { id: 'PERMIT', name: 'Permit' },
@@ -42,7 +42,7 @@ export const productTypes = [
   },
   {
     id: 'COMMERCIAL',
-    name: 'Commercial Insurance',
+    name: 'Commercial',
     products: [
       { id: 'FLOOD', name: 'Flood Coverage' },
       { id: 'PERMIT', name: 'Permit' },
@@ -51,7 +51,7 @@ export const productTypes = [
   },
   {
     id: 'LIFE',
-    name: 'Life insurance',
+    name: 'Life',
     products: [
       { id: 'LIABILITY_BASIC', name: 'Basic Liability' },
       { id: 'PERMIT', name: 'Permit' },
@@ -60,7 +60,7 @@ export const productTypes = [
   },
   {
     id: 'HEALTH',
-    name: 'Health Insurance',
+    name: 'Health',
     products: [
       { id: 'LIABILITY_BASIC', name: 'Basic Liability' },
       { id: 'PERMIT', name: 'Permit' },

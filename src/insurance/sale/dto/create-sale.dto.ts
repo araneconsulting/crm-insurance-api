@@ -41,6 +41,11 @@ export class CreateSaleDto {
   @IsOptional()
   @IsNumber()
   @IsNotEmpty()
+  totalInsurance: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty()
   chargesPaid: number;
 
   @IsOptional()

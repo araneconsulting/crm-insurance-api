@@ -5,98 +5,116 @@ import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
 import { SaleDto } from './dto/sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
+import { Number } from 'mongoose';
 
-
+const PERMIT_COMMISION_PERCENT = 0.2;
+const FEE_COMMISION_PERCENT = 0.2;
 export async function setSaleCalculations(
   saleDto: Partial<SaleDto>,
   providers: Insurer[],
 ): Promise<Partial<SaleDto>> {
-
   let sale: Partial<SaleDto> = { ...saleDto };
   let items: SaleItem[] = sale.items;
 
   if (items) {
     let premium = 0;
     let totalCharge = 0;
+    let totalInsurance = 0;
     let profits = 0;
     let permits = 0;
     let fees = 0;
 
-    const totalChargeItemized = !sale.totalCharge || sale.totalCharge === -1;
+    console.log(sale.isChargeItemized);
+    sale.isChargeItemized = sale.isChargeItemized || true;
 
-    sale.items.map((item:SaleItem) => {
-      switch (item.product) {
-        case 'PERMIT':
-          permits += item.amount;
-          break;
-        case 'FEE':
-          fees += item.amount;
-          break;
-        default:
-          if (item.details) {
-            const details: Partial<TruckingDetails> = item.details;
-            //Calculate premium (sum of providers amounts)
-            premium += details.premium || 0;
-          }
+    if (sale.isChargeItemized) {
+      sale.fees = 0;
+      sale.permits = 0;
+      sale.premium = 0;
+      sale.profits = 0;
+      sale.totalInsurance = 0;
+      sale.amountReceivable = 0;
 
-          //calculate total charge (aka total down payment)
-          if (totalChargeItemized) {
-            totalCharge = totalCharge + item.amount;
-          }
+      sale.items.map((item: SaleItem) => {
+        switch (item.product) {
+          case 'PERMIT':
+            permits += item.amount;
+            item.profits = PERMIT_COMMISION_PERCENT * item.amount;
+            profits += item.profits;
+            break;
+          case 'FEE':
+            fees += item.amount;
+            item.profits = item.amount - FEE_COMMISION_PERCENT * item.amount;
+            profits += item.profits;
+            break;
+          default:
+            totalInsurance += item.amount || 0;
+            premium += item.premium || 0;
 
-          //calculate item profits and sale total profits
-          if (item.provider) {
-            const provider = providers.find(
-              (provider) =>
-                item.provider &&
-                item.provider !== '' &&
-                provider.id === item.provider.toString(),
-            );
-
-            if (!provider) {
-              throw new ConflictException(
-                'Sale Item ' + `${item.provider}` + ' provider not found',
-              );
-            }
-
-            let commission = provider.commissions.find(
-              (commission) => commission.productType === sale.type,
-            );
-
-            if (commission) {
-              item.profits = roundAmount(
-                (commission.percent / 100) * item.amount,
+            //calculate item profits and sale total profits
+            if (item.provider) {
+              item.profits = calculateProfitByProvider(
+                providers,
+                item.provider,
+                item.amount,
+                sale.type,
               );
               profits += item.profits;
             } else {
-              throw new ConflictException(
-                `Provider ${item.provider} commissions missing`,
-              );
+              throw new ConflictException(`Item provider is required`);
             }
-          } else {
-            throw new ConflictException(`Item provider is required`);
-          }
-      }
-    });
+        }
 
-    sale.profits = roundAmount(profits || 0);
-    sale.premium = roundAmount(premium || 0);
-    sale.permits = roundAmount(permits || 0);
-
-    if (totalChargeItemized) {
-      sale.totalCharge = roundAmount(totalCharge || 0);
+        //all charges but tips
+        totalCharge += item.amount;
+      });
     }
 
-    sale.amountReceivable = roundAmount(sale.totalCharge - sale.chargesPaid);
+    if (sale.isChargeItemized) {
+      sale.permits = roundAmount(permits || 0);
+      sale.fees = roundAmount(fees || 0);
+      sale.totalInsurance = roundAmount(totalInsurance || 0);
+      sale.profits = roundAmount(profits || 0);
+      sale.totalCharge = roundAmount(totalCharge || 0);
+      sale.premium = roundAmount(premium || 0);
+    } else {
+      console.log('entro a calcular non itemized');
+      sale.premium = roundAmount(sale.premium || 0);
+      sale.permits = roundAmount(sale.permits || 0);
+      sale.fees = roundAmount(sale.fees || 0);
+      sale.totalInsurance = roundAmount(sale.totalInsurance || 0);
+
+      sale.totalCharge = roundAmount(
+        sale.totalInsurance + sale.permits + sale.fees + sale.tips,
+      );
+
+      let providerItem = sale.items.find(
+        (item) => item.provider !== 'PERMIT' && item.provider !== 'FEE',
+      );
+
+      if (providerItem) {
+        profits = calculateProfitByProvider(
+          providers,
+          providerItem.provider,
+          sale.totalInsurance,
+          sale.type,
+        );
+      }
+
+      sale.profits = roundAmount(profits || 0);
+    }
+
+    sale.amountReceivable = roundAmount(
+      sale.totalCharge + (sale.tips || 0) - (sale.chargesPaid || 0),
+    );
   }
   return sale;
 }
 
-
 /**
-   * @param  {string} dateRange
-   */
- export function getDateMatchExpressionByRange(dateRange: string): any {
+ * @param  {string} dateRange
+ */
+export function getDateMatchExpressionByRange(dateRange: string): any {
   //Set filtering conditions
   const dates = DateFactory.dateRangeByName(dateRange);
 
@@ -112,7 +130,10 @@ export async function setSaleCalculations(
  * @param  {string} startDate?
  * @param  {string} endDate?
  */
-export function getDateMatchExpressionByDates(startDate?: string, endDate?: string): Object {
+export function getDateMatchExpressionByDates(
+  startDate?: string,
+  endDate?: string,
+): Object {
   if (startDate && endDate) {
     return {
       $gte: new Date(startDate + 'T00:00:00.000Z'),
@@ -123,4 +144,36 @@ export function getDateMatchExpressionByDates(startDate?: string, endDate?: stri
   } else if (endDate) {
     return { $lte: new Date(endDate + 'T23:59:59.999Z') };
   } else return { $lte: new Date() };
+}
+
+export function calculateProfitByProvider(
+  providers,
+  providerId: string,
+  amount: number,
+  saleType: string,
+): number {
+  let profits = 0;
+
+  const provider = providers.find(
+    (provider) =>
+      providerId && providerId !== '' && provider.id === providerId.toString(),
+  );
+
+  if (!provider) {
+    throw new ConflictException(
+      'Sale Item ' + `${providerId}` + ' provider not found',
+    );
+  }
+
+  let commission = provider.commissions.find(
+    (commission) => commission.productType === saleType,
+  );
+
+  if (commission) {
+    profits = roundAmount((commission.percent / 100) * amount);
+  } else {
+    throw new ConflictException(`Provider ${providerId} commissions missing`);
+  }
+
+  return profits;
 }

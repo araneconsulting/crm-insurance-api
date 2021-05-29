@@ -27,6 +27,7 @@ import { User } from 'database/user.model';
 import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 import { UpdateSaleDto } from './dto/update-sale.dto';
+import { ObjectId } from 'mongoose';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {
@@ -79,7 +80,7 @@ export class SaleController {
   }
 
   @Post(':id/endorse')
-  @HttpCode(201)
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async endorseSale(
@@ -107,5 +108,14 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   deleteSaleById(@Param('id', ParseObjectIdPipe) id: string): Observable<Sale> {
     return this.saleService.deleteById(id);
+  }
+
+  @Post('/delete')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(MongoFilter)
+  async deleteSales(@Req() req: Request, @Body() body: any): Promise<any> {
+    let ids: string[] = body['ids'];
+    return await this.saleService.batchDelete(ids);
   }
 }

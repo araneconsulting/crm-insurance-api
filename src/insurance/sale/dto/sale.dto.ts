@@ -8,7 +8,7 @@ import { User } from 'database/user.model';
 export class SaleDto {
 
   code: string;
-  amountReceivable: number;
+  amountReceivable?: number;
   chargesPaid: number;
   company: Partial<Company>;
   customer: Partial<Customer>; 
@@ -18,8 +18,10 @@ export class SaleDto {
   soldAt: string;
   tips: number;
   totalCharge: number; //Sum of all sale item amounts
+  totalInsurance: number; //Sum of items that are neither fee nor permits
   type: string; 
   isRenewal: boolean; 
+  isChargeItemized: boolean; 
   renewalReference?: Partial<Sale>; 
   isEndorsement: boolean; 
   endorsementReference?: Partial<Sale>; 

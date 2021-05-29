@@ -16,26 +16,27 @@ import { nanoid } from 'nanoid';
 import { Location } from './location.model';
 
 interface Sale extends Document<any> {
-  readonly code: string;
   readonly amountReceivable: number;
   readonly chargesPaid: number;
+  readonly code: string;
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
+  readonly endorsementReference: Partial<Sale>; 
+  readonly financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
   readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
+  readonly isChargeItemized: boolean;
+  readonly isEndorsement: boolean; 
+  readonly isRenewal: boolean; 
+  readonly monthlyPayment: number;
+  readonly nextRenewalAt: string;
+  readonly policyEffectiveAt: string;
+  readonly renewalReference: Partial<Sale>; 
   readonly seller: Partial<User>;
   readonly soldAt: string;
   readonly tips: number;
   readonly totalCharge: number; //Sum of all sale item amounts
   readonly type: string; 
-  readonly isRenewal: boolean; 
-  readonly renewalReference: Partial<Sale>; 
-  readonly isEndorsement: boolean; 
-  readonly endorsementReference: Partial<Sale>; 
-  readonly policyEffectiveAt: string;
-  readonly nextRenewalAt: string;
-  readonly monthlyPayment: number;
-  readonly financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
 
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
@@ -45,32 +46,35 @@ interface Sale extends Document<any> {
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   readonly profits: number; //[auto-calculated] Sum of al SaleItem profits;
+  readonly totalInsurance: number; //[auto-calculated] Sum of al SaleItem profits;
+  
 }
 
 type SaleModel = Model<Sale>;
 
 const SaleSchema = new Schema<any>(
   {
-    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     amountReceivable: { type: SchemaTypes.Number, default: 0, required: false },
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
+    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
-    location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
+    endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
+    financerCompany: { type: SchemaTypes.ObjectId, ref: 'BusinessInfo' },
+    isEndorsement: { type: SchemaTypes.Boolean, default: false },
+    isRenewal: { type: SchemaTypes.Boolean, default: false },
+    isChargeItemized: { type: SchemaTypes.Boolean, default: true },
     items: [{ type: SaleItemSchema, required: true }],
+    location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
+    monthlyPayment: { type: SchemaTypes.Number },
+    nextRenewalAt: { type: SchemaTypes.Date },
+    policyEffectiveAt: { type: SchemaTypes.Date },
+    renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     soldAt: { type: SchemaTypes.Date, required: false, default: new Date() },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
     type:  { type: SchemaTypes.String },
-    isRenewal: { type: SchemaTypes.Boolean, default: false },
-    renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
-    isEndorsement: { type: SchemaTypes.Boolean, default: false },
-    endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
-    policyEffectiveAt: { type: SchemaTypes.Date },
-    nextRenewalAt: { type: SchemaTypes.Date },
-    monthlyPayment: { type: SchemaTypes.Number },
-    financerCompany: { type: SchemaTypes.ObjectId, ref: 'BusinessInfo' },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
@@ -79,6 +83,7 @@ const SaleSchema = new Schema<any>(
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     premium: { type: SchemaTypes.Number, default: 0, required: false },
     profits: { type: SchemaTypes.Number, default: 0, required: false },
+    totalInsurance: { type: SchemaTypes.Number, default: 0, required: false },
   },
   {
     timestamps: true,

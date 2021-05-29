@@ -69,6 +69,9 @@ export class UpdateSaleDto {
   totalCharge: number; //Sum of all sale item amounts
 
   @IsOptional()
+  totalInsurance: number; //Sum of all sale item amounts
+
+  @IsOptional()
   nextRenewalAt: string;
 
   @IsOptional()

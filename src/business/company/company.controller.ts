@@ -107,6 +107,7 @@ export class CompanyController {
 
   @Post('/catalog')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @HttpCode(200)
   async getCatalog(@Req() req: Request, @Response() res): Promise<any> {
     const user: Partial<User> = req.user;
 
