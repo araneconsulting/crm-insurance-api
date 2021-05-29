@@ -24,8 +24,7 @@ export async function setSaleCalculations(
     let permits = 0;
     let fees = 0;
 
-    console.log(sale.isChargeItemized);
-    sale.isChargeItemized = sale.isChargeItemized || true;
+    sale.isChargeItemized = true && sale.isChargeItemized;
 
     if (sale.isChargeItemized) {
       sale.fees = 0;
@@ -44,7 +43,7 @@ export async function setSaleCalculations(
             break;
           case 'FEE':
             fees += item.amount;
-            item.profits = item.amount - FEE_COMMISION_PERCENT * item.amount;
+            item.profits = (1 - FEE_COMMISION_PERCENT) * item.amount;
             profits += item.profits;
             break;
           default:
@@ -71,6 +70,7 @@ export async function setSaleCalculations(
     }
 
     if (sale.isChargeItemized) {
+      //Do total calculations for itemized
       sale.permits = roundAmount(permits || 0);
       sale.fees = roundAmount(fees || 0);
       sale.totalInsurance = roundAmount(totalInsurance || 0);
@@ -78,14 +78,14 @@ export async function setSaleCalculations(
       sale.totalCharge = roundAmount(totalCharge || 0);
       sale.premium = roundAmount(premium || 0);
     } else {
-      console.log('entro a calcular non itemized');
+      //Do total calculations for non itemized
       sale.premium = roundAmount(sale.premium || 0);
       sale.permits = roundAmount(sale.permits || 0);
       sale.fees = roundAmount(sale.fees || 0);
       sale.totalInsurance = roundAmount(sale.totalInsurance || 0);
 
       sale.totalCharge = roundAmount(
-        sale.totalInsurance + sale.permits + sale.fees + sale.tips,
+        sale.totalInsurance + sale.permits + sale.fees,
       );
 
       let providerItem = sale.items.find(
@@ -101,7 +101,11 @@ export async function setSaleCalculations(
         );
       }
 
-      sale.profits = roundAmount(profits || 0);
+      sale.profits = roundAmount(
+        (profits || 0) +
+          PERMIT_COMMISION_PERCENT * sale.permits +
+          (1 - FEE_COMMISION_PERCENT) * sale.fees,
+      );
     }
 
     sale.amountReceivable = roundAmount(
