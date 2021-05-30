@@ -32,6 +32,7 @@ interface Sale extends Document<any> {
   readonly nextRenewalAt: string;
   readonly policyEffectiveAt: string;
   readonly renewalReference: Partial<Sale>; 
+  readonly renewed: boolean;
   readonly seller: Partial<User>;
   readonly soldAt: string;
   readonly tips: number;
@@ -70,6 +71,7 @@ const SaleSchema = new Schema<any>(
     nextRenewalAt: { type: SchemaTypes.Date },
     policyEffectiveAt: { type: SchemaTypes.Date },
     renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
+    renewed: { type: SchemaTypes.Boolean, default: false },
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     soldAt: { type: SchemaTypes.Date, required: false, default: new Date() },
     tips: { type: SchemaTypes.Number, default: 0, required: false },

@@ -267,13 +267,13 @@ export class SaleService {
     return from(this.saleModel.deleteMany({}).exec());
   }
 
-    /**
+  /**
    * @returns Observable
    */
 
-     async batchDelete(ids: string[]): Promise<any> {
-      return await from(this.saleModel.deleteMany({id: { $in: ids}}).exec());
-    }
+  async batchDelete(ids: string[]): Promise<any> {
+    return await from(this.saleModel.deleteMany({ id: { $in: ids } }).exec());
+  }
 
   async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};
@@ -467,5 +467,49 @@ export class SaleService {
     );
 
     return result;
+  }
+
+  /**
+   * @param  {CreateSaleDto} saleDto
+   * @returns Promise
+   */
+  async renew(id: string, createSaleDto: CreateSaleDto): Promise<Sale> {
+    let saleDto: Partial<SaleDto> = { ...createSaleDto };
+
+    const updated: Partial<Sale> = await this.saleModel
+      .findOneAndUpdate({ _id: id }, { renewed: true })
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException(
+        `Cannot renew sale: ${saleDto.endorsementReference} because is missing. `,
+      );
+    }
+
+    if (
+      !saleDto.seller ||
+      (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
+    ) {
+      saleDto.seller = this.req.user.id;
+      saleDto.location = this.req.user.location;
+    } else {
+      const seller = await this.userModel.findOne({ _id: saleDto.seller });
+      if (!seller) {
+        throw new ConflictException('Seller not found');
+      }
+      saleDto.seller = seller._id;
+      saleDto.location = seller.location;
+    }
+
+    saleDto.renewalReference = updated.id;
+
+    const insurers = await this.insurerModel.find({}).exec();
+    let saleData = await setSaleCalculations(saleDto, insurers);
+
+    return this.saleModel.create({
+      ...saleData,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    });
   }
 }

@@ -91,6 +91,18 @@ export class SaleController {
     return await this.saleService.endorse(id, sale);
   }
 
+  @Post(':id/renew')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(MongoFilter)
+  async renewSale(
+    @Req() req: Request,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() sale: any,
+  ): Promise<Sale> {
+    return await this.saleService.renew(id, sale);
+  }
+
   @Put(':id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
