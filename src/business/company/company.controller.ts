@@ -113,11 +113,10 @@ export class CompanyController {
 
     if (!user.company && !isSuperAdmin(user)) throw new BadRequestException(user.company);
 
-    const companyFilter = { id: user.company.id };
     const entitiesFilter = { company: user.company };
 
     return res.json({
-      companies:  await this.companyService.getCatalog(companyFilter),
+      company: await this.companyService.findById(user.company.toString()),
       users:  await this.userService.getCatalog(entitiesFilter),
       locations: await this.locationService.getCatalog(entitiesFilter),
       customers: await this.customerService.getCatalog(entitiesFilter),
