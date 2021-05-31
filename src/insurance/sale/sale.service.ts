@@ -371,6 +371,27 @@ export class SaleService {
               lang: 'js',
             },
           },
+          productName: {
+            $function: {
+              body: function (items: SaleItem[]) {
+                return [
+                  ...new Set(
+                    items.map((item) =>
+                      item.product
+                        .toLowerCase()
+                        .split(' ')
+                        .map(function (word) {
+                          return word.charAt(0).toUpperCase() + word.slice(1);
+                        })
+                        .join(' '),
+                    ),
+                  ),
+                ].join('/');
+              },
+              args: ['$items'],
+              lang: 'js',
+            },
+          },
           customerName: {
             $function: {
               body: function (customer: any) {

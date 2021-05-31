@@ -7,8 +7,6 @@ import {
   IsNotEmptyObject,
   IsOptional,
 } from 'class-validator';
-import { Communication } from 'shared/sub-documents/communication';
-import { SubProvider } from './update-insurer.dto';
 export class CreateInsurerDto {
   @IsNotEmptyObject()
   readonly business?: BusinessInfo;
@@ -23,7 +21,7 @@ export class CreateInsurerDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly subproviders?: SubProvider[];
+  readonly subproviders?: string[];
 
   @IsOptional()
   @IsNotEmpty()
