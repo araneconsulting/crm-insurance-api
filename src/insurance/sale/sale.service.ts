@@ -180,6 +180,16 @@ export class SaleService {
   async save(createSaleDto: CreateSaleDto): Promise<Sale> {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
 
+    if (!saleDto.isChargeItemized) {
+      saleDto.items = saleDto.items.map((item) => ({
+        ...item,
+        amount: 0,
+        premium: 0,
+        profits: 0,
+      }));
+    }
+
+
     if (
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
@@ -212,6 +222,16 @@ export class SaleService {
    */
   async update(id: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
     let saleDto: Partial<SaleDto> = { ...updateSaleDto };
+
+    if (!saleDto.isChargeItemized) {
+      saleDto.items = saleDto.items.map((item) => ({
+        ...item,
+        amount: 0,
+        premium: 0,
+        profits: 0,
+      }));
+    }
+
 
     saleDto.updatedBy = this.req.user.id;
 
@@ -429,6 +449,15 @@ export class SaleService {
 
     let saleDto: Partial<SaleDto> = { ...endorseSaleDto };
 
+    if (!saleDto.isChargeItemized) {
+      saleDto.items = saleDto.items.map((item) => ({
+        ...item,
+        amount: 0,
+        premium: 0,
+        profits: 0,
+      }));
+    }
+
     const insurers = await this.insurerModel.find({}).exec();
 
     const originalSale: Partial<Sale> = await this.saleModel
@@ -476,7 +505,6 @@ export class SaleService {
       updatedBy: this.req.user.id,
     };
 
-    console.log(newOriginal);
     let newOriginalData: any = await setSaleCalculations(newOriginal, insurers);
 
     result['endorsed'] = await this.saleModel.findOneAndUpdate(
@@ -496,6 +524,16 @@ export class SaleService {
    */
   async renew(id: string, createSaleDto: CreateSaleDto): Promise<Sale> {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
+
+    if (!saleDto.isChargeItemized) {
+      saleDto.items = saleDto.items.map((item) => ({
+        ...item,
+        amount: 0,
+        premium: 0,
+        profits: 0,
+      }));
+    }
+
 
     const updated: Partial<Sale> = await this.saleModel
       .findOneAndUpdate({ _id: id }, { renewed: true })
