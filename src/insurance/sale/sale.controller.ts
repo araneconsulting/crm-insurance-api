@@ -92,7 +92,7 @@ export class SaleController {
   }
 
   @Post(':id/renew')
-  @HttpCode(200)
+  @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async renewSale(
