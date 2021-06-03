@@ -49,14 +49,12 @@ export class UpdateSaleDto {
   isRenewal: boolean; 
   
   @IsOptional()
-  @IsMongoId()
   renewalReference: Partial<Sale>; 
 
   @IsOptional()
   isEndorsement: boolean; 
 
   @IsOptional()
-  @IsMongoId()
   endorsementReference: Partial<Sale>; 
   
   @IsOptional()

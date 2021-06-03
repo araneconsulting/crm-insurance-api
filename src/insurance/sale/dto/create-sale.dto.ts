@@ -17,7 +17,6 @@ export class CreateSaleDto {
   soldAt: string;
   
   @IsNotEmpty()
-  @IsMongoId()
   customer: Partial<Customer>;
   
   @IsOptional()
@@ -25,7 +24,6 @@ export class CreateSaleDto {
   seller: Partial<User>;
 
   @IsNotEmpty()
-  @IsMongoId()
   location: Partial<Location>;
 
   @IsOptional()
@@ -58,14 +56,12 @@ export class CreateSaleDto {
   isRenewal: boolean; 
   
   @IsOptional()
-  @IsMongoId()
   renewalReference: Partial<Sale>; 
 
   @IsOptional()
   isEndorsement: boolean; 
 
   @IsOptional()
-  @IsMongoId()
   endorsementReference: Partial<Sale>; 
   
   @IsOptional()
