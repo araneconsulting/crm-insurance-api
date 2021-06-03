@@ -189,7 +189,6 @@ export class SaleService {
       }));
     }
 
-
     if (
       !saleDto.seller ||
       (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
@@ -231,7 +230,6 @@ export class SaleService {
         profits: 0,
       }));
     }
-
 
     saleDto.updatedBy = this.req.user.id;
 
@@ -309,8 +307,12 @@ export class SaleService {
     }
 
     let conditions = {};
+    let fixedQueries = [/* { isRenewal: false },  */ { isEndorsement: false }];
+    let filterQueries = [];
 
-    conditions = { $and: [{ deleted: false }] };
+    conditions = {
+      $and: [{ deleted: false }],
+    };
     if (
       type ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
@@ -322,17 +324,17 @@ export class SaleService {
       }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
-        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+        filterQueries = Object.keys(queryParams.filter).map((key) => {
           return {
             [key]: {
               $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
             },
           };
         });
-
-        conditions['$or'] = filterQueries;
       }
     }
+
+    conditions['$or'] = [...filterQueries, ...fixedQueries];
 
     const query = this.saleModel.aggregate();
 
@@ -426,6 +428,10 @@ export class SaleService {
             },
           },
           code: '$code',
+          isRenewal: '$isRenewal',
+          isEndorsement: '$isEndorsement',
+          createdAt: '$createdAt',
+          nextRenewalAt: '$nextRenewalAt',
         },
       },
     ]);
@@ -533,7 +539,6 @@ export class SaleService {
         profits: 0,
       }));
     }
-
 
     const updated: Partial<Sale> = await this.saleModel
       .findOneAndUpdate({ _id: id }, { renewed: true })

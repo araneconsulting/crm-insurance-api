@@ -61,7 +61,7 @@ const SaleSchema = new Schema<any>(
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
     endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
-    financerCompany: { type: SchemaTypes.ObjectId, ref: 'BusinessInfo' },
+    financerCompany: { type: SchemaTypes.String, required:false },
     isEndorsement: { type: SchemaTypes.Boolean, default: false },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },

@@ -76,5 +76,5 @@ export class UpdateSaleDto {
   monthlyPayment: number;
 
   @IsOptional()
-  financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
+  financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
 }

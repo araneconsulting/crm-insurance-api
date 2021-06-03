@@ -72,7 +72,8 @@ export class CreateSaleDto {
   @IsNumber()
   monthlyPayment: number;
 
+  @IsOptional()
   @IsString()
-  financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
+  financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
   
 }
