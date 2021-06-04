@@ -307,11 +307,11 @@ export class SaleService {
     }
 
     let conditions = {};
-    let fixedQueries = [/* { isRenewal: false },  */ { isEndorsement: false }];
+    let fixedQueries = [];
     let filterQueries = [];
 
     conditions = {
-      $and: [{ deleted: false }],
+      $and: [{ deleted: false }, { renewed: false }, { isEndorsement: false }],
     };
     if (
       type ||
@@ -334,7 +334,9 @@ export class SaleService {
       }
     }
 
-    conditions['$or'] = [...filterQueries, ...fixedQueries];
+    if (filterQueries.length || fixedQueries.length) {
+      conditions['$or'] = [...filterQueries, ...fixedQueries];
+    }
 
     const query = this.saleModel.aggregate();
 

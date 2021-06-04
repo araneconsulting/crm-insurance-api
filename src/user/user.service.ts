@@ -1,8 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
-import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
-import { EMPTY, from, Observable, of, throwError } from 'rxjs';
-import { mergeMap, tap, throwIfEmpty, catchError } from 'rxjs/operators';
+import { EMPTY, from, Observable, of } from 'rxjs';
+import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { USER_MODEL } from '../database/database.constants';
 import { User, UserModel } from '../database/user.model';
 import { SendgridService } from '../sendgrid/sendgrid.service';
@@ -36,7 +34,7 @@ export class UserService {
     return from(this.userModel.exists({ id }));
   }
 
-  async createUser(data: CreateUserDto, user:Partial<User>): Promise<User> {
+  async createUser(data: CreateUserDto, user: Partial<User>): Promise<User> {
     // Simply here we can send a verification email to the new registered user
     // by calling SendGrid directly.
     //
@@ -101,7 +99,7 @@ export class UserService {
   updateUser(
     id: string,
     data: UpdateUserDto,
-    user: Partial<User>
+    user: Partial<User>,
   ): Observable<User> {
     const updateQuery = this.userModel.findOneAndUpdate(
       { _id: id },
@@ -170,46 +168,88 @@ export class UserService {
     const limitCriteria = queryParams.pageSize;
 
     let roles = null;
+
     if (queryParams.filter.hasOwnProperty('roles')) {
       roles = queryParams.filter.roles;
       delete queryParams.filter['roles'];
     }
 
-    let conditions = null;
+    let conditions = {};
+    let fixedQueries = [];
+    let filterQueries = [];
 
+    conditions = {
+      $and: [{ deleted: false }, { roles: { $nin: ['SUPER'] } }],
+    };
     if (
       roles ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      conditions = roles
-        ? {
-            $and: [{ roles: roles }],
-          }
-        : {};
+      if (roles) {
+        conditions = {
+          $and: [{ roles: roles }, { deleted: false }],
+        };
+      }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
-        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+        filterQueries = Object.keys(queryParams.filter).map((key) => {
           return {
             [key]: {
               $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
             },
           };
         });
-
-        conditions['$or'] = filterQueries;
       }
-    } 
+    }
 
-    const documentsQuery = conditions
-      ? this.userModel.find(conditions)
-      : this.userModel.find();
+    if (filterQueries.length || fixedQueries.length) {
+      conditions['$or'] = [...filterQueries, ...fixedQueries];
+    }
 
-    let entities = await documentsQuery
-      .populate('location', 'alias business.name')
-      .skip(skipCriteria)
-      .limit(limitCriteria)
-      .sort(sortCriteria)
-      .exec();
+    const query = this.userModel.aggregate();
+
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: 'location',
+      })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+
+    if (conditions) {
+      query.match(conditions);
+    }
+
+    query.append([
+      {
+        $project: {
+          id: '$_id',
+          roles: '$roles',
+          firstName: '$firstName',
+          lastName: '$lastName',
+          email: '$email',
+          phone: '$phone',
+          deleted: '$deleted',
+          locationName: {
+            $function: {
+              body: function (location: any) {
+                return location ? location.business.name : 'N/A';
+              },
+              args: ['$location'],
+              lang: 'js',
+            },
+          },
+          code: '$code',
+          createdAt: '$createdAt',
+        },
+      },
+    ]);
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
 
     return {
       entities: entities,
