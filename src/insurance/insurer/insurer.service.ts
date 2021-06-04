@@ -194,8 +194,15 @@ export class InsurerService {
           name: '$business.name',
           email: '$business.email',
           fax: '$business.fax',
-          phone: '$business.primaryPhone',
-          phoneExtension: '$business.primaryPhoneExtension',
+          phone: {
+            $function: {
+              body: function (business: any) {
+                return `${business.primaryPhone} ext.${business.primaryPhoneExtension}`;
+              },
+              args: ['$business', '$contact', '$type'],
+              lang: 'js',
+            },
+          },
           deleted: "$deleted",
           code: '$code',
         },
