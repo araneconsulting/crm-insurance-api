@@ -43,8 +43,6 @@ export class InsurerService {
   }
 
   save(data: CreateInsurerDto): Observable<Insurer> {
-    console.log(this.req.user);
-    console.log(data);
     const createInsurer = this.insurerModel.create({
       ...data,
       createdBy: { _id: this.req.user.id },
@@ -72,6 +70,10 @@ export class InsurerService {
     );
   }
 
+  /**
+   * @param  {string} id
+   * @returns Observable
+   */
   deleteById(id: string): Observable<Insurer> {
     return from(this.insurerModel.findOneAndDelete({ _id: id }).exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
@@ -82,66 +84,6 @@ export class InsurerService {
   deleteAll(): Observable<any> {
     return from(this.insurerModel.deleteMany({}).exec());
   }
-
-  async searchOld(queryParams?: any): Promise<any> {
-    const sortCriteria = {};
-    sortCriteria[queryParams.sortField] =
-      queryParams.sortOrder === 'desc' ? -1 : 1;
-    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
-    const limitCriteria = queryParams.pageSize;
-
-    let type = null;
-    if (queryParams.filter.hasOwnProperty('type')) {
-      type = queryParams.filter.type;
-      delete queryParams.filter['type'];
-    }
-
-    let conditions = null;
-
-    if (
-      type ||
-      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
-    ) {
-      conditions = type
-        ? {
-            $and: [{ type: type }],
-          }
-        : {};
-
-      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
-        const filterQueries = Object.keys(queryParams.filter).map((key) => {
-          return {
-            [key]: {
-              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
-            },
-          };
-        });
-
-        conditions['$or'] = filterQueries;
-      }
-    }
-
-    const documentsQuery = conditions
-      ? this.insurerModel.find(conditions)
-      : this.insurerModel.find();
-
-    let entities = await documentsQuery
-      .skip(skipCriteria)
-      .limit(limitCriteria)
-      .sort(sortCriteria)
-      .select('business.name business.email business.fax business.primaryPhone type _id subproviders')
-      .exec();
-
-    return {
-      entities: entities,
-      totalCount: entities.length,
-    };
-  }
-
-
-
-
-
 
   async search(queryParams?: any): Promise<any> {
     const sortCriteria = {};
@@ -156,16 +98,19 @@ export class InsurerService {
       delete queryParams.filter['type'];
     }
 
-    let conditions = null;
+    let conditions = {};
+
+    conditions = {
+      $and: [{ deleted: false }],
+    };
+
     if (
       type ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      conditions = type
-        ? {
-            $and: [{ type: type }],
-          }
-        : {};
+      if (type) {
+        conditions['$and'].push({ type: type });
+      }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
         const filterQueries = Object.keys(queryParams.filter).map((key) => {
@@ -197,13 +142,17 @@ export class InsurerService {
           phone: {
             $function: {
               body: function (business: any) {
-                return `${business.primaryPhone} ext.${business.primaryPhoneExtension}`;
+                return `${business.primaryPhone} ${
+                  business.primaryPhoneExtension
+                    ? 'ext.' + business.primaryPhoneExtension
+                    : ''
+                }`;
               },
               args: ['$business', '$contact', '$type'],
               lang: 'js',
             },
           },
-          deleted: "$deleted",
+          deleted: '$deleted',
           code: '$code',
         },
       },
@@ -223,7 +172,7 @@ export class InsurerService {
     return await this.insurerModel
       .find(filterCriteria)
       .select('business.name type _id subproviders')
-      .sort({ "business.name": 1 })
+      .sort({ 'business.name': 1 })
       .exec();
   }
 }

@@ -163,27 +163,28 @@ export function calculateProfitByProvider(
       providerId && providerId !== '' && provider.id === providerId.toString(),
   );
 
-  if (!provider) {
-    throw new ConflictException(
-      'Sale Item ' + `${providerId}` + ' provider not found',
+  let commission = { percent: 0 };
+  if (provider) {
+    commission = provider.commissions.find(
+      (commission) => commission.productType === saleType,
     );
-  }
 
-  let commission = provider.commissions.find(
-    (commission) => commission.productType === saleType,
-  );
-
-  if (commission) {
-    profits = roundAmount((commission.percent / 100) * amount);
-  } else {
-    throw new ConflictException(`Provider ${providerId} commissions missing`);
+    if (commission) {
+      profits = roundAmount((commission.percent / 100) * amount);
+    } else {
+      profits = 0;
+    }
   }
 
   return profits;
 }
 
 export function titleCase(str) {
-  return str.toLowerCase().split(' ').map(function(word) {
-    return (word.charAt(0).toUpperCase() + word.slice(1));
-  }).join(' ');
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
 }

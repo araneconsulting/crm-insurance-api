@@ -186,9 +186,7 @@ export class UserService {
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
       if (roles) {
-        conditions = {
-          $and: [{ roles: roles }, { deleted: false }],
-        };
+        conditions['$and'].push({ roles: roles });
       }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {

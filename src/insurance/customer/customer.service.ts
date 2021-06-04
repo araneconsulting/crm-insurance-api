@@ -72,66 +72,6 @@ export class CustomerService {
     return this.customerModel.deleteMany({}).exec();
   }
 
-  async searchOld(queryParams?: any): Promise<any> {
-    const sortCriteria = {};
-    sortCriteria[queryParams.sortField] =
-      queryParams.sortOrder === 'desc' ? -1 : 1;
-    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
-    const limitCriteria = queryParams.pageSize;
-
-    let type = null;
-    if (queryParams.filter.hasOwnProperty('type')) {
-      type = queryParams.filter.type;
-      delete queryParams.filter['type'];
-    }
-
-    if (
-      type ||
-      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
-    ) {
-      let conditions = type
-        ? {
-            $and: [{ type: type }],
-          }
-        : {};
-
-      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
-        const filterQueries = Object.keys(queryParams.filter).map((key) => {
-          return {
-            [key]: {
-              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
-            },
-          };
-        });
-
-        conditions['$or'] = filterQueries;
-      }
-
-      return {
-        totalCount: await this.customerModel
-          .find(conditions)
-          .countDocuments()
-          .exec(),
-        entities: await this.customerModel
-          .find(conditions)
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    } else {
-      return {
-        totalCount: await this.customerModel.find().countDocuments().exec(),
-        entities: await this.customerModel
-          .find()
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    }
-  }
-
   async getCatalog(filterCriteria: any): Promise<any> {
     return await this.customerModel
       .find(filterCriteria)
@@ -153,16 +93,19 @@ export class CustomerService {
       delete queryParams.filter['type'];
     }
 
-    let conditions = null;
+    let conditions = {};
+
+    conditions = {
+      $and: [{ deleted: false }],
+    };
+
     if (
       type ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      conditions = type
-        ? {
-            $and: [{ type: type }],
-          }
-        : {};
+      if (type) {
+        conditions['$and'].push({ type: type });
+      }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
         const filterQueries = Object.keys(queryParams.filter).map((key) => {
@@ -213,7 +156,11 @@ export class CustomerService {
             $function: {
               body: function (business: any, contact: any, type: any) {
                 return type === 'BUSINESS'
-                  ? `${business.primaryPhone} ext.${business.primaryPhoneExtension}`
+                  ? `${business.primaryPhone} ${
+                      business.primaryPhoneExtension
+                        ? 'ext.' + business.primaryPhoneExtension
+                        : ''
+                    }`
                   : contact.phone || contact.mobilePhone;
               },
               args: ['$business', '$contact', '$type'],
@@ -232,6 +179,7 @@ export class CustomerService {
             },
           },
           code: '$code',
+          deleted: '$deleted',
         },
       },
     ]);

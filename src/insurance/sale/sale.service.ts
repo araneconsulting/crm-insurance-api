@@ -306,9 +306,9 @@ export class SaleService {
       delete queryParams.filter['type'];
     }
 
-    let conditions = {};
     let fixedQueries = [];
     let filterQueries = [];
+    let conditions = {};
 
     conditions = {
       $and: [{ deleted: false }, { renewed: false }, { isEndorsement: false }],
@@ -318,9 +318,7 @@ export class SaleService {
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
       if (type) {
-        conditions = {
-          $and: [{ type: type }, { deleted: false }],
-        };
+        conditions['$and'].push({ type: type });
       }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
