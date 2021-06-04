@@ -83,7 +83,7 @@ export class InsurerService {
     return from(this.insurerModel.deleteMany({}).exec());
   }
 
-  async search(queryParams?: any): Promise<any> {
+  async searchOld(queryParams?: any): Promise<any> {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
@@ -131,6 +131,80 @@ export class InsurerService {
       .sort(sortCriteria)
       .select('business.name business.email business.fax business.primaryPhone type _id subproviders')
       .exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
+  }
+
+
+
+
+
+
+  async search(queryParams?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    let type = null;
+    if (queryParams.filter.hasOwnProperty('type')) {
+      type = queryParams.filter.type;
+      delete queryParams.filter['type'];
+    }
+
+    let conditions = null;
+    if (
+      type ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+    ) {
+      conditions = type
+        ? {
+            $and: [{ type: type }],
+          }
+        : {};
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+
+        conditions['$or'] = filterQueries;
+      }
+    }
+
+    const query = this.insurerModel.aggregate();
+
+    if (conditions) {
+      query.match(conditions);
+    }
+
+    query.append([
+      {
+        $project: {
+          id: '$_id',
+          type: '$type',
+          name: '$business.name',
+          email: '$business.email',
+          fax: '$business.fax',
+          phone: '$business.primaryPhone',
+          phoneExtension: '$business.primaryPhoneExtension',
+          deleted: "$deleted",
+          code: '$code',
+        },
+      },
+    ]);
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
 
     return {
       entities: entities,
