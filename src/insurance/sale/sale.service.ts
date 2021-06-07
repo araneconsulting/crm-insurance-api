@@ -380,6 +380,7 @@ export class SaleService {
           soldAt: '$soldAt',
           deleted: '$deleted',
           totalCharge: { $round: ['$totalCharge', 2] },
+          premium: { $round: ['$premium', 2] },
           totalInsurance: { $round: ['$totalInsurance', 2] },
           sellerName: {
             $concat: ['$seller.firstName', ' ', '$seller.lastName'],

@@ -1,6 +1,8 @@
 import {
   IsArray,
+  IsDateString,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   Matches,
   MaxLength,
@@ -17,19 +19,19 @@ import { Location } from 'database/location.model';
 
 export class UpdateUserDto {
   @IsOptional()
-  @IsNotEmpty()
+  @IsObject()
   readonly address: Address;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsDateString()
   readonly dob: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsObject()
   readonly communication: Communication;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsObject()
   readonly emailSettings: EmailSettings;
 
   @IsOptional()
@@ -37,19 +39,15 @@ export class UpdateUserDto {
   readonly firstName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly gender: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly language: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly lastName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly mobilePhone: string;
 
   @IsOptional()
@@ -73,15 +71,13 @@ export class UpdateUserDto {
   readonly roles: RoleType[];
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsDateString()
   readonly startedAt: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly timezone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly website: string;
 
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)

@@ -4,6 +4,7 @@ import {
   IsEmail,
 IsNotEmpty,
 IsNotEmptyObject,
+IsObject,
   IsOptional,
   Matches,
   MaxLength,
@@ -26,7 +27,7 @@ export class CreateUserDto {
   readonly dob: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsObject()
   readonly communication: Communication;
 
   @IsNotEmpty()
@@ -34,7 +35,7 @@ export class CreateUserDto {
   readonly email: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsObject()
   readonly emailSettings: EmailSettings;
 
   @IsNotEmpty()
@@ -47,7 +48,6 @@ export class CreateUserDto {
   readonly language: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly lastName: string;
 
   @IsOptional()
@@ -65,7 +65,6 @@ export class CreateUserDto {
   readonly password: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly phone: string;
 
   @IsOptional()
@@ -91,7 +90,7 @@ export class CreateUserDto {
   readonly company: Partial<Company>;
 
   @IsOptional()
-  @IsNotEmptyObject()
+  @IsObject()
   readonly employeeInfo: EmployeeInfo;
 
   @IsOptional()

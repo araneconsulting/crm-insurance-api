@@ -17,11 +17,9 @@ export class EmployeeInfo {
   readonly endedAt: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly position: string; //can be: Sales Agent, IT, Certificates Assistant, etc
 
   @IsOptional()
-  @IsNotEmpty()
   readonly payFrequency: string; //can be: hourly (H), daily (D), weekly (W), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
 
   @IsOptional()
@@ -37,7 +35,6 @@ export class EmployeeInfo {
   readonly overtimePayRate: number;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly salaryFormula: string;
 
   @IsOptional()
@@ -49,7 +46,6 @@ export class EmployeeInfo {
   readonly workPrimaryPhone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly workPrimaryPhoneExtension: string;
 
   @IsOptional()

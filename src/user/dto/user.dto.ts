@@ -1,5 +1,5 @@
 import { EmployeeInfo } from 'business/sub-docs/employee-info';
-import { IsArray, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsArray, IsDateString, IsEmail, IsNotEmpty, IsNotEmptyObject, IsObject, IsOptional } from 'class-validator';
 import { Company } from 'database/company.model';
 import { Location } from 'database/location.model';
 import { User } from 'database/user.model';
@@ -10,15 +10,15 @@ import { EmailSettings } from './email-settings';
 
 export class UserDto {
   @IsOptional()
-  @IsNotEmpty()
+  @IsObject()
   readonly address: Address;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsDateString()
   readonly dob: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsNotEmptyObject()
   readonly communication: Communication;
 
   @IsOptional()
@@ -27,7 +27,7 @@ export class UserDto {
   readonly email: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsNotEmptyObject()
   readonly emailSettings: EmailSettings;
 
   @IsOptional()
@@ -35,23 +35,18 @@ export class UserDto {
   readonly firstName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly gender: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly language: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly lastName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly mobilePhone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly phone: string;
 
   @IsOptional()
@@ -59,11 +54,10 @@ export class UserDto {
   readonly roles: RoleType[];
 
   @IsOptional()
-  @IsNotEmpty()
+  @IsDateString()
   readonly startedAt: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly timezone: string;
 
   @IsOptional()
@@ -71,7 +65,6 @@ export class UserDto {
   readonly username: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly website: string;
 
   //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)

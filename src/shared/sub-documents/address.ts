@@ -2,27 +2,25 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Schema, SchemaTypes } from 'mongoose';
 
 export class Address {
-  @IsNotEmpty()
+  @IsOptional()
   readonly address1: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly address2: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly city: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly county: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly state: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly country: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   readonly zip: string;
 }
 

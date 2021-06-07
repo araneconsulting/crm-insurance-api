@@ -16,6 +16,7 @@ export class CreateSaleDto {
   @IsNotEmpty()
   soldAt: string;
   
+  @IsOptional()
   @IsNotEmpty()
   customer: Partial<Customer>;
   
@@ -23,27 +24,24 @@ export class CreateSaleDto {
   @IsNotEmpty()
   seller: Partial<User>;
 
+  @IsOptional()
   @IsNotEmpty()
   location: Partial<Location>;
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   tips: number;
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   totalCharge: number;
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   totalInsurance: number;
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   chargesPaid: number;
 
   @IsOptional()
@@ -56,12 +54,14 @@ export class CreateSaleDto {
   isRenewal: boolean; 
   
   @IsOptional()
+  @IsNotEmpty()
   renewalReference: Partial<Sale>; 
 
   @IsOptional()
   isEndorsement: boolean; 
 
   @IsOptional()
+  @IsNotEmpty()
   endorsementReference: Partial<Sale>; 
   
   @IsOptional()

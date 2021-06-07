@@ -12,15 +12,12 @@ export class CreateCompanyDto {
   email: string;
 
   @IsOptional()
-  @IsNotEmpty()
   fax: string;
 
   @IsOptional()
-  @IsNotEmpty()
   industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
 
   @IsOptional()
-  @IsNotEmpty()
   logo: string;
 
   @IsNotEmpty()
@@ -33,30 +30,24 @@ export class CreateCompanyDto {
   primaryPhone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   primaryPhoneExtension: string;
 
   @IsOptional()
-  @IsNotEmpty()
   secondaryPhone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   secondaryPhoneExtension: string;
 
   @IsOptional()
-  @IsNotEmpty()
   sector: string; // can be: Financial, Technology, Healthcare, etc
 
   @IsOptional()
-  @IsNotEmpty()
   startedAt: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   type: string; // LLC, S Corp, C Corp
 
   @IsOptional()
-  @IsNotEmpty()
   website: string;
 
   financerCompanies: BusinessInfo[];

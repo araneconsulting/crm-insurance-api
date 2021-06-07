@@ -29,17 +29,14 @@ export class UpdateSaleDto {
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   tips: number;
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   chargesPaid: number;
 
   @IsOptional()
   @IsNumber()
-  @IsNotEmpty()
   premium: number;
 
   @IsArray()
@@ -49,18 +46,21 @@ export class UpdateSaleDto {
   isRenewal: boolean; 
   
   @IsOptional()
+  @IsNotEmpty()
   renewalReference: Partial<Sale>; 
 
   @IsOptional()
   isEndorsement: boolean; 
 
   @IsOptional()
+  @IsNotEmpty()
   endorsementReference: Partial<Sale>; 
   
   @IsOptional()
   policyEffectiveAt: string; 
 
   @IsOptional()
+  @IsNotEmpty()
   customer: Partial<Customer>;
 
   @IsOptional()

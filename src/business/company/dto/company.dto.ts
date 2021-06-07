@@ -11,15 +11,12 @@ export class BusinessInfo {
     readonly email: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly fax: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly industry: string; //can be: Auto Parts, Entertainment, Chemical, Engineering, etc
 
     @IsOptional()
-    @IsNotEmpty()
     readonly logo: string;
 
     @IsNotEmpty()
@@ -34,30 +31,23 @@ export class BusinessInfo {
     readonly primaryPhone: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly primaryPhoneExtension: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly secondaryPhone: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly secondaryPhoneExtension: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly sector: string; // can be: Financial, Technology, Healthcare, etc
 
     @IsOptional()
-    @IsNotEmpty()
     readonly startedAt: string;
 
     @IsOptional()
-    @IsNotEmpty()
     readonly type: string;  //LLC, INC
 
     @IsOptional()
-    @IsNotEmpty()
     readonly website: string;
 }

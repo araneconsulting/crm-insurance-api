@@ -13,15 +13,12 @@ export class ContactInfo {
   readonly address: Address;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly dob: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly driverLicense: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsEmail()
   readonly email: string;
 
@@ -30,7 +27,6 @@ export class ContactInfo {
   readonly firstName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly language: string;
 
   @IsOptional()
@@ -38,23 +34,18 @@ export class ContactInfo {
   readonly lastName: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly mobilePhone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly phone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly ssn: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly timezone: string;
 
   @IsOptional()
-  @IsNotEmpty()
   readonly website: string;
 }
 
