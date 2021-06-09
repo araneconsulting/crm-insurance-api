@@ -4,7 +4,7 @@ import { CreatePayrollDto } from 'business/payroll/dto/create-payroll.dto';
 import { UpdatePayrollDto } from 'business/payroll/dto/update-payroll.dto';
 import { PayrollDto } from 'business/payroll/dto/payroll.dto';
 import { Payroll } from 'database/payroll.model';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
@@ -12,6 +12,8 @@ import { PAYROLL_MODEL, USER_MODEL } from '../../database/database.constants';
 import { ReportService } from 'insurance/report/report.service';
 import { PayAddon } from 'business/sub-docs/pay-addon';
 import e from 'express';
+import { InitPayrollDto } from './dto/init-payroll.dto';
+import * as moment from 'moment';
 
 const ADDON_TYPE_DISCOUNT = 'DISCOUNT';
 const ADDON_TYPE_BONUS = 'BONUS';
@@ -50,6 +52,74 @@ export class PayrollService {
         throwIfEmpty(() => new NotFoundException(`Payroll:$id was not found`)),
       )
       .toPromise();
+  }
+
+  getAvailablePayPeriod(
+    scope: string,
+    location: string = null,
+  ): InitPayrollDto[] {
+    const monthDiff = moment().date() >= 21 ? 0 : 1;
+
+    let payrolls: InitPayrollDto[] = [
+      {
+        payPeriodStartedAt: moment()
+          .subtract(monthDiff,'month')
+          .date(21)
+          .startOf('day')
+          .format('MM-DD-YYYY'),
+        payPeriodEndedAt: moment()
+          .subtract(monthDiff + 1,'month')
+          .date(20)
+          .endOf('day')
+          .format('MM-DD-YYYY'),
+        location: location,
+        scope: 'LOCATION',
+      },
+    ];
+
+    return payrolls;
+
+    //TODO: Implement it to return all non executed payroll periods.
+
+    /* const monthsAgo = (moment().date()>= 21) ? 6 : 7;
+
+    const periodStarting = moment()
+      .subtract(monthsAgo, 'months')
+      .date(21)
+      .startOf('day')
+      .toISOString();
+    console.log(periodStarting);
+
+    let conditions = {};
+
+    conditions['$and'] = [{ payPeriodStartedAt: { $gte: periodStarting } }];
+
+    if (scope === 'LOCATION') {
+      conditions['$and'].push({ location: Types.ObjectId(location) });
+    }
+
+    let payrolls = this.payrollModel
+      .find(conditions)
+      .sort({ payPeriodStartedAt: -1 })
+      .exec();
+
+    return payrolls; */
+  }
+
+  async prepare(data: CreatePayrollDto): Promise<Payroll> {
+    let payrollDto: PayrollDto = {
+      ...data,
+      company: this.req.user.company,
+      createdBy: { _id: this.req.user.id },
+    };
+
+    payrollDto = await this.runPayrollCalculations(payrollDto);
+
+    if (payrollDto.scope === ADDON_SCOPE_LOCATION && !payrollDto.location) {
+      payrollDto.location = this.req.user.location;
+    }
+
+    return this.payrollModel.create(payrollDto);
   }
 
   async save(data: CreatePayrollDto): Promise<Payroll> {
@@ -108,43 +178,93 @@ export class PayrollService {
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
 
-    if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
-      let conditions = {};
+    let location = null;
+
+    if (queryParams.filter.hasOwnProperty('location')) {
+      location = queryParams.filter.location;
+      delete queryParams.filter['location'];
+    }
+
+    let conditions = {};
+    let fixedQueries = [];
+    let filterQueries = [];
+
+    conditions = {
+      $and: [{ deleted: false }],
+    };
+    if (
+      location ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+    ) {
+      if (location) {
+        conditions['$and'].push({ location: Types.ObjectId(location) });
+      }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
-        const filterQueries = Object.keys(queryParams.filter).map((key) => {
+        filterQueries = Object.keys(queryParams.filter).map((key) => {
           return {
             [key]: {
               $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
             },
           };
         });
-        conditions['$or'] = filterQueries;
       }
-
-      return {
-        totalCount: await this.payrollModel
-          .find(conditions)
-          .countDocuments()
-          .exec(),
-        entities: await this.payrollModel
-          .find(conditions)
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
-    } else {
-      return {
-        totalCount: await this.payrollModel.find().countDocuments().exec(),
-        entities: await this.payrollModel
-          .find()
-          .skip(skipCriteria)
-          .limit(limitCriteria)
-          .sort(sortCriteria)
-          .exec(),
-      };
     }
+
+    if (filterQueries.length || fixedQueries.length) {
+      conditions['$or'] = [...filterQueries, ...fixedQueries];
+    }
+
+    const query = this.payrollModel.aggregate();
+
+    if (conditions) {
+      query.match(conditions);
+    }
+
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: 'location',
+      })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+
+    query.append([
+      {
+        $project: {
+          id: '$_id',
+          payPeriodStartedAt: '$payPeriodStartedAt',
+          payPeriodEndedAt: '$payPeriodEndedAt',
+          locationName: {
+            $function: {
+              body: function (location: any) {
+                return location ? location.business.name : 'N/A';
+              },
+              args: ['$location'],
+              lang: 'js',
+            },
+          },
+          code: '$code',
+          status: '$status',
+          totalSaleBonus: '$totalSaleBonus',
+          totalNetSalary: '$totalNetSalary',
+          createdAt: '$createdAt',
+          scope: '$scope',
+          
+        },
+      },
+    ]);
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
   }
 
   private async runPayrollCalculations(payrollDto: PayrollDto) {

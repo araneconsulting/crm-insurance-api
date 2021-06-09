@@ -81,4 +81,11 @@ export class LocationController {
   ): Promise<Location> {
     return await this.locationService.deleteById(id);
   }
+
+  @Post('/search')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchLocations(@Body() query: any): Promise<any> {
+    return await this.locationService.search(query.queryParams);
+  }
 }

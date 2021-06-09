@@ -12,6 +12,7 @@ export class PayrollDto {
   payPeriodStartedAt?: string;
   payStubs?: PayStub[];
   scope?: string;
+  status?: string;
   createdBy?: Partial<User>;
   updatedBy?: Partial<User>;
 }

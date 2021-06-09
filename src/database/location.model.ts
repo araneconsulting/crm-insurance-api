@@ -6,6 +6,7 @@ import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { nanoid } from 'nanoid';
 import { Company } from './company.model';
+import { User } from './user.model';
 
 interface Location extends Document<any> {
   readonly code: string;
@@ -13,6 +14,7 @@ interface Location extends Document<any> {
   readonly business: BusinessInfo;
   readonly payFrequency: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Twice a month (T), Yearly (Y)
   readonly company: Partial<Company>;
+  readonly manager: Partial<User>;
 }
 
 type LocationModel = Model<Location>;
@@ -50,6 +52,7 @@ const LocationSchema = new Schema<any>(
     },
     payFrequency: { type: SchemaTypes.String },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
+    manager: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
   },
   {
     timestamps: true,

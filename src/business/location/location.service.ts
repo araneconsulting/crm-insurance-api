@@ -84,6 +84,94 @@ export class LocationService {
     return this.locationModel.deleteMany({}).exec();
   }
 
+  async search(queryParams?: any): Promise<any> {
+    const sortCriteria = {};
+    sortCriteria[queryParams.sortField] =
+      queryParams.sortOrder === 'desc' ? -1 : 1;
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    let country = null;
+
+    if (queryParams.filter.hasOwnProperty('country')) {
+      country = queryParams.filter.country;
+      delete queryParams.filter['country'];
+    }
+
+    let conditions = {};
+    let fixedQueries = [];
+    let filterQueries = [];
+
+    conditions = {
+      $and: [{ deleted: false }],
+    };
+    if (
+      country ||
+      (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+    ) {
+      if (country) {
+        conditions['$and'].push({ 'business.address.country': country });
+      }
+
+      if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+        filterQueries = Object.keys(queryParams.filter).map((key) => {
+          return {
+            [key]: {
+              $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+            },
+          };
+        });
+      }
+    }
+
+    if (filterQueries.length || fixedQueries.length) {
+      conditions['$or'] = [...filterQueries, ...fixedQueries];
+    }
+
+    const query = this.locationModel.aggregate();
+
+    if (conditions) {
+      console.log(conditions);
+      query.match(conditions);
+    }
+
+    query.append([
+      {
+        $project: {
+          id: '$_id',
+          name: '$business.name',
+          code: '$code',
+          alias: '$alias',
+          email: '$business.email',
+          city: '$business.address.city',
+          country: '$business.address.country',
+          phone: {
+            $function: {
+              body: function (business: any) {
+                return `${business.primaryPhone} ${
+                  business.primaryPhoneExtension
+                    ? 'ext.' + business.primaryPhoneExtension
+                    : ''
+                }`;
+              },
+              args: ['$business'],
+              lang: 'js',
+            },
+          },
+        },
+      },
+    ]);
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
+  }
+
   async getCatalog(filterCriteria: any): Promise<any> {
     return await this.locationModel
       .find(filterCriteria)

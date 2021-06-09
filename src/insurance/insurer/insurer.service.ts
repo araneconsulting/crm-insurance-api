@@ -148,7 +148,7 @@ export class InsurerService {
                     : ''
                 }`;
               },
-              args: ['$business', '$contact', '$type'],
+              args: ['$business'],
               lang: 'js',
             },
           },
