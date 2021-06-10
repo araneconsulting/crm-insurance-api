@@ -16,18 +16,22 @@ interface Payroll extends Document<any> {
   readonly payPeriodStartedAt: string;
   readonly payStubs: PayStub[];
   readonly scope: string; //can be COMPANY (C), LOCATION (L), INDIVIDUAL (I)
-  readonly status: string; //can be: CREATED, IN_PROGRESS, EXECUTED
+  readonly status: string; //can be: IN-PROGRESS, EXECUTED
 
-  readonly totalSalary: number;
-  readonly totalTips: number;
-  readonly totalFees: number;
-  readonly totalPermits: number;
-  readonly totalSaleBonus: number;
   readonly totalBonus: number;
   readonly totalDiscount: number;
-  readonly totalReimbursement: number;
-  readonly totalSales: number;
+  readonly totalDownPayment: number;
+  readonly totalFees: number;
   readonly totalNetSalary: number;
+  readonly totalPermits: number;
+  readonly totalReimbursement: number;
+  readonly totalSalary: number;
+  readonly totalSaleBonus: number;
+  readonly totalSales: number;
+  readonly totalTips: number;
+
+  
+  
 }
 
 type PayrollModel = Model<Payroll>;
@@ -47,7 +51,7 @@ const PayrollSchema = new Schema<any>(
     payPeriodEndedAt: { type: SchemaTypes.Date },
     payStubs: [{ type: PayStubSchema, required: false, default: [] }],
     scope: { type: SchemaTypes.String }, //can be Company (C), Location (L), Individual (I)
-    status: { type: SchemaTypes.String },
+    status: { type: SchemaTypes.String, default: 'IN-PROGRESS' },//can be: IN-PROGRESS, EXECUTED
 
     totalSalary: { type: SchemaTypes.Number },
     totalTips: { type: SchemaTypes.Number },

@@ -14,6 +14,13 @@ import { PayAddon } from 'business/sub-docs/pay-addon';
 import e from 'express';
 import { InitPayrollDto } from './dto/init-payroll.dto';
 import * as moment from 'moment';
+import { Location } from 'database/location.model';
+import {
+  generateDefaultPayStubs,
+  getLastPayPeriod,
+  runPayrollCalculations,
+} from './payroll.utils';
+import { UserService } from 'user/user.service';
 
 const ADDON_TYPE_DISCOUNT = 'DISCOUNT';
 const ADDON_TYPE_BONUS = 'BONUS';
@@ -26,6 +33,7 @@ export class PayrollService {
     @Inject(PAYROLL_MODEL) private payrollModel: Model<Payroll>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
     private reportService: ReportService,
+    private userService: UserService,
   ) {}
 
   findAll(keyword?: string, skip = 0, limit = 0): Promise<Payroll[]> {
@@ -54,86 +62,51 @@ export class PayrollService {
       .toPromise();
   }
 
-  getAvailablePayPeriod(
-    scope: string,
-    location: string = null,
-  ): InitPayrollDto[] {
-    const monthDiff = moment().date() >= 21 ? 0 : 1;
+  /*
+   * Get Available Pay Period for next Payroll
+   */
+
+  getAvailablePayPeriod(location: Partial<Location> = null): InitPayrollDto[] {
+    const payPeriod = getLastPayPeriod(21);
 
     let payrolls: InitPayrollDto[] = [
       {
-        payPeriodStartedAt: moment()
-          .subtract(monthDiff,'month')
-          .date(21)
-          .startOf('day')
-          .format('MM-DD-YYYY'),
-        payPeriodEndedAt: moment()
-          .subtract(monthDiff + 1,'month')
-          .date(20)
-          .endOf('day')
-          .format('MM-DD-YYYY'),
+        payPeriodStartedAt: payPeriod.start,
+        payPeriodEndedAt: payPeriod.end,
         location: location,
-        scope: 'LOCATION',
       },
     ];
 
     return payrolls;
-
-    //TODO: Implement it to return all non executed payroll periods.
-
-    /* const monthsAgo = (moment().date()>= 21) ? 6 : 7;
-
-    const periodStarting = moment()
-      .subtract(monthsAgo, 'months')
-      .date(21)
-      .startOf('day')
-      .toISOString();
-    console.log(periodStarting);
-
-    let conditions = {};
-
-    conditions['$and'] = [{ payPeriodStartedAt: { $gte: periodStarting } }];
-
-    if (scope === 'LOCATION') {
-      conditions['$and'].push({ location: Types.ObjectId(location) });
-    }
-
-    let payrolls = this.payrollModel
-      .find(conditions)
-      .sort({ payPeriodStartedAt: -1 })
-      .exec();
-
-    return payrolls; */
   }
 
-  async prepare(data: CreatePayrollDto): Promise<Payroll> {
+  /*
+   * Generate initial Payroll with Sales bonus calculated but without: regular salary, extra-bonus, discounts, reimbursements,
+   * to be set up in frontend by payroll creator user.
+   */
+
+  async initPayroll(data: InitPayrollDto): Promise<PayrollDto> {
     let payrollDto: PayrollDto = {
-      ...data,
       company: this.req.user.company,
-      createdBy: { _id: this.req.user.id },
+      ...data,
     };
 
-    payrollDto = await this.runPayrollCalculations(payrollDto);
+    payrollDto.payStubs = await generateDefaultPayStubs(payrollDto, this.userService);
 
-    if (payrollDto.scope === ADDON_SCOPE_LOCATION && !payrollDto.location) {
-      payrollDto.location = this.req.user.location;
-    }
-
-    return this.payrollModel.create(payrollDto);
+    return payrollDto;
   }
 
   async save(data: CreatePayrollDto): Promise<Payroll> {
     let payrollDto: PayrollDto = {
       ...data,
-      company: this.req.user.company,
       createdBy: { _id: this.req.user.id },
     };
 
-    payrollDto = await this.runPayrollCalculations(payrollDto);
-
-    if (payrollDto.scope === ADDON_SCOPE_LOCATION && !payrollDto.location) {
-      payrollDto.location = this.req.user.location;
-    }
+    payrollDto = await runPayrollCalculations(
+      payrollDto,
+      this.reportService,
+      this.req.user,
+    );
 
     return this.payrollModel.create(payrollDto);
   }
@@ -144,7 +117,7 @@ export class PayrollService {
       updatedBy: { _id: this.req.user.id },
     };
 
-    await this.runPayrollCalculations(payrollDto);
+    await runPayrollCalculations(payrollDto, this.reportService, this.req.user);
 
     return from(
       this.payrollModel
@@ -252,7 +225,6 @@ export class PayrollService {
           totalNetSalary: '$totalNetSalary',
           createdAt: '$createdAt',
           scope: '$scope',
-          
         },
       },
     ]);
@@ -265,81 +237,5 @@ export class PayrollService {
       entities: entities,
       totalCount: entities.length,
     };
-  }
-
-  private async runPayrollCalculations(payrollDto: PayrollDto) {
-    let salaryReport: [] = await this.reportService.getSalaryReportByDates(
-      this.req.user,
-      payrollDto.payPeriodStartedAt,
-      payrollDto.payPeriodEndedAt,
-      null,
-    );
-
-    let bonusAddon: PayAddon = {
-      amount: 0,
-      category: 'BONUS_SALE',
-      description: 'Employee Monthly Sale Bonus',
-      type: 'BONUS',
-    };
-
-    let reports = salaryReport.filter((employee) => employee);
-    let stubs = payrollDto.payStubs.filter((payStub) => payStub);
-
-    console.log('salary report: ', reports);
-    console.log('payroll paystubs: ', stubs);
-
-    payrollDto.payStubs = stubs;
-
-    payrollDto.payStubs = payrollDto.payStubs.map((payStub) => {
-      const employeeReport = reports.find(({ id }) => id === payStub.employee);
-
-      let stub = { ...payStub };
-
-      if (employeeReport) {
-        console.log('hay reporte para ' + employeeReport['id']);
-        const saleBonusAddon = {
-          ...bonusAddon,
-          amount: employeeReport['bonus'] || 0,
-        };
-        stub.addons.push(saleBonusAddon) || 0;
-        stub.totalSales = employeeReport['totalCharge'] || 0;
-        stub.totalPermits = employeeReport['totalPermits'] || 0;
-        stub.totalFees = employeeReport['totalFees'] || 0;
-        stub.totalTips = employeeReport['totalTips'] || 0;
-      } else {
-        stub.totalSales = 0;
-        stub.totalPermits = 0;
-        stub.totalFees = 0;
-        stub.totalTips = 0;
-      }
-
-      stub.totalBonus = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_BONUS ? cur.amount : 0);
-      }, 0);
-
-      stub.totalDiscount = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_DISCOUNT ? cur.amount : 0);
-      }, 0);
-
-      stub.totalReimbursement = payStub.addons.reduce(function (prev, cur) {
-        return prev + (cur.type === ADDON_TYPE_REIMBURSEMENT ? cur.amount : 0);
-      }, 0);
-
-      stub.totalSalary =
-        stub.payRate * stub.normalHoursWorked +
-        stub.overtimeHoursWorked * stub.payRate * 1.5;
-
-      stub.totalNetSalary =
-        stub.totalSalary +
-        stub.totalBonus +
-        stub.totalReimbursement -
-        stub.totalDiscount;
-
-      console.log('PayStub: ', stub);
-
-      return stub;
-    });
-
-    return payrollDto;
   }
 }

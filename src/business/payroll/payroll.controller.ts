@@ -27,6 +27,8 @@ import { CreatePayrollDto } from 'business/payroll/dto/create-payroll.dto';
 import { UpdatePayrollDto } from 'business/payroll/dto/update-payroll.dto';
 import { Request } from 'express';
 import { InitPayrollDto } from './dto/init-payroll.dto';
+import { Location } from 'database/location.model';
+import { PayrollDto } from './dto/payroll.dto';
 
 @Controller({ path: 'payrolls', scope: Scope.REQUEST })
 export class PayrollController {
@@ -49,10 +51,21 @@ export class PayrollController {
   @HasRoles(RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAvailablePayPeriod(
-    @Query('scope') scope: string,
-    @Query('location') location?: string,
+    @Query('location', ParseObjectIdPipe) location: Partial<Location>,
   ): Promise<InitPayrollDto[]> {
-    return await this.payrollService.getAvailablePayPeriod(scope, location);
+    return await this.payrollService.getAvailablePayPeriod(location);
+  }
+
+
+  @Post('/init')
+  @HttpCode(201)
+  @HasRoles(RoleType.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters( MongoFilter)
+  async preparePayroll(
+    @Req() req: Request,
+    @Body() payroll: InitPayrollDto): Promise<PayrollDto> {
+    return await this.payrollService.initPayroll(payroll);
   }
 
   @Get(':id')
@@ -63,17 +76,6 @@ export class PayrollController {
     @Param('id', ParseObjectIdPipe) id: string,
   ): Promise<Payroll> {
     return await this.payrollService.findById(id);
-  }
-
-  @Post('/prepare')
-  @HttpCode(201)
-  @HasRoles(RoleType.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters( MongoFilter)
-  async preparePayroll(
-    @Req() req: Request,
-    @Body() payroll: CreatePayrollDto): Promise<Payroll> {
-    return await this.payrollService.prepare(payroll);
   }
 
   @Post()

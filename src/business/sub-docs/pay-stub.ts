@@ -10,15 +10,19 @@ export class PayStub {
   normalHoursWorked: number;
   overtimeHoursWorked: number;
   payRate: number;
-  totalSalary: number; //auto-calculated
-  totalTips: number; //auto-calculated
-  totalFees: number; //auto-calculated
-  totalPermits: number; //auto-calculated
-  totalBonus: number; //auto-calculated
-  totalDiscount: number; //auto-calculated
-  totalReimbursement: number; //auto-calculated
-  totalSales: number; //auto-calculated
-  totalNetSalary: number; //auto-calculated
+
+  //AGGREGATORS
+  totalBonus: number;
+  totalDiscount: number;
+  totalDownPayment: number;
+  totalFees: number;
+  totalNetSalary: number;
+  totalPermits: number;
+  totalReimbursement: number;
+  totalSalary: number;
+  totalSaleBonus: number;
+  totalSales: number;
+  totalTips: number;
 }
 
 export const PayStubSchema = new Schema<any>({
@@ -28,13 +32,15 @@ export const PayStubSchema = new Schema<any>({
   normalHoursWorked: SchemaTypes.Number,
   overtimeHoursWorked: SchemaTypes.Number,
   payRate: SchemaTypes.Number,
-  totalSalary: SchemaTypes.Number,
-  totalTips: SchemaTypes.Number,
-  totalFees: SchemaTypes.Number,
-  totalPermits: SchemaTypes.Number,
   totalBonus: SchemaTypes.Number,
   totalDiscount: SchemaTypes.Number,
-  totalReimbursement: SchemaTypes.Number,
-  totalSales: SchemaTypes.Number,
+  totalDownPayment: SchemaTypes.Number,
+  totalFees: SchemaTypes.Number,
   totalNetSalary: SchemaTypes.Number,
+  totalPermits: SchemaTypes.Number,
+  totalReimbursement: SchemaTypes.Number,
+  totalSalary: SchemaTypes.Number,
+  totalSaleBonus: SchemaTypes.Number,
+  totalSales: SchemaTypes.Number,
+  totalTips: SchemaTypes.Number,
 });

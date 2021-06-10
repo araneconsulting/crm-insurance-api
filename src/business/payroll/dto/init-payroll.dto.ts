@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Location } from 'database/location.model';
 export class InitPayrollDto {
   @IsOptional()
-  location?: string;
+  location?: Partial<Location>;
 
   @IsNotEmpty()
   payPeriodEndedAt: string;

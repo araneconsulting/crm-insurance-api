@@ -20,13 +20,10 @@ import {
   isExecutive,
 } from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
-import { CompanyCatalog } from '../../shared/const/catalog/company';
 import { REQUEST } from '@nestjs/core';
 import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
 import { Location } from 'database/location.model';
 import { bonusByRole } from 'shared/vl17-specific/salary/mexico-bonus';
-import { Address } from 'shared/sub-documents/address';
-import { BusinessInfo } from 'business/sub-docs/business-info';
 
 const GROUP_BY_SELLER = 'SELLER';
 @Injectable({ scope: Scope.REQUEST })
@@ -316,7 +313,7 @@ export class ReportService {
   }
 
   async getSalaryReport(
-    user: Partial<User>,
+    currentUser: Partial<User>,
     month: number,
     year: number,
     seller?: string,
@@ -328,11 +325,16 @@ export class ReportService {
       .subtract(1, 'day')
       .toISOString();
 
-    return this.getSalaryReportByDates(user, startDate, endDate, seller);
+    return this.getEmployeesSalaryMetrics(
+      currentUser,
+      startDate,
+      endDate,
+      seller,
+    );
   }
 
-  async getSalaryReportByDates(
-    user: Partial<User>,
+  async getEmployeesSalaryMetrics(
+    currentUser: Partial<User>,
     startDate: string,
     endDate: string,
     sellerId?: string,
@@ -359,6 +361,8 @@ export class ReportService {
       return result;
     });
 
+    //console.log('employee metrics', employeeMetrics);
+
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
@@ -367,70 +371,25 @@ export class ReportService {
           )
         : 0;
 
-    let allUsers = [];
+    let allEmployeeSalaryMetrics = [];
 
     if (sellerId) {
-      try {
-        const user: any = await this.userModel
-          .findOne({ _id: sellerId })
-          .populate('location')
-          .exec();
-        const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
-
-        const result = {
-          //...user._doc,
-          roles: user.roles,
-          permits: userMetrics ? userMetrics.permits : 0,
-          fees: userMetrics ? userMetrics.fees : 0,
-          tips: userMetrics ? userMetrics.tips : 0,
-          location: user.location ? user.location : null,
-          locationId: user.location ? user.location.id : null,
-          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-          sellerName: user.firstName + ' ' + user.lastName,
-        };
-
-        allUsers.push(result);
-      } catch (e) {
-        throw new NotFoundException('User not found');
-      }
+      await this.getEmployeeSalaryMetricBySeller(sellerId, employeeMetrics);
     } else {
-      const users: any[] = await this.userModel
-        .find({})
-        .populate('location')
-        .exec();
-
-      allUsers = users
-        .filter((user) => !isAdmin(user) && !isExecutive(user))
-        .map((user) => {
-          const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
-
-          const result = {
-            //...user._doc,
-            id: user.id,                        
-            roles: user.roles,
-            permits: userMetrics ? userMetrics.permits : 0,
-            fees: userMetrics ? userMetrics.fees : 0,
-            tips: userMetrics ? userMetrics.tips : 0,
-            location: user.location ? user.location : null,
-            locationId: user.location ? user.location.id : null,
-            totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-            sellerName: user.firstName + ' ' + user.lastName,
-          };
-
-          return result;
-        });
+      allEmployeeSalaryMetrics = await this.getAllEmployeeSalaryMetrics(
+        employeeMetrics,
+      );
     }
 
-    
-
-    const userFilteredByLocation =
-      !isAdmin(user) && isExecutive(user)
-        ? allUsers.filter((employee) => {
-            return employee.locationId === user.location;
+    //TODO: Improve this solution to give access to Boris to all Mexico locations (assign multiple locations)
+    const salaryMetricsByAuthUserLocation =
+      !isAdmin(currentUser) && isExecutive(currentUser)
+        ? allEmployeeSalaryMetrics.filter((employee) => {
+            return employee.locationId === currentUser.location;
           })
-        : allUsers;
+        : allEmployeeSalaryMetrics;
 
-    const payroll = userFilteredByLocation.map((employeeInfo) => {
+    const payroll = salaryMetricsByAuthUserLocation.map((employeeInfo) => {
       if (employeeInfo.location) {
         employeeInfo['bonus'] = bonusByRole(
           getPrimaryRole(employeeInfo),
@@ -452,7 +411,7 @@ export class ReportService {
   }
 
   async getProfitsReport(
-    user: Partial<User>,
+    currentUser: Partial<User>,
     month: number,
     year: number,
     seller?: string,
@@ -516,7 +475,9 @@ export class ReportService {
         throw new NotFoundException('User not found');
       }
     } else {
-      users = await this.userModel.find({}).exec();
+      users = await this.userModel
+        .find({ $and: [{ deleted: false }, { location: { $exists: true } }] })
+        .exec();
     }
 
     const profitsReport = users
@@ -573,5 +534,55 @@ export class ReportService {
     seller?: string,
   ): Promise<any> {
     return await this.getProfitsReport(user, month, year, seller);
+  }
+
+  async getAllEmployeeSalaryMetrics(employeeMetrics: any) {
+    const users: any[] = await this.userModel
+      .find({ $and: [{ deleted: false }, { location: { $exists: true } }] })
+      .populate('location')
+      .exec();
+
+    return users
+      .filter((user) => !isAdmin(user) && !isExecutive(user))
+      .map((user) => {
+        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+        const salaryMetrics = this.setEmployeeSalaryMetric(user, userMetrics);
+        return salaryMetrics;
+      });
+  }
+
+  async getEmployeeSalaryMetricBySeller(
+    sellerId: string,
+    employeeMetrics: any,
+  ) {
+    let result = [];
+    try {
+      const user: any = await this.userModel
+        .findOne({ _id: sellerId })
+        .populate('location')
+        .exec();
+      const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
+      const salaryMetrics = this.setEmployeeSalaryMetric(user, userMetrics);
+
+      result.push(salaryMetrics);
+    } catch (e) {
+      throw new NotFoundException('User not found');
+    }
+
+    return result;
+  }
+
+  setEmployeeSalaryMetric(user: any, userMetrics: any) {
+    return {
+      id: user.id,
+      roles: user.roles,
+      permits: userMetrics ? userMetrics.permits : 0,
+      fees: userMetrics ? userMetrics.fees : 0,
+      tips: userMetrics ? userMetrics.tips : 0,
+      location: user.location ? user.location : null,
+      locationId: user.location ? user.location.id : null,
+      totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+      sellerName: user.firstName + ' ' + user.lastName,
+    };
   }
 }

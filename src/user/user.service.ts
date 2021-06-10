@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Location } from 'database/location.model';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { USER_MODEL } from '../database/database.constants';
@@ -20,6 +21,10 @@ export class UserService {
 
   findByEmail(email: string): Observable<User> {
     return from(this.userModel.findOne({ email }).exec());
+  }
+
+  async findByLocation(location:Partial<Location>): Promise<User[]> {
+    return this.userModel.find({location:location}).exec();
   }
 
   existsByUsername(username: string): Observable<boolean> {
