@@ -25,5 +25,5 @@ export class CreateInsurerDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly type?: string = 'SINGLE';
+  readonly type?: string = 'CARRIER';
 }

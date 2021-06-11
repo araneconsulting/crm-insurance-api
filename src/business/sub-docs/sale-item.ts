@@ -24,10 +24,10 @@ export class SaleItem {
   profits: number; //Auto calculated (commission % of amount)
 
   @IsNotEmpty()
-  provider: string; //Provider (Insurer) ID
+  provider: string; //Broker (Insurer) ID
 
   @IsOptional()
-  subprovider: string; //Broker subprovider name (ej: Progressive)
+  subprovider: string; //Carrier (Insurer) ID
 
   @IsNotEmpty()
   type: string; //can be:
@@ -41,7 +41,7 @@ export const SaleItemSchema = new Schema<any>({
   product: { type: SchemaTypes.String },
   profits: { type: SchemaTypes.Number },
   provider: { type: SchemaTypes.ObjectId, ref: 'Insurer' },
-  subprovider: { type: SchemaTypes.String },
+  subprovider: { type: SchemaTypes.ObjectId, ref: 'Insurer' },
   type: { type: SchemaTypes.String },
 });
 

@@ -50,7 +50,7 @@ export async function setSaleCalculations(
             totalInsurance += item.amount || 0;
             premium += item.premium || 0;
 
-            //calculate item profits and sale total profits
+            //calculate item profits based on broker commissions
             if (item.provider) {
               item.profits = calculateProfitByProvider(
                 providers,
@@ -59,8 +59,19 @@ export async function setSaleCalculations(
                 sale.type,
               );
               profits += item.profits;
+            } //calculate item profits based on carrier commissions
+            else if (item.subprovider) {
+              item.profits = calculateProfitByProvider(
+                providers,
+                item.subprovider,
+                item.amount,
+                sale.type,
+              );
+              profits += item.profits;
             } else {
-              throw new ConflictException(`Item provider is required`);
+              throw new ConflictException(
+                `Carrier/MGA at least one of them is required for this product.`,
+              );
             }
         }
 
@@ -88,14 +99,21 @@ export async function setSaleCalculations(
         sale.totalInsurance + sale.permits + sale.fees,
       );
 
-      let providerItem = sale.items.find(
-        (item) => item.provider !== 'PERMIT' && item.provider !== 'FEE',
+      let insuranceItems = sale.items.filter(
+        (item) => item.product !== 'PERMIT' && item.product !== 'FEE',
       );
 
-      if (providerItem) {
+      let profits = 0;
+      if (insuranceItems) {
+        //This assumes that on non-itemized policies, there should be only one provider/subprovider, to take the commission from it, so we take the first one.
+
+        const insurer = items[0].provider
+          ? items[0].provider
+          : items[0].subprovider;
+
         profits = calculateProfitByProvider(
           providers,
-          providerItem.provider,
+          insurer,
           sale.totalInsurance,
           sale.type,
         );

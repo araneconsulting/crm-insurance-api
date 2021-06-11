@@ -169,10 +169,15 @@ export class InsurerService {
   }
 
   async getCatalog(filterCriteria: any): Promise<any> {
-    return await this.insurerModel
+    const insurers = await this.insurerModel
       .find(filterCriteria)
       .select('business.name type _id subproviders')
       .sort({ 'business.name': 1 })
       .exec();
+
+    return {
+      carriers: insurers.filter((insurer) => insurer.type === 'CARRIER'),
+      brokers: insurers.filter((insurer) => insurer.type === 'BROKER'),
+    };
   }
 }

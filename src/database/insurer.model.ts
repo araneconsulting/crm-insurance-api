@@ -17,7 +17,7 @@ interface Insurer extends Document<any> {
   readonly contact: ContactInfo;
   readonly createdBy?: Partial<User>;
   readonly subproviders?: string[];
-  readonly type: string; //BROKER or SINGLE
+  readonly type: string; //BROKER or CARRIER
   readonly updatedBy?: Partial<User>;
 }
 
@@ -36,7 +36,7 @@ const InsurerSchema = new Schema<any>(
     contact: ContactInfoSchema,
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     subproviders: [{ type: SchemaTypes.String }],
-    type: { type: SchemaTypes.String, default: 'SINGLE' },
+    type: { type: SchemaTypes.String, default: 'CARRIER' },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
   },
   {

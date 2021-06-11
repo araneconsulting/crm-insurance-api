@@ -111,16 +111,20 @@ export class CompanyController {
   async getCatalog(@Req() req: Request, @Response() res): Promise<any> {
     const user: Partial<User> = req.user;
 
-    if (!user.company && !isSuperAdmin(user)) throw new BadRequestException(user.company);
+    if (!user.company && !isSuperAdmin(user))
+      throw new BadRequestException(user.company);
 
-    const entitiesFilter = { company: user.company };
+    const entitiesFilter = { company: user.company, deleted: false };
+
+    const insurers: any = await this.insurerService.getCatalog(entitiesFilter);
 
     return res.json({
       company: await this.companyService.findById(user.company.toString()),
-      users:  await this.userService.getCatalog(entitiesFilter),
+      users: await this.userService.getCatalog(entitiesFilter),
       locations: await this.locationService.getCatalog(entitiesFilter),
       customers: await this.customerService.getCatalog(entitiesFilter),
-      insurers: await this.insurerService.getCatalog(entitiesFilter),
+      carriers: insurers.carriers,
+      brokers: insurers.brokers,
       roles: UserCatalog.roles,
       dateRanges: DateCatalog.ranges,
       states: States,
