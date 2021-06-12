@@ -1,7 +1,7 @@
 export const productTypes = [
   {
     id: 'TRUCKING',
-    name: 'Commercial Trucking',
+    name: 'Commercial Auto',
     products: [
       { id: 'LIABILITY', name: 'General Liability' },
       { id: 'PHYSICAL_DAMAGE', name: 'Physical Damage' },
@@ -13,7 +13,7 @@ export const productTypes = [
   },
   {
     id: 'AUTO',
-    name: 'Auto',
+    name: 'Personal Auto',
     products: [
       { id: 'LIABILITY_FULL', name: 'Full Coverage Liability' },
       { id: 'LIABILITY_GENERAL', name: 'General Liability' },
@@ -24,7 +24,7 @@ export const productTypes = [
   },
   {
     id: 'HOME',
-    name: 'Homeowner',
+    name: 'Homeowners',
     products: [
       { id: 'FLOOD', name: 'Flood Coverage' },
       { id: 'PERMIT', name: 'Permit' },
