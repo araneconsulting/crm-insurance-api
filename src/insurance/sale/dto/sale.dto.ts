@@ -15,7 +15,7 @@ export class SaleDto {
   location?: Partial<Location>;
   items: SaleItem[]; //Contains all info about Sale
   seller: Partial<User>;
-  soldAt: string;
+  soldAt: Date;
   tips: number;
   totalCharge: number; //Sum of all sale item amounts
   totalInsurance: number; //Sum of items that are neither fee nor permits
@@ -25,8 +25,8 @@ export class SaleDto {
   renewalReference?: Partial<Sale>; 
   isEndorsement: boolean; 
   endorsementReference?: Partial<Sale>; 
-  policyEffectiveAt?: string;
-  nextRenewalAt?: string;
+  policyEffectiveAt?: Date;
+  nextRenewalAt?: Date;
   monthlyPayment?: number;
   financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
 

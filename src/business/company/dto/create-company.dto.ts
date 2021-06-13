@@ -42,7 +42,7 @@ export class CreateCompanyDto {
   sector: string; // can be: Financial, Technology, Healthcare, etc
 
   @IsOptional()
-  startedAt: string;
+  startedAt: Date;
 
   @IsOptional()
   type: string; // LLC, S Corp, C Corp

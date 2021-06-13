@@ -20,8 +20,8 @@ export class DashboardService {
     groupingCriteria: string,
     aggregation: string,
     user: Partial<User>,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     location?: string,
   ): Promise<any> {
     const filterConditions = {

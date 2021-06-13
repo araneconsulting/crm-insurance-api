@@ -3,13 +3,28 @@ import { ReportService } from 'insurance/report/report.service';
 import { PayAddon } from 'business/sub-docs/pay-addon';
 import { User } from 'database/user.model';
 import * as moment from 'moment';
-import { Location } from 'database/location.model';
 import { PayStub } from 'business/sub-docs/pay-stub';
 import { UserService } from 'user/user.service';
 
 const ADDON_TYPE_DISCOUNT = 'DISCOUNT';
 const ADDON_TYPE_BONUS = 'BONUS';
 const ADDON_TYPE_REIMBURSEMENT = 'REIMBURSEMENT';
+const ADDON_CATEGORY_SALES_BONUS = 'SALES_BONUS';
+
+const DEFAULT_SALE_BONUS_ADDON = {
+  amount: 0,
+  category: 'BONUS_SALE',
+  description: 'Employee Monthly Sale Bonus',
+  type: 'BONUS',
+};
+
+const DEFAULT_STUB_METRICS = {
+  totalSales: 0,
+  totalPermits: 0,
+  totalFees: 0,
+  totalTips: 0,
+  totalSaleBonus: 0,
+};
 
 /*
  * Receives:
@@ -26,6 +41,8 @@ export async function runPayrollCalculations(
   reportService: ReportService,
   currentUser: Partial<User>,
 ) {
+  const bonusAddon: PayAddon = DEFAULT_SALE_BONUS_ADDON;
+
   let salaryMetrics: [] = await reportService.getEmployeesSalaryMetrics(
     currentUser,
     payrollDto.payPeriodStartedAt,
@@ -35,68 +52,41 @@ export async function runPayrollCalculations(
 
   console.log('salary report: ', salaryMetrics);
 
-  let bonusAddon: PayAddon = {
-    amount: 0,
-    category: 'BONUS_SALE',
-    description: 'Employee Monthly Sale Bonus',
-    type: 'BONUS',
-  };
+  removeInvalidPayStubs();
+
+  //Por cada uno de los paystubs generar las metricas del addon de sales
 
   let reports = salaryMetrics.filter((employee) => employee);
-  if (payrollDto.payStubs) {
-    let stubs = payrollDto.payStubs.filter((payStub) => payStub);
-    payrollDto.payStubs = stubs;
-  } else {
-    payrollDto.payStubs = [];
-  }
-
-  /* console.log('salary report: ', reports);
-  console.log('payroll paystubs: ', stubs); */
-
   payrollDto.payStubs = payrollDto.payStubs.map((payStub) => {
     const employeeReport = reports.find(({ id }) => id === payStub.employee);
 
-    let stub = { ...payStub };
+    let stub = {
+      ...payStub,
+      ...DEFAULT_STUB_METRICS,
+    };
 
     if (employeeReport) {
-      /* console.log('hay reporte para ' + employeeReport['id']); */
+      console.log('hay reporte para ' + employeeReport['id']);
       const saleBonusAddon = {
         ...bonusAddon,
         amount: employeeReport['bonus'] || 0,
       };
+
       stub.addons.push(saleBonusAddon) || 0;
-      stub.totalSales = employeeReport['totalPremium'] || 0;
+      (stub.totalSaleBonus = employeeReport['bonus']),
+        (stub.totalSales = employeeReport['totalPremium'] || 0);
       stub.totalPermits = employeeReport['totalPermits'] || 0;
       stub.totalFees = employeeReport['totalFees'] || 0;
       stub.totalTips = employeeReport['totalTips'] || 0;
     } else {
-      stub.totalSales = 0;
-      stub.totalPermits = 0;
-      stub.totalFees = 0;
-      stub.totalTips = 0;
+      console.log('entro a calcular los totales');
+      stub.totalExtraBonus = calculatePayStubTotalExtraBonus(payStub);
+      stub.totalDiscount = calculatePayStubTotalDiscount(payStub);
+      stub.totalReimbursement = calculatePayStubTotalReimbursement(payStub);
+      stub.totalRegularSalary = calculateTotalRegularSalary(stub);
+      stub.totalNetSalary = calculateTotalNetSalary(stub);
+      console.log(stub);
     }
-
-    stub.totalBonus = payStub.addons.reduce(function (prev, cur) {
-      return prev + (cur.type === ADDON_TYPE_BONUS ? cur.amount : 0);
-    }, 0);
-
-    stub.totalDiscount = payStub.addons.reduce(function (prev, cur) {
-      return prev + (cur.type === ADDON_TYPE_DISCOUNT ? cur.amount : 0);
-    }, 0);
-
-    stub.totalReimbursement = payStub.addons.reduce(function (prev, cur) {
-      return prev + (cur.type === ADDON_TYPE_REIMBURSEMENT ? cur.amount : 0);
-    }, 0);
-
-    stub.totalSalary =
-      stub.payRate * stub.normalHoursWorked +
-      stub.overtimeHoursWorked * stub.payRate * 1.5;
-
-    stub.totalNetSalary =
-      stub.totalSalary +
-      stub.totalBonus +
-      stub.totalReimbursement -
-      stub.totalDiscount;
 
     /* console.log('PayStub: ', stub); */
 
@@ -104,22 +94,73 @@ export async function runPayrollCalculations(
   });
 
   return payrollDto;
+
+  function removeInvalidPayStubs() {
+    if (payrollDto.payStubs) {
+      let stubs = payrollDto.payStubs.filter((payStub) => payStub);
+      payrollDto.payStubs = stubs;
+    } else {
+      payrollDto.payStubs = [];
+    }
+  }
+}
+
+function calculateTotalNetSalary(stub: Partial<PayStub>): number {
+  return (
+    stub.totalRegularSalary +
+    stub.totalSaleBonus +
+    stub.totalExtraBonus +
+    stub.totalReimbursement -
+    stub.totalDiscount
+  );
+}
+
+function calculateTotalRegularSalary(stub: Partial<PayStub>): number {
+  return (
+    stub.payRate * (stub.normalHoursWorked || 0) +
+    (stub.overtimeHoursWorked || 0) * stub.payRate * 1.5
+  );
+}
+
+function calculatePayStubTotalReimbursement(payStub: Partial<PayStub>): number {
+  return payStub.addons.reduce(function (prev, cur) {
+    return prev + (cur.type === ADDON_TYPE_REIMBURSEMENT ? cur.amount : 0);
+  }, 0);
+}
+
+function calculatePayStubTotalDiscount(payStub: Partial<PayStub>): number {
+  return payStub.addons.reduce(function (prev, cur) {
+    return prev + (cur.type === ADDON_TYPE_DISCOUNT ? cur.amount : 0);
+  }, 0);
+}
+
+function calculatePayStubTotalExtraBonus(payStub: Partial<PayStub>): number {
+  return payStub.addons.reduce(function (prev, cur) {
+    return (
+      prev +
+      (cur.type === ADDON_TYPE_BONUS &&
+      cur.category !== ADDON_CATEGORY_SALES_BONUS
+        ? cur.amount
+        : 0)
+    );
+  }, 0);
 }
 
 export function getLastPayPeriod(payPeriodStartDay: number = 1) {
   const monthDiff = moment().date() >= payPeriodStartDay ? 0 : 1;
 
   return {
-    start: moment()
-      .subtract(monthDiff, 'month')
+    start: new Date(moment()
+      .subtract(monthDiff + 1, 'month')
       .date(payPeriodStartDay)
       .startOf('day')
-      .format('MM-DD-YYYY'),
-    end: moment()
-      .subtract(monthDiff + 1, 'month')
+      .toISOString())
+      ,
+    end: new Date(moment()
+      .subtract(monthDiff, 'month')
       .date(payPeriodStartDay - 1)
       .endOf('day')
-      .format('MM-DD-YYYY'),
+      .toISOString()),
   };
 }
 
@@ -134,7 +175,9 @@ export async function generateDefaultPayStubs(
   if (employees.length) {
     paystubs = employees.map((employee) => {
       let paystub: Partial<PayStub> = {
-        employee: (({ id, firstName, lastName }) => ({ id, firstName, lastName }))(employee),
+        employeeName: (({ id, firstName, lastName }) =>
+          `${firstName} ${lastName}`)(employee),
+        employee: employee.id,
         normalHoursWorked: 0,
         overtimeHoursWorked: 0,
         payRate: employee.employeeInfo.payRate,

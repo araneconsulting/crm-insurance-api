@@ -37,17 +37,17 @@ export async function setSaleCalculations(
       sale.items.map((item: SaleItem) => {
         switch (item.product) {
           case 'PERMIT':
-            permits += item.amount;
-            item.profits = PERMIT_COMMISION_PERCENT * item.amount;
+            permits += item.premium;
+            item.profits = PERMIT_COMMISION_PERCENT * item.premium;
             profits += item.profits;
             break;
           case 'FEE':
-            fees += item.amount;
-            item.profits = (1 - FEE_COMMISION_PERCENT) * item.amount;
+            fees += item.premium;
+            item.profits = (1 - FEE_COMMISION_PERCENT) * item.premium;
             profits += item.profits;
             break;
           default:
-            totalInsurance += item.amount || 0;
+            totalInsurance += item.premium || 0;
             premium += item.premium || 0;
 
             //calculate item profits based on broker commissions
@@ -55,7 +55,7 @@ export async function setSaleCalculations(
               item.profits = calculateProfitByProvider(
                 providers,
                 item.provider,
-                item.amount,
+                item.premium,
                 sale.type,
               );
               profits += item.profits;
@@ -64,7 +64,7 @@ export async function setSaleCalculations(
               item.profits = calculateProfitByProvider(
                 providers,
                 item.subprovider,
-                item.amount,
+                item.premium,
                 sale.type,
               );
               profits += item.profits;
@@ -153,8 +153,8 @@ export function getDateMatchExpressionByRange(dateRange: string): any {
  * @param  {string} endDate?
  */
 export function getDateMatchExpressionByDates(
-  startDate?: string,
-  endDate?: string,
+  startDate?: Date,
+  endDate?: Date,
 ): Object {
   if (startDate && endDate) {
     return {

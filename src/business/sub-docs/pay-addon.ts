@@ -7,8 +7,8 @@ export interface PayAddon {
   category: string; //can be: Year's End bonus
   description: string; //can be: Year's End Bonus for 2021
   frequency?: string; //can be: hourly (H), daily (D), monthly (M), Bi-weekly (B), Yearly (Y)
-  endedAt?: string;
-  startedAt?: string;
+  endedAt?: Date;
+  startedAt?: Date;
   type: string; // can be: bonus (B), discount (D), reimbursement (R), etc
 }
 

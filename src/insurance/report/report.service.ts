@@ -18,6 +18,7 @@ import {
   getPrimaryRole,
   isAdmin,
   isExecutive,
+  isSuperAdmin,
 } from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
 import { REQUEST } from '@nestjs/core';
@@ -37,8 +38,8 @@ export class ReportService {
   ) {}
 
   async getSalesMetrics(
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     filterField?: string,
     filterValue?: string,
     groupBy?: string,
@@ -49,6 +50,8 @@ export class ReportService {
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
     let location: Partial<Location> = null;
+
+    console.log('dates: ', startDate,endDate);
 
     const filterConditions = {
       soldAt: getDateMatchExpressionByDates(startDate, endDate),
@@ -129,8 +132,8 @@ export class ReportService {
   }
 
   async getAllSales(
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     filterField?: string,
     filterValue?: string,
   ): Promise<any> {
@@ -216,6 +219,7 @@ export class ReportService {
             premium: '$premium',
             amountReceivable: '$amountReceivable',
             totalCharge: '$totalCharge',
+            totalInsurance: '$totalInsurance',
             createdBy: '$createdBy',
             updatedBy: '$updatedBy',
             sellerName: {
@@ -318,14 +322,18 @@ export class ReportService {
     year: number,
     seller?: string,
   ): Promise<any> {
-    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'month')
-      .toISOString();
-    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'day')
-      .toISOString();
+    const startDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'month')
+        .toISOString(),
+    );
+    const endDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'day')
+        .toISOString(),
+    );
 
-    return this.getEmployeesSalaryMetrics(
+    return await this.getEmployeesSalaryMetrics(
       currentUser,
       startDate,
       endDate,
@@ -335,18 +343,26 @@ export class ReportService {
 
   async getEmployeesSalaryMetrics(
     currentUser: Partial<User>,
-    startDate: string,
-    endDate: string,
+    startDate: Date,
+    endDate: Date,
     sellerId?: string,
   ): Promise<any> {
     let employeeMetrics = await this.getSalesMetrics(
-      moment(startDate).toISOString(),
-      moment(endDate).toISOString(),
+      startDate,
+      endDate,
       null,
       null,
       GROUP_BY_SELLER,
       [],
-      ['totalCharge', 'tips', 'permits', 'fees'],
+      [
+        'totalCharge',
+        'tips',
+        'permits',
+        'fees',
+        'premium',
+        'totalInsurance',
+        'profits',
+      ],
       true,
     );
 
@@ -357,19 +373,24 @@ export class ReportService {
       result['tips'] = roundAmount(metric.tips);
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
+      result['premium'] = roundAmount(metric.premium);
+      result['totalInsurance'] = roundAmount(metric.totalInsurance);
+      result['profits'] = roundAmount(metric.profits);
 
       return result;
     });
 
-    //console.log('employee metrics', employeeMetrics);
+    console.log('employee metrics', employeeMetrics);
 
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.totalCharge,
+            (accumulator, item) => accumulator + item.premium,
             0,
           )
         : 0;
+
+    //console.log('officeTotalSales',officeTotalSales);
 
     let allEmployeeSalaryMetrics = [];
 
@@ -382,21 +403,23 @@ export class ReportService {
     }
 
     //TODO: Improve this solution to give access to Boris to all Mexico locations (assign multiple locations)
-    const salaryMetricsByAuthUserLocation =
-      !isAdmin(currentUser) && isExecutive(currentUser)
+    const salaryMetricsByAuthUserLocation = allEmployeeSalaryMetrics;
+    /* !isAdmin(currentUser) && isExecutive(currentUser)
         ? allEmployeeSalaryMetrics.filter((employee) => {
             return employee.locationId === currentUser.location;
           })
-        : allEmployeeSalaryMetrics;
+        : allEmployeeSalaryMetrics; */
 
     const payroll = salaryMetricsByAuthUserLocation.map((employeeInfo) => {
+      //      console.log('employee info before bonus calc', employeeInfo);
+
       if (employeeInfo.location) {
         employeeInfo['bonus'] = bonusByRole(
           getPrimaryRole(employeeInfo),
           employeeInfo.location.business
             ? employeeInfo.location.business.address.country
             : 'N/A',
-          employeeInfo.totalCharge,
+          employeeInfo.premium,
           employeeInfo.permits,
           employeeInfo.fees,
           employeeInfo.tips,
@@ -416,12 +439,16 @@ export class ReportService {
     year: number,
     seller?: string,
   ): Promise<any> {
-    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'month')
-      .toISOString();
-    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'day')
-      .toISOString();
+    const startDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'month')
+        .toISOString(),
+    );
+    const endDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'day')
+        .toISOString(),
+    );
 
     let employeeMetrics = await this.getSalesMetrics(
       startDate,
@@ -430,37 +457,26 @@ export class ReportService {
       null,
       'SELLER',
       [],
-      [
-        'totalCharge',
-        'permits',
-        'fees',
-        'tips',
-        'liabilityProfit',
-        'cargoProfit',
-        'physicalDamageProfit',
-        'wcGlUmbProfit',
-      ],
+      ['totalCharge', 'premium', 'totalInsurance', 'permits', 'fees', 'tips'],
       true,
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
       const result = metric._id;
       result['totalCharge'] = roundAmount(metric.totalCharge);
+      result['premium'] = roundAmount(metric.premium);
+      result['totalInsurance'] = roundAmount(metric.totalInsurance);
       result['tips'] = roundAmount(metric.tips);
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
-      result['liabilityProfit'] = roundAmount(metric.liabilityProfit);
-      result['cargoProfit'] = roundAmount(metric.cargoProfit);
-      result['physicalDamageProfit'] = roundAmount(metric.physicalDamageProfit);
-      result['wcGlUmbProfit'] = roundAmount(metric.wcGlUmbProfit);
-
+      result['profits'] = roundAmount(metric.profits);
       return result;
     });
 
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
-            (accumulator, item) => accumulator + item.totalCharge,
+            (accumulator, item) => accumulator + item.premium,
             0,
           )
         : 0;
@@ -488,39 +504,25 @@ export class ReportService {
         const result = {
           ...user._doc,
           totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          totalInsurance: userMetrics ? userMetrics.totalInsurance : 0,
+          premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           fees: userMetrics ? userMetrics.fees : 0,
           permits: userMetrics ? userMetrics.permits : 0,
+          profits: userMetrics ? userMetrics.profits : 0,
           sellerName: user.firstName + ' ' + user.lastName,
-          liabilityProfit: userMetrics ? userMetrics.liabilityProfit : 0,
-          cargoProfit: userMetrics ? userMetrics.cargoProfit : 0,
-          physicalDamageProfit: userMetrics
-            ? userMetrics.physicalDamageProfit
-            : 0,
-          wcGlUmbProfit: userMetrics ? userMetrics.wcGlUmbProfit : 0,
         };
 
-        result['bonus'] = bonusByRole(
+        result['salesBonus'] = bonusByRole(
           getPrimaryRole(user),
           user.location,
-          result.totalCharge,
+          result.premium,
           result.permits,
           result.fees,
           result.tips,
           employeeMetrics.length,
           officeTotalSales,
         );
-        result['totalSalary'] = roundAmount(result.bonus + user.baseSalary);
-        result['totalSaleGrossProfit'] = roundAmount(
-          result.liabilityProfit +
-            result.cargoProfit +
-            result.physicalDamageProfit +
-            result.wcGlUmbProfit,
-        );
-        result['totalSaleNetProfit'] = roundAmount(
-          result.totalSaleGrossProfit - result.baseSalary - result.bonus,
-        );
-
         return result;
       });
 
@@ -543,7 +545,7 @@ export class ReportService {
       .exec();
 
     return users
-      .filter((user) => !isAdmin(user) && !isExecutive(user))
+      .filter((user) => !isSuperAdmin(user))
       .map((user) => {
         const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
         const salaryMetrics = this.setEmployeeSalaryMetric(user, userMetrics);
@@ -582,6 +584,8 @@ export class ReportService {
       location: user.location ? user.location : null,
       locationId: user.location ? user.location.id : null,
       totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+      premium: userMetrics ? userMetrics.premium : 0,
+      totalInsurance: userMetrics ? userMetrics.totalInsurance : 0,
       sellerName: user.firstName + ' ' + user.lastName,
     };
   }

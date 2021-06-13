@@ -21,7 +21,7 @@ export class UpdateSaleDto {
   @IsOptional()
   @IsDateString()
   @IsNotEmpty()
-  soldAt: string;
+  soldAt: Date;
 
   @IsOptional()
   @IsNotEmpty()
@@ -57,7 +57,7 @@ export class UpdateSaleDto {
   endorsementReference: Partial<Sale>; 
   
   @IsOptional()
-  policyEffectiveAt: string; 
+  policyEffectiveAt: Date; 
 
   @IsOptional()
   @IsNotEmpty()
@@ -70,7 +70,7 @@ export class UpdateSaleDto {
   totalInsurance: number; //Sum of all sale item amounts
 
   @IsOptional()
-  nextRenewalAt: string;
+  nextRenewalAt: Date;
 
   @IsOptional()
   monthlyPayment: number;

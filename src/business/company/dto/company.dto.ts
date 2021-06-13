@@ -43,7 +43,7 @@ export class BusinessInfo {
     readonly sector: string; // can be: Financial, Technology, Healthcare, etc
 
     @IsOptional()
-    readonly startedAt: string;
+    readonly startedAt: Date;
 
     @IsOptional()
     readonly type: string;  //LLC, INC

@@ -51,7 +51,7 @@ export class UpdateCompanyDto {
   readonly sector: string; // can be: Financial, Technology, Healthcare, etc
 
   @IsOptional()
-  readonly startedAt: string;
+  readonly startedAt: Date;
 
   @IsOptional()
   readonly state: string;

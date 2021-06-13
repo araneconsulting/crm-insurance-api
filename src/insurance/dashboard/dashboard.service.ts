@@ -19,8 +19,8 @@ export class DashboardService {
     dataCriteria: string,
     groupingCriteria: string,
     aggregation: string,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     location?: string,
   ): Promise<any> {
     const filterConditions = {

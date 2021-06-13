@@ -4,11 +4,11 @@ export class UpdatePayrollDto {
   
   @IsOptional()
   @IsNotEmpty()
-  readonly payPeriodEndedAt?: string;
+  readonly payPeriodEndedAt?: Date;
 
   @IsOptional()
   @IsNotEmpty()
-  readonly payPeriodStartedAt?: string;
+  readonly payPeriodStartedAt?: Date;
 
   @IsOptional() 
   @IsNotEmpty()

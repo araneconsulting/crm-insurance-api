@@ -55,7 +55,7 @@ export class UserDto {
 
   @IsOptional()
   @IsDateString()
-  readonly startedAt: string;
+  readonly startedAt: Date;
 
   @IsOptional()
   readonly timezone: string;

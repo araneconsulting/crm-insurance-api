@@ -30,10 +30,10 @@ export class ReportService {
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
   ) {}
 
-  async getCompaniesMetrics(
+  /* async getCompaniesMetrics(
     user: Partial<User>,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     filterField?: string,
     filterValue?: string,
     groupBy?: string,
@@ -122,8 +122,8 @@ export class ReportService {
 
   async getAllCompanies(
     user: Partial<User>,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     filterField?: string,
     filterValue?: string,
   ): Promise<any> {
@@ -298,10 +298,10 @@ export class ReportService {
     seller?: string,
     location?: string,
   ): Promise<any> {
-    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
+    const startDate: Date = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'month')
       .toISOString();
-    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
+    const endDate: Date = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'day')
       .toISOString();
 
@@ -402,10 +402,10 @@ export class ReportService {
     year: number,
     seller?: string,
   ): Promise<any> {
-    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
+    const startDate: Date = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'month')
       .toISOString();
-    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
+    const endDate: Date = moment([year, month - 1, COMPANY.payrollDay])
       .subtract(1, 'day')
       .toISOString();
 
@@ -477,12 +477,6 @@ export class ReportService {
           fees: userMetrics ? userMetrics.fees : 0,
           permits: userMetrics ? userMetrics.permits : 0,
           sellerName: user.firstName + ' ' + user.lastName,
-          liabilityProfit: userMetrics ? userMetrics.liabilityProfit : 0,
-          cargoProfit: userMetrics ? userMetrics.cargoProfit : 0,
-          physicalDamageProfit: userMetrics
-            ? userMetrics.physicalDamageProfit
-            : 0,
-          wcGlUmbProfit: userMetrics ? userMetrics.wcGlUmbProfit : 0,
         };
 
         result['bonus'] = bonusByRole(
@@ -495,7 +489,7 @@ export class ReportService {
           employeeMetrics.length,
           officeTotalCompanies,
         );
-        result['totalSalary'] = roundAmount(result.bonus + user.baseSalary);
+        result['totalRegularSalary'] = roundAmount(result.bonus + user.baseSalary);
         result['totalCompanyGrossProfit'] = roundAmount(
           result.liabilityProfit +
             result.cargoProfit +
@@ -519,5 +513,5 @@ export class ReportService {
     seller?: string,
   ): Promise<any> {
     return await this.getProfitsReport(user, month, year, seller);
-  }
+  } */
 }

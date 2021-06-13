@@ -20,7 +20,7 @@ interface Company extends Document<any> {
   readonly secondaryPhone: string;
   readonly secondaryPhoneExtension: string;
   readonly sector: string; // can be: Financial, Technology, Healthcare, etc
-  readonly startedAt: string;
+  readonly startedAt: Date;
   readonly type: string;
   readonly website: string;
 }

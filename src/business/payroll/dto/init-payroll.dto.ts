@@ -6,10 +6,10 @@ export class InitPayrollDto {
   location?: Partial<Location>;
 
   @IsNotEmpty()
-  payPeriodEndedAt: string;
+  payPeriodEndedAt: Date;
 
   @IsNotEmpty()
-  payPeriodStartedAt: string;
+  payPeriodStartedAt: Date;
 
   @IsOptional()
   @IsNotEmpty()

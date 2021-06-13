@@ -274,18 +274,6 @@ export function bonusByRole(
 ): any {
   let bonus = 0;
 
-  /* console.log(
-    'BONUS:',
-    role,
-    userCountry,
-    employeeTotalSales,
-    employeeTotalPermits,
-    employeeTotalFees,
-    employeeTotalTips,
-    officeEmployees,
-    officeTotalSales,
-  ); */
-
   const extraBonus = totalBonusExtra(
     employeeTotalFees,
     employeeTotalPermits,

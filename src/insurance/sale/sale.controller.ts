@@ -40,8 +40,8 @@ export class SaleController {
   async findAll(
     @Req() req: Request,
     @Response() res,
-    @Query('start_date') startDate?: string,
-    @Query('end_date') endDate?: string,
+    @Query('start_date') startDate?: Date,
+    @Query('end_date') endDate?: Date,
     @Query('type') type?: string,
   ): Promise<any> {
     return res.json(await this.saleService.findAll(startDate, endDate, type));

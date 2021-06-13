@@ -11,24 +11,24 @@ interface Payroll extends Document<any> {
   readonly executedBy: Partial<User>;
   readonly company: Partial<Company>;
   readonly location: Partial<Location>;
-  readonly payExecutedAt: string;
-  readonly payPeriodEndedAt: string;
-  readonly payPeriodStartedAt: string;
+  readonly payExecutedAt: Date;
+  readonly payPeriodEndedAt: Date;
+  readonly payPeriodStartedAt: Date;
   readonly payStubs: PayStub[];
   readonly scope: string; //can be COMPANY (C), LOCATION (L), INDIVIDUAL (I)
   readonly status: string; //can be: IN-PROGRESS, EXECUTED
 
-  readonly totalBonus: number;
-  readonly totalDiscount: number;
-  readonly totalDownPayment: number;
-  readonly totalFees: number;
-  readonly totalNetSalary: number;
-  readonly totalPermits: number;
-  readonly totalReimbursement: number;
-  readonly totalSalary: number;
-  readonly totalSaleBonus: number;
-  readonly totalSales: number;
-  readonly totalTips: number;
+  readonly totalExtraBonus?: number;
+  readonly totalDiscount?: number;
+  readonly totalDownPayment?: number;
+  readonly totalFees?: number;
+  readonly totalNetSalary?: number;
+  readonly totalPermits?: number;
+  readonly totalReimbursement?: number;
+  readonly totalRegularSalary?: number;
+  readonly totalSaleBonus?: number;
+  readonly totalSales?: number;
+  readonly totalTips?: number;
 
   
   
@@ -53,16 +53,16 @@ const PayrollSchema = new Schema<any>(
     scope: { type: SchemaTypes.String }, //can be Company (C), Location (L), Individual (I)
     status: { type: SchemaTypes.String, default: 'IN-PROGRESS' },//can be: IN-PROGRESS, EXECUTED
 
-    totalSalary: { type: SchemaTypes.Number },
-    totalTips: { type: SchemaTypes.Number },
-    totalFees: { type: SchemaTypes.Number },
-    totalPermits: { type: SchemaTypes.Number },
-    totalSaleBonus: { type: SchemaTypes.Number },
-    totalBonus: { type: SchemaTypes.Number },
-    totalDiscount: { type: SchemaTypes.Number },
-    totalReimbursement: { type: SchemaTypes.Number },
-    totalSales: { type: SchemaTypes.Number },
-    totalNetSalary: { type: SchemaTypes.Number },
+    totalRegularSalary: { type: SchemaTypes.Number, default: 0 },
+    totalTips: { type: SchemaTypes.Number, default: 0 },
+    totalFees: { type: SchemaTypes.Number, default: 0 },
+    totalPermits: { type: SchemaTypes.Number, default: 0 },
+    totalSaleBonus: { type: SchemaTypes.Number, default: 0 },
+    totalExtraBonus: { type: SchemaTypes.Number, default: 0 },
+    totalDiscount: { type: SchemaTypes.Number, default: 0 },
+    totalReimbursement: { type: SchemaTypes.Number, default: 0 },
+    totalSales: { type: SchemaTypes.Number, default: 0 },
+    totalNetSalary: { type: SchemaTypes.Number, default: 0 },
   },
   {
     timestamps: true,

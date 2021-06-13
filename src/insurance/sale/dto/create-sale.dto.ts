@@ -14,7 +14,7 @@ export class CreateSaleDto {
   @IsOptional()
   @IsDateString()
   @IsNotEmpty()
-  soldAt: string;
+  soldAt: Date;
   
   @IsOptional()
   @IsNotEmpty()
@@ -65,9 +65,9 @@ export class CreateSaleDto {
   endorsementReference: Partial<Sale>; 
   
   @IsOptional()
-  policyEffectiveAt: string; 
+  policyEffectiveAt: Date; 
 
-  nextRenewalAt: string;
+  nextRenewalAt: Date;
   
   @IsNumber()
   monthlyPayment: number;

@@ -7,9 +7,9 @@ export class PayrollDto {
   executedBy?: Partial<User>;
   company?: Partial<Company>;
   location?: Partial<Location>;
-  payExecutedAt?: string;
-  payPeriodEndedAt?: string;
-  payPeriodStartedAt?: string;
+  payExecutedAt?: Date;
+  payPeriodEndedAt?: Date;
+  payPeriodStartedAt?: Date;
   payStubs?: Partial<PayStub>[];
   scope?: string;
   status?: string;

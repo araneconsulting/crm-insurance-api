@@ -36,8 +36,8 @@ export class DashboardController {
     @Query('grouping_criteria') groupingCriteria: string,
     @Query('aggregation') aggregation: string,
     @Query('location') location?: string,
-    @Query('start_date') startDate?: string,
-    @Query('end_date') endDate?: string,
+    @Query('start_date') startDate?: Date,
+    @Query('end_date') endDate?: Date,
     @Query('options') options?: string,
   ): Promise<any> {
     const user: Partial<User> = req.user;
@@ -90,8 +90,8 @@ export class DashboardController {
     @Req() req: Request,
     @Response() res,
     @Body() body,
-    @Query('start_date') startDate?: string,
-    @Query('end_date') endDate?: string,
+    @Query('start_date') startDate?: Date,
+    @Query('end_date') endDate?: Date,
   ): Promise<any> {
     const user: Partial<User> = req.user;
 

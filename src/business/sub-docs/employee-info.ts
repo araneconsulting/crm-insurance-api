@@ -14,7 +14,7 @@ export class EmployeeInfo {
 
   @IsOptional()
   @IsDateString()
-  readonly endedAt: string;
+  readonly endedAt: Date;
 
   @IsOptional()
   readonly position: string; //can be: Sales Agent, IT, Certificates Assistant, etc
@@ -39,7 +39,7 @@ export class EmployeeInfo {
 
   @IsOptional()
   @IsDateString()
-  readonly startedAt: string;
+  readonly startedAt: Date;
 
   @IsOptional()
   @IsNotEmpty()

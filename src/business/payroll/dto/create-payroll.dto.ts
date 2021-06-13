@@ -7,10 +7,10 @@ export class CreatePayrollDto {
   readonly location?: Partial<Location>;
 
   @IsNotEmpty()
-  readonly payPeriodEndedAt: string;
+  readonly payPeriodEndedAt: Date;
 
   @IsNotEmpty()
-  readonly payPeriodStartedAt: string;
+  readonly payPeriodStartedAt: Date;
 
   @IsOptional() 
   @IsNotEmpty()

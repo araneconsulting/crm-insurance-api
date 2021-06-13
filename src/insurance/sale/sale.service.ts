@@ -8,7 +8,7 @@ import {
 import { REQUEST } from '@nestjs/core';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Model, ObjectId, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { EMPTY, from, Observable, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
@@ -25,7 +25,6 @@ import { Insurer } from 'database/insurer.model';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { EndorseSaleDto } from './dto/endorse-sale.dto';
 import { setSaleCalculations } from './sale.utils';
-import * as moment from 'moment';
 import { SaleItem } from 'business/sub-docs/sale-item';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -44,8 +43,8 @@ export class SaleService {
    * @returns Promise
    */
   async findAll(
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     type?: string,
   ): Promise<any> {
     const filterConditions = {
@@ -500,7 +499,7 @@ export class SaleService {
     let result = {
       endorsement: await this.saleModel.create({
         ...saleData,
-        soldAt: moment().toISOString(),
+        soldAt: new Date(),
         createdBy: { _id: this.req.user.id },
         company: { _id: this.req.user.company },
       }),

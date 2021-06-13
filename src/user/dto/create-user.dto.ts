@@ -72,7 +72,7 @@ export class CreateUserDto {
   readonly roles: RoleType[];
 
   @IsOptional()
-  readonly startedAt: string;
+  readonly startedAt: Date;
 
   @IsOptional()
   readonly timezone: string;

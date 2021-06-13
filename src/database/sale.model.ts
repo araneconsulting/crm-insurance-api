@@ -16,7 +16,6 @@ import { nanoid } from 'nanoid';
 import { Location } from './location.model';
 
 interface Sale extends Document<any> {
-  readonly amountReceivable: number;
   readonly chargesPaid: number;
   readonly code: string;
   readonly company: Partial<Company>;
@@ -29,19 +28,20 @@ interface Sale extends Document<any> {
   readonly isEndorsement: boolean; 
   readonly isRenewal: boolean; 
   readonly monthlyPayment: number;
-  readonly nextRenewalAt: string;
-  readonly policyEffectiveAt: string;
+  readonly nextRenewalAt: Date;
+  readonly policyEffectiveAt: Date;
   readonly renewalReference: Partial<Sale>; 
   readonly renewed: boolean;
   readonly seller: Partial<User>;
-  readonly soldAt: string;
-  readonly tips: number;
-  readonly totalCharge: number; //Sum of all sale item amounts
+  readonly soldAt: Date;
   readonly type: string; 
-
+  readonly amountReceivable: number;
+  
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
-
+  
+  readonly tips: number;
+  readonly totalCharge: number; //Sum of all item amount (down payments)
   //Only-insurance properties
   readonly fees: number;
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit

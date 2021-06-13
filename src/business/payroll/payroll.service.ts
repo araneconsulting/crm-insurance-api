@@ -8,12 +8,9 @@ import { Model, Types } from 'mongoose';
 import { EMPTY, from, of } from 'rxjs';
 import { mergeMap, throwIfEmpty } from 'rxjs/operators';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
-import { PAYROLL_MODEL, USER_MODEL } from '../../database/database.constants';
+import { PAYROLL_MODEL } from '../../database/database.constants';
 import { ReportService } from 'insurance/report/report.service';
-import { PayAddon } from 'business/sub-docs/pay-addon';
-import e from 'express';
 import { InitPayrollDto } from './dto/init-payroll.dto';
-import * as moment from 'moment';
 import { Location } from 'database/location.model';
 import {
   generateDefaultPayStubs,
@@ -21,12 +18,6 @@ import {
   runPayrollCalculations,
 } from './payroll.utils';
 import { UserService } from 'user/user.service';
-
-const ADDON_TYPE_DISCOUNT = 'DISCOUNT';
-const ADDON_TYPE_BONUS = 'BONUS';
-const ADDON_TYPE_REIMBURSEMENT = 'REIMBURSEMENT';
-const ADDON_SCOPE_LOCATION = 'LOCATION';
-
 @Injectable({ scope: Scope.REQUEST })
 export class PayrollService {
   constructor(
@@ -69,6 +60,8 @@ export class PayrollService {
   getAvailablePayPeriod(location: Partial<Location> = null): InitPayrollDto[] {
     const payPeriod = getLastPayPeriod(21);
 
+    console.log('pay period: ', payPeriod);
+
     let payrolls: InitPayrollDto[] = [
       {
         payPeriodStartedAt: payPeriod.start,
@@ -91,7 +84,10 @@ export class PayrollService {
       ...data,
     };
 
-    payrollDto.payStubs = await generateDefaultPayStubs(payrollDto, this.userService);
+    payrollDto.payStubs = await generateDefaultPayStubs(
+      payrollDto,
+      this.userService,
+    );
 
     return payrollDto;
   }

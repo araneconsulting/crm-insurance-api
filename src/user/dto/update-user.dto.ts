@@ -72,7 +72,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsDateString()
-  readonly startedAt: string;
+  readonly startedAt: Date;
 
   @IsOptional()
   readonly timezone: string;
