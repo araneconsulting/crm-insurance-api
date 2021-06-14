@@ -40,15 +40,22 @@ export async function setSaleCalculations(
             permits += item.premium;
             item.profits = PERMIT_COMMISION_PERCENT * item.premium;
             profits += item.profits;
+            totalCharge += item.premium;
+            delete item['provider'];
+            delete item['subprovider'];
             break;
           case 'FEE':
             fees += item.premium;
             item.profits = (1 - FEE_COMMISION_PERCENT) * item.premium;
             profits += item.profits;
+            totalCharge += item.premium;
+            delete item['provider'];
+            delete item['subprovider'];
             break;
           default:
             totalInsurance += item.premium || 0;
             premium += item.premium || 0;
+            totalCharge += item.amount;
 
             //calculate item profits based on broker commissions
             if (item.provider) {
@@ -74,9 +81,6 @@ export async function setSaleCalculations(
               );
             }
         }
-
-        //all charges but tips
-        totalCharge += item.amount;
       });
     }
 

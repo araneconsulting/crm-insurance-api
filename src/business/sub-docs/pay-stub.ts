@@ -5,7 +5,7 @@ import { PayAddon, PayAddonSchema } from './pay-addon';
 
 export class PayStub {
   code?: string;
-  addons: PayAddon[];
+  addons?: PayAddon[];
   employee: Partial<User>;
   employeeName: string;
   normalHoursWorked: number;
@@ -13,23 +13,23 @@ export class PayStub {
   payRate: number;
 
   //AGGREGATORS
-  totalExtraBonus: number;
-  totalDiscount: number;
-  totalDownPayment: number;
-  totalFees: number;
-  totalNetSalary: number;
-  totalPermits: number;
-  totalReimbursement: number;
-  totalRegularSalary: number;
-  totalSaleBonus: number;
-  totalSales: number;
-  totalTips: number;
+  totalExtraBonus?: number;
+  totalDiscount?: number;
+  totalDownPayment?: number;
+  totalFees?: number;
+  totalNetSalary?: number;
+  totalPermits?: number;
+  totalReimbursement?: number;
+  totalRegularSalary?: number;
+  totalSaleBonus?: number;
+  totalSales?: number;
+  totalTips?: number;
 }
 
 export const PayStubSchema = new Schema<any>({
   code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   addons: [{ type: PayAddonSchema }],
-  employee: [{ type: SchemaTypes.ObjectId, ref: 'User' }],
+  employee: { type: SchemaTypes.ObjectId, ref: 'User' },
   employeeName: SchemaTypes.String,
   normalHoursWorked: SchemaTypes.Number,
   overtimeHoursWorked: SchemaTypes.Number,

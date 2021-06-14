@@ -107,24 +107,30 @@ export class PayrollService {
     return this.payrollModel.create(payrollDto);
   }
 
-  async update(id: string, data: UpdatePayrollDto): Promise<Payroll> {
-    const payrollDto = {
+  async update(id: string, data: Partial<PayrollDto>): Promise<Payroll> {
+    let payrollDto: PayrollDto = {
       ...data,
       updatedBy: { _id: this.req.user.id },
     };
 
-    await runPayrollCalculations(payrollDto, this.reportService, this.req.user);
+    let foundPayroll = await this.findById(id);
 
-    return from(
-      this.payrollModel
-        .findOneAndUpdate({ _id: id }, payrollDto, { new: true })
-        .exec(),
-    )
-      .pipe(
-        mergeMap((p) => (p ? of(p) : EMPTY)),
-        throwIfEmpty(() => new NotFoundException(`Payroll:$id was not found`)),
-      )
-      .toPromise();
+    if (!foundPayroll){
+      throw new NotFoundException(`Payroll:$id was not found`);
+    }
+
+    payrollDto = await runPayrollCalculations(payrollDto, this.reportService, this.req.user);
+
+
+    return this.payrollModel.findOneAndUpdate(
+      { _id: Types.ObjectId(id) },
+      {
+        //...foundPayroll,
+        ...payrollDto,
+      },
+      { new: true },
+    );
+
   }
 
   deleteById(id: string): Promise<Payroll> {

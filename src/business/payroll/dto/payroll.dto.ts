@@ -10,10 +10,22 @@ export class PayrollDto {
   payExecutedAt?: Date;
   payPeriodEndedAt?: Date;
   payPeriodStartedAt?: Date;
-  payStubs?: Partial<PayStub>[];
+  payStubs?: PayStub[];
   scope?: string;
   status?: string;
   createdBy?: Partial<User>;
   updatedBy?: Partial<User>;
+
+  totalExtraBonus?: number;
+  totalDiscount?: number;
+  totalDownPayment?: number;
+  totalFees?: number;
+  totalNetSalary?: number;
+  totalPermits?: number;
+  totalReimbursement?: number;
+  totalRegularSalary?: number;
+  totalSaleBonus?: number;
+  totalSales?: number;
+  totalTips?: number;
 }
 

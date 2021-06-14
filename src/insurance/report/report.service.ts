@@ -51,10 +51,9 @@ export class ReportService {
     let customer: Partial<Customer> = null;
     let location: Partial<Location> = null;
 
-    console.log('dates: ', startDate,endDate);
-
     const filterConditions = {
       soldAt: getDateMatchExpressionByDates(startDate, endDate),
+      deleted: false,
     };
 
     switch (filterField) {
@@ -380,8 +379,6 @@ export class ReportService {
       return result;
     });
 
-    console.log('employee metrics', employeeMetrics);
-
     const officeTotalSales =
       employeeMetrics && employeeMetrics.length
         ? employeeMetrics.reduce(
@@ -389,8 +386,6 @@ export class ReportService {
             0,
           )
         : 0;
-
-    //console.log('officeTotalSales',officeTotalSales);
 
     let allEmployeeSalaryMetrics = [];
 
@@ -414,7 +409,7 @@ export class ReportService {
       //      console.log('employee info before bonus calc', employeeInfo);
 
       if (employeeInfo.location) {
-        employeeInfo['bonus'] = bonusByRole(
+        employeeInfo['salesBonus'] = bonusByRole(
           getPrimaryRole(employeeInfo),
           employeeInfo.location.business
             ? employeeInfo.location.business.address.country
@@ -422,7 +417,6 @@ export class ReportService {
           employeeInfo.premium,
           employeeInfo.permits,
           employeeInfo.fees,
-          employeeInfo.tips,
           employeeMetrics.length,
           officeTotalSales,
         );
@@ -519,7 +513,6 @@ export class ReportService {
           result.premium,
           result.permits,
           result.fees,
-          result.tips,
           employeeMetrics.length,
           officeTotalSales,
         );

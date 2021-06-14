@@ -23,15 +23,13 @@ const DEFAULT_TRAINEE_CASH_BONUS_AFTER_SALES = 50;
  * @param  {number} permitsAmount
  * @param  {number} tipsAmount
  */
-export function totalBonusExtra(
+export function totalNonPremiumBonus(
   feesAmount: number,
   permitsAmount: number,
-  tipsAmount: number,
 ) {
   return (
     percentpercentBonusPerTips(feesAmount) +
-    percentBonusPerPermits(permitsAmount) +
-    percentBonusPerTips(tipsAmount)
+    percentBonusPerPermits(permitsAmount)
   );
 }
 
@@ -194,7 +192,6 @@ function variablePercentAndCashSalesBonus(
     percent = DEFAULT_25K_BONUS_PERCENT;
   else {
     const mult = Math.floor(employeeTotalSales / employeeMonthlySalesTarget);
-    console.log('multiplier', mult);
     cashCommission = (mult * employeeMonthlySalesTarget) / 1000;
   }
   return employeeTotalSales * percent + cashCommission;
@@ -212,14 +209,14 @@ function variablePercentAndCashSalesBonus(
 export function salesBonusByRoleMexico(
   role: string,
   employeeTotalSales: number,
-  extraBonus: number,
+  nonPremiumBonus: number,
   officeEmployees: number,
   officeTotalSales: number,
 ) {
-  let bonus = 0;
+  let premiumBonus = 0;
   switch (role) {
     case RoleType.CERTIFICATES:
-      bonus =
+      premiumBonus =
         percentOfSalesFixed(employeeTotalSales) +
         cashBonusAfterMeetSalesTarget(employeeTotalSales);
       break;
@@ -228,13 +225,13 @@ export function salesBonusByRoleMexico(
       break;
 
     case RoleType.LEGAL:
-      bonus =
+      premiumBonus =
         cashBonusAfterEmployeesCount(officeEmployees) +
         cashBonusAfterEmployeesTotalSales(officeTotalSales);
       break;
 
     case RoleType.MANAGER:
-      bonus =
+      premiumBonus =
         variablePercentAndCashSalesBonus(employeeTotalSales) +
         locationSalesBonusAfterTarget(
           officeTotalSales,
@@ -245,53 +242,53 @@ export function salesBonusByRoleMexico(
 
     case RoleType.SELLER:
     case RoleType.OWNER:
-      bonus = variablePercentAndCashSalesBonus(employeeTotalSales);
+      premiumBonus = variablePercentAndCashSalesBonus(employeeTotalSales);
       break;
 
     case RoleType.TRAINEE:
-      bonus =
+      premiumBonus =
         percentBonusAfterMeetSalesTarget(MONTHLY_SALES_TARGET_BY_EMPLOYEE) +
         DEFAULT_TRAINEE_CASH_BONUS_AFTER_SALES;
 
       break;
     case RoleType.ADMIN:
     default:
-      bonus = 0;
+      premiumBonus = 0;
   }
 
-  return bonus + extraBonus;
+  return premiumBonus + nonPremiumBonus;
 }
 
 export function bonusByRole(
   role: string,
-  userCountry: string = "USA",
+  userCountry: string = 'USA',
   employeeTotalSales: number,
   employeeTotalPermits: number,
   employeeTotalFees: number,
-  employeeTotalTips: number,
   officeEmployees: number,
   officeTotalSales: number,
 ): any {
   let bonus = 0;
 
-  const extraBonus = totalBonusExtra(
+  const nonPremiumBonus = totalNonPremiumBonus(
     employeeTotalFees,
     employeeTotalPermits,
-    employeeTotalTips,
   );
 
   switch (userCountry) {
-    case 'MX':
+
+    //TODO: Roll it back to MEX, and set calculations for USA
+    case 'USA':
       bonus = salesBonusByRoleMexico(
         role,
         employeeTotalSales,
-        extraBonus,
+        nonPremiumBonus,
         officeEmployees,
         officeTotalSales,
       );
 
       break;
-    case 'US':
+    case 'MEX':
       break;
   }
 

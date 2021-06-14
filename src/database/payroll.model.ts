@@ -30,7 +30,8 @@ interface Payroll extends Document<any> {
   readonly totalSales?: number;
   readonly totalTips?: number;
 
-  
+  readonly createdBy?: Partial<User>;
+  readonly updatedBy?: Partial<User>;
   
 }
 
@@ -63,6 +64,10 @@ const PayrollSchema = new Schema<any>(
     totalReimbursement: { type: SchemaTypes.Number, default: 0 },
     totalSales: { type: SchemaTypes.Number, default: 0 },
     totalNetSalary: { type: SchemaTypes.Number, default: 0 },
+
+    createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
+    updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
+    
   },
   {
     timestamps: true,

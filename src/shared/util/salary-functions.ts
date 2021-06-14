@@ -10,14 +10,13 @@ export function bonusByRole(
   employeeTotalPremium: number,
   employeeTotalPermits: number,
   employeeTotalFees: number,
-  employeeTotalTips: number,
   officeEmployees: number,
   officeTotalSales: number,
 ): any {
   let bonus = 0;
 
   const extraBonus =
-    employeeTotalFees * 0.3 + employeeTotalPermits * 0.2 + employeeTotalTips;
+    employeeTotalFees * 0.3 + employeeTotalPermits * 0.2;
 
   switch (location) {
     case 'MEXICO-I':

@@ -5,6 +5,7 @@ export function getDateMatchExpressionByDates(
   startDate?: Date,
   endDate?: Date,
 ): any {
+
   if (startDate && endDate) {
     return {
       $gte: new Date(moment(startDate).startOf('day').toISOString()),
