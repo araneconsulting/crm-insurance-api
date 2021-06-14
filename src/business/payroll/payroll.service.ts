@@ -89,6 +89,12 @@ export class PayrollService {
       this.userService,
     );
 
+    payrollDto = await runPayrollCalculations(
+      payrollDto,
+      this.reportService,
+      this.req.user,
+    );
+
     return payrollDto;
   }
 

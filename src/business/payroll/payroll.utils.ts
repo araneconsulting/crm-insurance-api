@@ -87,8 +87,6 @@ export async function runPayrollCalculations(
 
     updatePayrollAggregators(payrollDto, stub);
 
-    console.log(stub);
-
     return stub;
   });
 
