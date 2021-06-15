@@ -26,7 +26,7 @@ export class SaleDto {
   isEndorsement: boolean; 
   endorsementReference?: Partial<Sale>; 
   policyEffectiveAt?: Date;
-  nextRenewalAt?: Date;
+  policyExpiresAt?: Date;
   monthlyPayment?: number;
   financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
 
@@ -37,5 +37,12 @@ export class SaleDto {
   permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   profits: number; //[auto-calculated] Sum of al SaleItem profits;
+
+  policyCancelledAt?: Date;
+  status?: string;
+  policyNumber: string;
+
+
+
 
 }

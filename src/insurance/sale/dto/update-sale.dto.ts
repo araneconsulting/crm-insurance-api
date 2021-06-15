@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsObject,
   IsOptional,
+  IsString,
 } from 'class-validator';
 import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
@@ -70,11 +71,22 @@ export class UpdateSaleDto {
   totalInsurance: number; //Sum of all sale item amounts
 
   @IsOptional()
-  nextRenewalAt: Date;
+  policyExpiresAt: Date;
 
   @IsOptional()
   monthlyPayment: number;
 
   @IsOptional()
   financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
+
+  @IsOptional()
+  @IsDateString()
+  policyCancelledAt?: Date;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  policyNumber: string;
 }

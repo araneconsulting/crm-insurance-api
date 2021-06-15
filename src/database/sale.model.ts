@@ -28,15 +28,17 @@ interface Sale extends Document<any> {
   readonly isEndorsement: boolean; 
   readonly isRenewal: boolean; 
   readonly monthlyPayment: number;
-  readonly nextRenewalAt: Date;
   readonly policyEffectiveAt: Date;
+  readonly policyExpiresAt: Date;
+  readonly policyCancelledAt: Date;
   readonly renewalReference: Partial<Sale>; 
   readonly renewed: boolean;
   readonly seller: Partial<User>;
   readonly soldAt: Date;
+  readonly status: string; //can be: ACTIVE, INACTIVE, RENEWED, CANCELLED
   readonly type: string; 
   readonly amountReceivable: number;
-  
+  readonly policyNumber: string;
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
   
@@ -47,7 +49,7 @@ interface Sale extends Document<any> {
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   readonly profits: number; //[auto-calculated] Sum of al SaleItem profits;
-  readonly totalInsurance: number; //[auto-calculated] Sum of al SaleItem profits;
+  readonly totalInsurance: number; //[auto-calculated] Sum of al SaleItem premium;
   
 }
 
@@ -68,12 +70,15 @@ const SaleSchema = new Schema<any>(
     items: [{ type: SaleItemSchema, required: true }],
     location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     monthlyPayment: { type: SchemaTypes.Number },
-    nextRenewalAt: { type: SchemaTypes.Date },
+    policyExpiresAt: { type: SchemaTypes.Date },
     policyEffectiveAt: { type: SchemaTypes.Date },
+    policyCancelledAt: { type: SchemaTypes.Date },
+    policyNumber:{ type: SchemaTypes.String },
     renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
     renewed: { type: SchemaTypes.Boolean, default: false },
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     soldAt: { type: SchemaTypes.Date, required: false, default: new Date() },
+    status: { type: SchemaTypes.String, default:'ACTIVE' },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
     type:  { type: SchemaTypes.String },

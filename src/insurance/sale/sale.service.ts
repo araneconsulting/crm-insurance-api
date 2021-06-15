@@ -431,7 +431,7 @@ export class SaleService {
           isRenewal: '$isRenewal',
           isEndorsement: '$isEndorsement',
           createdAt: '$createdAt',
-          nextRenewalAt: '$nextRenewalAt',
+          policyExpiresAt: '$policyExpiresAt',
         },
       },
     ]);

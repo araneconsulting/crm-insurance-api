@@ -67,7 +67,7 @@ export class CreateSaleDto {
   @IsOptional()
   policyEffectiveAt: Date; 
 
-  nextRenewalAt: Date;
+  policyExpiresAt: Date;
   
   @IsNumber()
   monthlyPayment: number;
@@ -75,5 +75,16 @@ export class CreateSaleDto {
   @IsOptional()
   @IsString()
   financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
+
+  @IsOptional()
+  @IsDateString()
+  policyCancelledAt?: Date;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  policyNumber: string;
   
 }
