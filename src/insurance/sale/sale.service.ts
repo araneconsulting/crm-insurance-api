@@ -537,7 +537,7 @@ export class SaleService {
         );
         if (originalMatchingItem) {
           //replace item with difference to original
-          item.amount = item.amount - originalMatchingItem.amount;
+          item.premium = item.premium - originalMatchingItem.premium;
           return { ...item };
         } else {
           return item;
