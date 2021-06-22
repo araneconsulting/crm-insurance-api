@@ -42,7 +42,6 @@ export class SaleDto {
   status?: string;
   policyNumber: string;
 
-
-
-
+  renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
+  autoRenew: boolean;
 }

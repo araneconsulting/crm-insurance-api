@@ -89,4 +89,7 @@ export class UpdateSaleDto {
 
   @IsOptional()
   policyNumber: string;
+
+  renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
+  autoRenew: boolean;
 }

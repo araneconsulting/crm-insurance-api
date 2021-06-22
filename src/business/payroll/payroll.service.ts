@@ -45,7 +45,7 @@ export class PayrollService {
   }
 
   findById(id: string): Promise<Payroll> {
-    return from(this.payrollModel.findOne({ _id: id }).exec())
+    return from(this.payrollModel.findOne({ _id: id }).populate('location', 'id business.name').exec())
       .pipe(
         mergeMap((p) => (p ? of(p) : EMPTY)),
         throwIfEmpty(() => new NotFoundException(`Payroll:$id was not found`)),

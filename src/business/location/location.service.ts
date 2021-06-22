@@ -131,7 +131,6 @@ export class LocationService {
     const query = this.locationModel.aggregate();
 
     if (conditions) {
-      console.log(conditions);
       query.match(conditions);
     }
 

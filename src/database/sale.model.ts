@@ -20,28 +20,28 @@ interface Sale extends Document<any> {
   readonly code: string;
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
-  readonly endorsementReference: Partial<Sale>; 
+  readonly endorsementReference: Partial<Sale>;
   readonly financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
   readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly isChargeItemized: boolean;
-  readonly isEndorsement: boolean; 
-  readonly isRenewal: boolean; 
+  readonly isEndorsement: boolean;
+  readonly isRenewal: boolean;
   readonly monthlyPayment: number;
   readonly policyEffectiveAt: Date;
   readonly policyExpiresAt: Date;
   readonly policyCancelledAt: Date;
-  readonly renewalReference: Partial<Sale>; 
+  readonly renewalReference: Partial<Sale>;
   readonly renewed: boolean;
   readonly seller: Partial<User>;
   readonly soldAt: Date;
   readonly status: string; //can be: ACTIVE, INACTIVE, RENEWED, CANCELLED
-  readonly type: string; 
+  readonly type: string;
   readonly amountReceivable: number;
   readonly policyNumber: string;
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
-  
+
   readonly tips: number;
   readonly totalCharge: number; //Sum of all item amount (down payments)
   //Only-insurance properties
@@ -50,7 +50,9 @@ interface Sale extends Document<any> {
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   readonly profits: number; //[auto-calculated] Sum of al SaleItem profits;
   readonly totalInsurance: number; //[auto-calculated] Sum of al SaleItem premium;
-  
+
+  readonly renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
+  readonly autoRenew: boolean;
 }
 
 type SaleModel = Model<Sale>;
@@ -58,12 +60,17 @@ type SaleModel = Model<Sale>;
 const SaleSchema = new Schema<any>(
   {
     amountReceivable: { type: SchemaTypes.Number, default: 0, required: false },
+    autoRenew: { type: SchemaTypes.Boolean, default: false },
     chargesPaid: { type: SchemaTypes.Number, default: 0, required: false },
-    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
+    code: {
+      type: SchemaTypes.String,
+      default: () => nanoid(6),
+      required: false,
+    },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
     endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
-    financerCompany: { type: SchemaTypes.String, required:false },
+    financerCompany: { type: SchemaTypes.String, required: false },
     isEndorsement: { type: SchemaTypes.Boolean, default: false },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },
@@ -73,15 +80,16 @@ const SaleSchema = new Schema<any>(
     policyExpiresAt: { type: SchemaTypes.Date },
     policyEffectiveAt: { type: SchemaTypes.Date },
     policyCancelledAt: { type: SchemaTypes.Date },
-    policyNumber:{ type: SchemaTypes.String },
+    policyNumber: { type: SchemaTypes.String },
+    renewalFrequency: { type: SchemaTypes.String, default: 'ANNUAL' },
     renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
     renewed: { type: SchemaTypes.Boolean, default: false },
     seller: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     soldAt: { type: SchemaTypes.Date, required: false, default: new Date() },
-    status: { type: SchemaTypes.String, default:'ACTIVE' },
+    status: { type: SchemaTypes.String, default: 'ACTIVE' },
     tips: { type: SchemaTypes.Number, default: 0, required: false },
     totalCharge: { type: SchemaTypes.Number, default: 0, required: false },
-    type:  { type: SchemaTypes.String },
+    type: { type: SchemaTypes.String },
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },

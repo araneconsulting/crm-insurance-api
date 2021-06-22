@@ -42,11 +42,7 @@ export class SaleService {
    * @param  {string} type?
    * @returns Promise
    */
-  async findAll(
-    startDate?: Date,
-    endDate?: Date,
-    type?: string,
-  ): Promise<any> {
+  async findAll(startDate?: Date, endDate?: Date, type?: string): Promise<any> {
     const filterConditions = {
       soldAt: getDateMatchExpressionByDates(startDate, endDate),
     };
@@ -305,6 +301,30 @@ export class SaleService {
       delete queryParams.filter['type'];
     }
 
+    let customer = null;
+    if (queryParams.filter.hasOwnProperty('customer')) {
+      customer = queryParams.filter.customer;
+      delete queryParams.filter['customer'];
+    }
+
+    let carrier = null;
+    if (queryParams.filter.hasOwnProperty('carrier')) {
+      carrier = queryParams.filter.carrier;
+      delete queryParams.filter['carrier'];
+    }
+
+    let broker = null;
+    if (queryParams.filter.hasOwnProperty('broker')) {
+      broker = queryParams.filter.broker;
+      delete queryParams.filter['broker'];
+    }
+
+    let status = null;
+    if (queryParams.filter.hasOwnProperty('status')) {
+      status = queryParams.filter.status;
+      delete queryParams.filter['status'];
+    }
+
     let fixedQueries = [];
     let filterQueries = [];
     let conditions = {};
@@ -314,10 +334,27 @@ export class SaleService {
     };
     if (
       type ||
+      customer ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
       if (type) {
         conditions['$and'].push({ type: type });
+      }
+
+      if (customer) {
+        conditions['$and'].push({ customer: customer });
+      }
+
+      if (carrier) {
+        conditions['$and'].push({ carrier: carrier });
+      }
+
+      if (broker) {
+        conditions['$and'].push({ broker: broker });
+      }
+
+      if (status) {
+        conditions['$and'].push({ status: status });
       }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
@@ -375,15 +412,24 @@ export class SaleService {
       {
         $project: {
           id: '$_id',
-          type: '$type',
-          soldAt: '$soldAt',
-          deleted: '$deleted',
-          totalCharge: { $round: ['$totalCharge', 2] },
-          premium: { $round: ['$premium', 2] },
-          totalInsurance: { $round: ['$totalInsurance', 2] },
-          sellerName: {
-            $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+          code: '$code',
+          createdAt: '$createdAt',
+          customerName: {
+            $function: {
+              body: function (customer: any) {
+                return customer
+                  ? customer.type === 'BUSINESS'
+                    ? customer.business.name
+                    : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                  : 'N/A';
+              },
+              args: ['$customer'],
+              lang: 'js',
+            },
           },
+          deleted: '$deleted',
+          isEndorsement: '$isEndorsement',
+          isRenewal: '$isRenewal',
           locationName: {
             $function: {
               body: function (location: any) {
@@ -393,6 +439,10 @@ export class SaleService {
               lang: 'js',
             },
           },
+          policyNumber: '$policyNumber',
+          policyEffectiveAt: '$policyEffectiveAt',
+          policyExpiresAt: '$policyExpiresAt',
+          premium: { $round: ['$premium', 2] },
           productName: {
             $function: {
               body: function (items: SaleItem[]) {
@@ -414,24 +464,14 @@ export class SaleService {
               lang: 'js',
             },
           },
-          customerName: {
-            $function: {
-              body: function (customer: any) {
-                return customer
-                  ? customer.type === 'BUSINESS'
-                    ? customer.business.name
-                    : `${customer.contact.firstName}  ${customer.contact.lastName}`
-                  : 'N/A';
-              },
-              args: ['$customer'],
-              lang: 'js',
-            },
+          sellerName: {
+            $concat: ['$seller.firstName', ' ', '$seller.lastName'],
           },
-          code: '$code',
-          isRenewal: '$isRenewal',
-          isEndorsement: '$isEndorsement',
-          createdAt: '$createdAt',
-          policyExpiresAt: '$policyExpiresAt',
+          soldAt: '$soldAt',
+          status: '$status',
+          totalCharge: { $round: ['$totalCharge', 2] },
+          totalInsurance: { $round: ['$totalInsurance', 2] },
+          type: '$type',
         },
       },
     ]);
