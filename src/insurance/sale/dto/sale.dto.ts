@@ -44,4 +44,6 @@ export class SaleDto {
 
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;
+
+  endorsements?: Partial<Sale>[];
 }

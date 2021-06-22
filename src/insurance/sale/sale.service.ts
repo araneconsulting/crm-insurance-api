@@ -27,6 +27,8 @@ import { EndorseSaleDto } from './dto/endorse-sale.dto';
 import { setSaleCalculations } from './sale.utils';
 import { SaleItem } from 'business/sub-docs/sale-item';
 
+const SALE_LAYOUT_DEFAULT = 'NORMAL';
+const SALE_LAYOUT_FULL = 'FULL';
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
   constructor(
@@ -146,12 +148,12 @@ export class SaleService {
    * @param  {} withInsurers=false
    * @returns Observable
    */
-  findById(
+  async findById(
     id: string,
     withSeller = false,
     withCustomer = false,
-    withInsurers = false,
-  ): Observable<Sale> {
+    layout = SALE_LAYOUT_DEFAULT,
+  ): Promise<Partial<Sale>> {
     const saleQuery = this.saleModel.findOne({ _id: id });
 
     if (withSeller) {
@@ -162,10 +164,20 @@ export class SaleService {
       saleQuery.populate('customer');
     }
 
-    return from(saleQuery.exec()).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-    );
+    let sale: Partial<Sale> = await saleQuery.exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale:$id was not found`);
+    }
+
+    if (layout === SALE_LAYOUT_FULL) {
+      sale.endorsements = await this.saleModel
+        .aggregate()
+        .match({ endorsementReference: Types.ObjectId(sale.id) })
+        .exec();
+    }
+    
+    return sale;
   }
 
   /**

@@ -42,6 +42,8 @@ interface Sale extends Document<any> {
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
 
+  endorsements?: Partial<Sale>[];
+
   readonly tips: number;
   readonly totalCharge: number; //Sum of all item amount (down payments)
   //Only-insurance properties
@@ -99,6 +101,7 @@ const SaleSchema = new Schema<any>(
     premium: { type: SchemaTypes.Number, default: 0, required: false },
     profits: { type: SchemaTypes.Number, default: 0, required: false },
     totalInsurance: { type: SchemaTypes.Number, default: 0, required: false },
+    endorsements: [{ type: SchemaTypes.Map, required: false }],
   },
   {
     timestamps: true,

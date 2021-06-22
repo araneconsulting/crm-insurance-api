@@ -51,17 +51,17 @@ export class SaleController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
-  getSaleById(
+  async getSaleById(
     @Param('id', ParseObjectIdPipe) id: string,
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
-    @Query('withInsurers', new DefaultValuePipe(false)) withInsurers?: boolean,
-  ): Observable<Sale> {
-    return this.saleService.findById(
+    @Query('layout') layout?: string,
+  ): Promise<Partial<Sale>> {
+    return await this.saleService.findById(
       id,
       withSeller,
       withCustomer,
-      withInsurers,
+      layout
     );
   }
   @Post('/search')
