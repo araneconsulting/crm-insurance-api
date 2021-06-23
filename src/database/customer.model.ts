@@ -63,32 +63,55 @@ CustomerSchema.plugin(mongoSoftDelete);
 
 function primaryNameGetHook(): boolean {
   return this.type === 'BUSINESS'
-    ? this.business.name
-    : `${this.contact.firstName} ${this.contact.lastName}`;
+    ? this.business
+      ? this.business.name
+      : 'N/A'
+    : this.contact
+    ? `${this.contact.firstName} ${this.contact.lastName}`
+    : 'N/A';
 }
 
 CustomerSchema.virtual('name').get(primaryNameGetHook);
 
 function primaryEmailGetHook(): boolean {
-  return this.type === 'BUSINESS' ? this.business.email : this.contact.email;
+  return this.type === 'BUSINESS'
+    ? this.business
+      ? this.business.email
+      : 'N/A'
+    : this.contact
+    ? this.contact.email
+    : 'N/A';
 }
 
 CustomerSchema.virtual('email').get(primaryEmailGetHook);
 
 function primaryPhoneGetHook(): boolean {
   return this.type === 'BUSINESS'
-    ? `${this.business.primaryPhone}`+ (this.business.primaryPhoneExtension ? `ext. ${this.business.primaryPhoneExtension}` : '')
-    : this.contact.phone
+    ? this.business && this.business.primaryPhone
+      ? `${this.business.primaryPhone}` +
+        (this.business.primaryPhoneExtension
+          ? `ext. ${this.business.primaryPhoneExtension}`
+          : '')
+      : 'N/A'
+    : this.contact && this.contact.phone
     ? this.contact.phone
-    : this.contact.mobilePhone;
+    : this.contact && this.contact.mobilePhone
+    ? this.contact.mobilePhone
+    : 'N/A';
 }
 
 CustomerSchema.virtual('phone').get(primaryPhoneGetHook);
 
 function primaryStateGetHook(): boolean {
   return this.type === 'BUSINESS'
-    ? `${this.business && this.business.address ? this.business.address.state : 'N/A'}`
-    : this.contact && this.contact.address ? this.contact.address.state : 'N/A';
+    ? `${
+        this.business && this.business.address
+          ? this.business.address.state
+          : 'N/A'
+      }`
+    : this.contact && this.contact.address
+    ? this.contact.address.state
+    : 'N/A';
 }
 
 CustomerSchema.virtual('state').get(primaryStateGetHook);

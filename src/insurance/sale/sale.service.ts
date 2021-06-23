@@ -157,11 +157,11 @@ export class SaleService {
     const saleQuery = this.saleModel.findOne({ _id: id });
 
     if (withSeller) {
-      saleQuery.populate('seller');
+      saleQuery.populate('seller', 'roles firstName lastName fullName');
     }
 
     if (withCustomer) {
-      saleQuery.populate('customer');
+      saleQuery.populate('customer', 'type contact.firstName contact.lastName business.name name');
     }
 
     let sale: Partial<Sale> = await saleQuery.exec();
