@@ -178,6 +178,7 @@ export class InsurerService {
     return {
       carriers: insurers.filter((insurer) => insurer.type === 'CARRIER'),
       brokers: insurers.filter((insurer) => insurer.type === 'BROKER'),
+      financers: insurers.filter((insurer) => insurer.type === 'FINANCER'),
     };
   }
 }
