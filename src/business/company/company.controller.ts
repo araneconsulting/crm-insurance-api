@@ -125,6 +125,7 @@ export class CompanyController {
       customers: await this.customerService.getCatalog(entitiesFilter),
       carriers: insurers.carriers,
       brokers: insurers.brokers,
+      financers: insurers.financers,
       roles: UserCatalog.roles,
       dateRanges: DateCatalog.ranges,
       states: States,
