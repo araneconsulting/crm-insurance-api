@@ -41,6 +41,7 @@ import { DateCatalog } from 'shared/const/catalog/date';
 import { States } from 'shared/const/catalog/states';
 import { Industries } from 'shared/const/catalog/industries';
 import { productTypes } from 'shared/const/catalog/product-types';
+import { CompanyCatalog } from 'shared/const/catalog/company';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -54,7 +55,7 @@ export class CompanyController {
 
   @Get()
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER, RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllCompanies(
     @Query('q') keyword?: string,
@@ -63,10 +64,31 @@ export class CompanyController {
   ): Promise<Company[]> {
     return await this.companyService.findAll(keyword, skip, limit);
   }
+  
+  @Get('my-company')
+  @HttpCode(200)
+  @HasRoles(RoleType.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getMyCompany(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<Company> {
+    return await this.companyService.getMyCompany();
+  }
+
+  @Put('my-company')
+  @HttpCode(200)
+  @HasRoles(RoleType.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseFilters(MongoFilter)
+  async updateMyCompany(
+    @Body() company: UpdateCompanyDto,
+  ): Promise<Company> {
+    return await this.companyService.updateMyCompany(company);
+  }
 
   @Get(':id')
   @HttpCode(200)
-  //@HasRoles(RoleType.SUPER,RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getCompanyById(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -76,7 +98,7 @@ export class CompanyController {
 
   @Post()
   @HttpCode(201)
-  @HasRoles(RoleType.SUPER, RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async createCompany(@Body() company: CreateCompanyDto): Promise<Company> {
@@ -85,7 +107,7 @@ export class CompanyController {
 
   @Put(':id')
   @HttpCode(200)
-  @HasRoles(RoleType.SUPER, RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async updateCompany(
@@ -96,7 +118,7 @@ export class CompanyController {
   }
 
   @Delete(':id')
-  @HasRoles(RoleType.SUPER, RoleType.ADMIN)
+  @HasRoles(RoleType.SUPER)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async deleteCompanyById(
@@ -131,6 +153,9 @@ export class CompanyController {
       states: States,
       industries: Industries,
       productTypes: productTypes,
+      locationPayFrequencies: CompanyCatalog.locations.payrollFrequencies,
+      locationAvailableCountries: CompanyCatalog.locations.availableCountries,
+      employeeRateFrequencies: CompanyCatalog.employeeRateFrequencies
     });
   }
 }

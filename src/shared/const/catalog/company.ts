@@ -1,28 +1,23 @@
 export const CompanyCatalog = {
-  locations: [
-    {
-      id: 'MEXICO-I',
-      name: 'Merida (MX) Office',
-      address: '',
-      phone: '',
-      email: 'contact@vl17insagency.com',
-      fax: '',
-      manager: 'Tatiana Nicles'
-    },
-    {
-      id: 'USA-I',
-      name: 'Houston Headquarters',
-      address: '2150 Hwy 6 S Ste: 130, Houston, TX 77077',
-      phone: '+1-281-803-8156',
-      email: 'contact@vl17insagency.com',
-      fax: '',
-      manager: 'Lisandra Cunill'
-    },
+  employeeRateFrequencies: [
+    { id: 'HOURLY', name: 'Per Hour' },
+    { id: 'DAILY', name: 'Per Day' },
+    { id: 'WEEKLY', name: 'Per Week' },
+    { id: 'BI-WEEKLY', name: 'Each Two Weeks' },
+    { id: 'TWICE-MONTH', name: 'Twice a Month' },
+    { id: 'MONTHLY', name: 'Per Month' },
+    { id: 'YEARLY', name: 'Per Year' },
   ],
+  locations: {
+    payrollFrequencies: [
+      { id: 'WEEKLY', name: 'Per Week' },
+      { id: 'BI-WEEKLY', name: 'Each Two Weeks' },
+      { id: 'TWICE-MONTH', name: 'Twice a Month' },
+      { id: 'MONTHLY', name: 'Per Month' },
+    ],
+    availableCountries: [
+      { id: 'MEX', name: 'Mexico' },
+      { id: 'USA', name: 'USA' },
+    ]
+  },
 };
-
-export function locationName(locationCode) {
-  return CompanyCatalog.locations.find(
-    (location) => location.id === locationCode
-  ).name;
-}

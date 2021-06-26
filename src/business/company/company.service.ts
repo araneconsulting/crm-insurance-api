@@ -33,6 +33,27 @@ export class CompanyService {
     }
   }
 
+  getMyCompany(): Promise<Company> {
+    return this.findById(this.req.user.company.toString());
+  }
+
+  updateMyCompany(data: UpdateCompanyDto): Promise<Company> {
+    return from(
+      this.companyModel
+        .findOneAndUpdate(
+          { _id: this.req.user.company },
+          { ...data, updatedBy: { _id: this.req.user.id } },
+          { new: true },
+        )
+        .exec(),
+    )
+      .pipe(
+        mergeMap((p) => (p ? of(p) : EMPTY)),
+        throwIfEmpty(() => new NotFoundException(`company:$id was not found`)),
+      )
+      .toPromise();
+  }
+
   findById(id: string): Promise<Company> {
     return from(this.companyModel.findOne({ _id: id }).exec())
       .pipe(
