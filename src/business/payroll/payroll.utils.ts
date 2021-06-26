@@ -89,8 +89,7 @@ export async function runPayrollCalculations(
 
     return stub;
   });
-
-  //console.log(payrollDto);
+  
   return payrollDto;
 
   function removeInvalidPayStubs() {

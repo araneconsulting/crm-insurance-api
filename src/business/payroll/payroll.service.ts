@@ -18,6 +18,7 @@ import {
   runPayrollCalculations,
 } from './payroll.utils';
 import { UserService } from 'user/user.service';
+import { COMPANY } from 'shared/const/project-constants';
 @Injectable({ scope: Scope.REQUEST })
 export class PayrollService {
   constructor(
@@ -58,9 +59,7 @@ export class PayrollService {
    */
 
   getAvailablePayPeriod(location: Partial<Location> = null): InitPayrollDto[] {
-    const payPeriod = getLastPayPeriod(21);
-
-    console.log('pay period: ', payPeriod);
+    const payPeriod = getLastPayPeriod(COMPANY.payrollDay);
 
     let payrolls: InitPayrollDto[] = [
       {

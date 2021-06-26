@@ -164,7 +164,7 @@ export class ReportController {
     }
 
     const baseDate =
-      moment().date() < 21
+      moment().date() < COMPANY.payrollDay
         ? moment({
             year: year,
             month: month,

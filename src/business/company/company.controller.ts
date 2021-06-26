@@ -64,7 +64,7 @@ export class CompanyController {
   ): Promise<Company[]> {
     return await this.companyService.findAll(keyword, skip, limit);
   }
-  
+
   @Get('my-company')
   @HttpCode(200)
   @HasRoles(RoleType.ADMIN)
@@ -75,14 +75,31 @@ export class CompanyController {
     return await this.companyService.getMyCompany();
   }
 
+  @Get('my-company/employees')
+  @HttpCode(200)
+  @HasRoles(RoleType.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getMyCompanyEmployees(
+    @Req() req: Request,
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<Company> {
+    const user: Partial<User> = req.user;
+
+    if (!user.company && !isSuperAdmin(user))
+      throw new BadRequestException(user.company);
+    const entitiesFilter = { company: user.company, deleted: false };
+
+    let employeesFilter = entitiesFilter;
+    employeesFilter['roles'] = { $nin: ['SUPER', 'ADMIN'] };
+    return await this.userService.getEmployees(employeesFilter);
+  }
+
   @Put('my-company')
   @HttpCode(200)
   @HasRoles(RoleType.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
-  async updateMyCompany(
-    @Body() company: UpdateCompanyDto,
-  ): Promise<Company> {
+  async updateMyCompany(@Body() company: UpdateCompanyDto): Promise<Company> {
     return await this.companyService.updateMyCompany(company);
   }
 
@@ -138,11 +155,15 @@ export class CompanyController {
 
     const entitiesFilter = { company: user.company, deleted: false };
 
+    let employeesFilter = entitiesFilter;
+    employeesFilter['roles'] = { $nin: ['SUPER', 'ADMIN'] };
+
     const insurers: any = await this.insurerService.getCatalog(entitiesFilter);
 
     return res.json({
       company: await this.companyService.findById(user.company.toString()),
       users: await this.userService.getCatalog(entitiesFilter),
+      employees: await this.userService.getCatalog(employeesFilter),
       locations: await this.locationService.getCatalog(entitiesFilter),
       customers: await this.customerService.getCatalog(entitiesFilter),
       carriers: insurers.carriers,
@@ -155,7 +176,7 @@ export class CompanyController {
       productTypes: productTypes,
       locationPayFrequencies: CompanyCatalog.locations.payrollFrequencies,
       locationAvailableCountries: CompanyCatalog.locations.availableCountries,
-      employeeRateFrequencies: CompanyCatalog.employeeRateFrequencies
+      employeeRateFrequencies: CompanyCatalog.employeeRateFrequencies,
     });
   }
 }

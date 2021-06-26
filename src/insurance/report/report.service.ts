@@ -406,7 +406,6 @@ export class ReportService {
         : allEmployeeSalaryMetrics; */
 
     const payroll = salaryMetricsByAuthUserLocation.map((employeeInfo) => {
-      //      console.log('employee info before bonus calc', employeeInfo);
 
       if (employeeInfo.location) {
         employeeInfo['salesBonus'] = bonusByRole(

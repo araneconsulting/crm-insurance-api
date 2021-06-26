@@ -33,6 +33,15 @@ import { Request } from 'express';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  @Get('/employees')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async getAllEmployees(): Promise<any> {
+    const res = await this.userService.getEmployees();
+    return {
+      data: res,
+    };
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   getUser(
@@ -41,6 +50,8 @@ export class UserController {
   ): Observable<Partial<User>> {
     return this.userService.findById(id, false, withSales);
   }
+
+  
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -184,7 +184,7 @@ export class UserService {
     let filterQueries = [];
 
     conditions = {
-      $and: [{ deleted: false }, { roles: { $nin: ['SUPER'] } }],
+      $and: [{ deleted: false }, { roles: { $nin: ['SUPER', 'ADMIN'] } }],
     };
     if (
       roles ||
@@ -260,11 +260,18 @@ export class UserService {
     };
   }
 
+  async getEmployees(filterCriteria?: any): Promise<any> {
+    return await this.userModel
+      .find(filterCriteria || {})
+      .sort({ fullName: 1 })
+      .exec();
+  }
+
   async getCatalog(filterCriteria?: any): Promise<any> {
     return await this.userModel
       .find(filterCriteria || {})
       .select('firstName lastName roles _id')
-      .sort({ name: 1 })
+      .sort({ fullName: 1 })
       .exec();
   }
 }
