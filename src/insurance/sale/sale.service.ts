@@ -26,6 +26,8 @@ import { UpdateSaleDto } from './dto/update-sale.dto';
 import { EndorseSaleDto } from './dto/endorse-sale.dto';
 import { setSaleCalculations } from './sale.utils';
 import { SaleItem } from 'business/sub-docs/sale-item';
+import { Location } from 'database/location.model';
+import { Customer } from 'database/customer.model';
 
 const SALE_LAYOUT_DEFAULT = 'NORMAL';
 const SALE_LAYOUT_FULL = 'FULL';
@@ -45,7 +47,8 @@ export class SaleService {
    * @returns Promise
    */
   async findAll(startDate?: Date, endDate?: Date, type?: string): Promise<any> {
-    const filterConditions = {
+    const query = this.saleModel.aggregate();
+    /* const filterConditions = {
       soldAt: getDateMatchExpressionByDates(startDate, endDate),
     };
 
@@ -57,7 +60,6 @@ export class SaleService {
       filterConditions['seller'] = Types.ObjectId(this.req.user.id);
     }
 
-    const query = this.saleModel.aggregate();
     query.match(filterConditions);
 
     query
@@ -136,7 +138,7 @@ export class SaleService {
           },
         },
       ])
-      .sort({ soldAt: -1 });
+      .sort({ soldAt: -1 }); */
 
     return query;
   }
@@ -161,7 +163,10 @@ export class SaleService {
     }
 
     if (withCustomer) {
-      saleQuery.populate('customer', 'type contact.firstName contact.lastName business.name name');
+      saleQuery.populate(
+        'customer',
+        'type contact.firstName contact.lastName business.name name',
+      );
     }
 
     let sale: Partial<Sale> = await saleQuery.exec();
@@ -176,7 +181,7 @@ export class SaleService {
         .match({ endorsementReference: Types.ObjectId(sale.id) })
         .exec();
     }
-    
+
     return sale;
   }
 
@@ -188,12 +193,29 @@ export class SaleService {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
 
     if (!saleDto.isChargeItemized) {
-      saleDto.items = saleDto.items.map((item) => ({
-        ...item,
-        amount: 0,
-        premium: 0,
-        profits: 0,
-      }));
+      saleDto.items = saleDto.items.map((item) => {
+        if (item.product === 'FEE' || item.product === 'PERMIT') {
+          delete item['provider'];
+          delete item['subprovider'];
+        }
+
+        if (item.provider === '') {
+          delete item['provider'];
+        }
+
+        if (item.subprovider === '') {
+          delete item['subprovider'];
+        }
+
+        console.log(item);
+
+        return {
+          ...item,
+          amount: 0,
+          premium: 0,
+          profits: 0,
+        };
+      });
     }
 
     if (
@@ -428,7 +450,7 @@ export class SaleService {
           createdAt: '$createdAt',
           customerName: {
             $function: {
-              body: function (customer: any) {
+              body: function (customer: Customer) {
                 return customer
                   ? customer.type === 'BUSINESS'
                     ? customer.business.name
@@ -444,7 +466,7 @@ export class SaleService {
           isRenewal: '$isRenewal',
           locationName: {
             $function: {
-              body: function (location: any) {
+              body: function (location: Location) {
                 return location ? location.business.name : 'N/A';
               },
               args: ['$location'],
