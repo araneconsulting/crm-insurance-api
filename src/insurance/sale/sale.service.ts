@@ -207,8 +207,6 @@ export class SaleService {
           delete item['subprovider'];
         }
 
-        console.log(item);
-
         return {
           ...item,
           amount: 0,
@@ -335,10 +333,10 @@ export class SaleService {
       delete queryParams.filter['type'];
     }
 
-    let customer = null;
-    if (queryParams.filter.hasOwnProperty('customer')) {
-      customer = queryParams.filter.customer;
-      delete queryParams.filter['customer'];
+    let insured = null;
+    if (queryParams.filter.hasOwnProperty('insured')) {
+      insured = queryParams.filter.insured;
+      delete queryParams.filter['insured'];
     }
 
     let carrier = null;
@@ -374,31 +372,39 @@ export class SaleService {
     };
     if (
       type ||
-      customer ||
+      insured ||
+      carrier ||
+      broker ||
+      status ||
+      location ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
       if (type) {
         conditions['$and'].push({ type: type });
       }
 
-      if (customer) {
-        conditions['$and'].push({ customer: customer });
-      }
-
-      if (carrier) {
-        conditions['$and'].push({ carrier: carrier });
+      if (insured) {
+        conditions['$and'].push({ 'customer._id': Types.ObjectId(insured) });
       }
 
       if (broker) {
-        conditions['$and'].push({ broker: broker });
+        conditions['$and'].push({
+          items: { $elemMatch: { provider: Types.ObjectId(broker) } },
+        });
+      }
+
+      if (carrier) {
+        conditions['$and'].push({
+          items: { $elemMatch: { subprovider: Types.ObjectId(carrier) } },
+        });
       }
 
       if (status) {
         conditions['$and'].push({ status: status });
       }
-      
+
       if (location) {
-        conditions['$and'].push({ location: location });
+        conditions['$and'].push({ 'location._id': Types.ObjectId(location) });
       }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
@@ -418,15 +424,13 @@ export class SaleService {
 
     const query = this.saleModel.aggregate();
 
-    query
-      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'users',
-        localField: 'seller',
-        foreignField: '_id',
-        as: 'seller',
-      })
-      .unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
+    query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true }).lookup({
+      from: 'users',
+      localField: 'seller',
+      foreignField: '_id',
+      as: 'seller',
+    });
+    query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
 
     query
       .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
@@ -435,8 +439,9 @@ export class SaleService {
         localField: 'customer',
         foreignField: '_id',
         as: 'customer',
-      })
-      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
+      });
+
+    query.unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
 
     query
       .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
@@ -445,8 +450,9 @@ export class SaleService {
         localField: 'location',
         foreignField: '_id',
         as: 'location',
-      })
-      .unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+      });
+
+    query.unwind({ path: '$location', preserveNullAndEmptyArrays: true });
 
     if (conditions) {
       query.match(conditions);
