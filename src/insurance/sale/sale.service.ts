@@ -359,6 +359,12 @@ export class SaleService {
       delete queryParams.filter['status'];
     }
 
+    let location = null;
+    if (queryParams.filter.hasOwnProperty('location')) {
+      location = queryParams.filter.location;
+      delete queryParams.filter['location'];
+    }
+
     let fixedQueries = [];
     let filterQueries = [];
     let conditions = {};
@@ -389,6 +395,10 @@ export class SaleService {
 
       if (status) {
         conditions['$and'].push({ status: status });
+      }
+      
+      if (location) {
+        conditions['$and'].push({ location: location });
       }
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {

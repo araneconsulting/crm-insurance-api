@@ -47,9 +47,15 @@ const InsurerSchema = new Schema<any>(
   },
 );
 
+function nameGetHook(): string {
+  return `${this.business.name}`;
+}
+
+InsurerSchema.virtual('name').get(nameGetHook);
+
 InsurerSchema.plugin(mongoSoftDelete);
 
 const insurerModelFn: (conn: Connection) => InsurerModel = (conn: Connection) =>
   conn.model<Insurer, InsurerModel>('Insurer', InsurerSchema, 'insurers');
 
-export { Insurer, InsurerSchema, insurerModelFn };
+export { Insurer, InsurerSchema, insurerModelFn, nameGetHook };

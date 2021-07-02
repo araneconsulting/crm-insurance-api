@@ -170,11 +170,12 @@ export class LocationService {
       totalCount: entities.length,
     };
   }
+  
 
   async getCatalog(filterCriteria: any): Promise<any> {
     return await this.locationModel
       .find(filterCriteria)
-      .select('business.name _id')
+      .select('business.name _id name')
       .sort({ name: 1 })
       .exec();
   }

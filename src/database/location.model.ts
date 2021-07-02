@@ -62,6 +62,12 @@ const LocationSchema = new Schema<any>(
   },
 );
 
+function nameGetHook(): string {
+  return `${this.business.name}`;
+}
+
+LocationSchema.virtual('name').get(nameGetHook);
+
 LocationSchema.plugin(mongoSoftDelete);
 
 const locationModelFn: (conn: Connection) => LocationModel = (
@@ -69,4 +75,4 @@ const locationModelFn: (conn: Connection) => LocationModel = (
 ) =>
   conn.model<Location, LocationModel>('Location', LocationSchema, 'locations');
 
-export { Location, LocationModel, LocationSchema, locationModelFn };
+export { Location, LocationModel, LocationSchema, locationModelFn,  nameGetHook};
