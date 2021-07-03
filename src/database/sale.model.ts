@@ -21,7 +21,7 @@ interface Sale extends Document<any> {
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
   readonly endorsementReference: Partial<Sale>;
-  readonly financerCompany: string; //code del subdocumento de la financiera dentro de la compañia
+  readonly financerCompany: string;
   readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly isChargeItemized: boolean;
@@ -72,7 +72,7 @@ const SaleSchema = new Schema<any>(
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
     endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
-    financerCompany: { type: SchemaTypes.String, required: false },
+    financerCompany: { type: SchemaTypes.ObjectId, ref: 'Insurer', nullable:true },
     isEndorsement: { type: SchemaTypes.Boolean, default: false },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },

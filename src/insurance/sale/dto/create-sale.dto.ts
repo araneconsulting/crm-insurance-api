@@ -1,6 +1,7 @@
 import { SaleItem } from 'business/sub-docs/sale-item';
 import { IsArray, IsDate, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Customer } from 'database/customer.model';
+import { Insurer } from 'database/insurer.model';
 import { Location } from 'database/location.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
@@ -74,7 +75,7 @@ export class CreateSaleDto {
 
   @IsOptional()
   @IsString()
-  financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
+  financerCompany?: Partial<Insurer>; //code del subdocumento de la financiera dentro de la compañia
 
   @IsOptional()
   @IsDateString()

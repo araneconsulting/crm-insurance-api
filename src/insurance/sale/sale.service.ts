@@ -327,6 +327,42 @@ export class SaleService {
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
 
+    let saleDateFrom = null;
+    let saleDateTo = null;
+    if (
+      queryParams.filter.hasOwnProperty('saleDateFrom') ||
+      queryParams.filter.hasOwnProperty('saleDateTo')
+    ) {
+      saleDateFrom = queryParams.filter.saleDateFrom;
+      saleDateTo = queryParams.filter.saleDateTo;
+      delete queryParams.filter['saleDateFrom'];
+      delete queryParams.filter['saleDateTo'];
+    }
+
+    let effectiveDateFrom = null;
+    let effectiveDateTo = null;
+    if (
+      queryParams.filter.hasOwnProperty('effectiveDateFrom') ||
+      queryParams.filter.hasOwnProperty('effectiveDateTo')
+    ) {
+      effectiveDateFrom = queryParams.filter.effectiveDateFrom;
+      effectiveDateTo = queryParams.filter.effectiveDateTo;
+      delete queryParams.filter['effectiveDateFrom'];
+      delete queryParams.filter['effectiveDateTo'];
+    }
+
+    let expirationDateFrom = null;
+    let expirationDateTo = null;
+    if (
+      queryParams.filter.hasOwnProperty('expirationDateFrom') ||
+      queryParams.filter.hasOwnProperty('expirationDateTo')
+    ) {
+      expirationDateFrom = queryParams.filter.expirationDateFrom;
+      expirationDateTo = queryParams.filter.expirationDateTo;
+      delete queryParams.filter['expirationDateFrom'];
+      delete queryParams.filter['expirationDateTo'];
+    }
+
     let type = null;
     if (queryParams.filter.hasOwnProperty('type')) {
       type = queryParams.filter.type;
@@ -371,6 +407,12 @@ export class SaleService {
       $and: [{ deleted: false }, { renewed: false }, { isEndorsement: false }],
     };
     if (
+      saleDateFrom ||
+      saleDateTo ||
+      effectiveDateFrom ||
+      effectiveDateTo ||
+      expirationDateFrom ||
+      expirationDateTo ||
       type ||
       insured ||
       carrier ||
@@ -379,6 +421,24 @@ export class SaleService {
       location ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
+      if (saleDateFrom || saleDateTo) {
+        conditions['$and'].push({
+          soldAt: getDateMatchExpressionByDates(saleDateFrom, saleDateTo),
+        });
+      }
+
+      if (effectiveDateFrom || effectiveDateTo) {
+        conditions['$and'].push({
+          policyEffectiveAt: getDateMatchExpressionByDates(effectiveDateFrom, effectiveDateTo),
+        });
+      }
+
+      if (expirationDateFrom || expirationDateTo) {
+        conditions['$and'].push({
+          policyExpiresAt: getDateMatchExpressionByDates(expirationDateFrom, expirationDateTo),
+        });
+      }
+
       if (type) {
         conditions['$and'].push({ type: type });
       }
@@ -525,6 +585,8 @@ export class SaleService {
         },
       },
     ]);
+
+    //console.log(JSON.stringify(query));
 
     query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
 

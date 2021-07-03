@@ -2,6 +2,7 @@ import { SaleItem } from 'business/sub-docs/sale-item';
 import { IsArray, IsDateString, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Company } from 'database/company.model';
 import { Customer } from 'database/customer.model';
+import { Insurer } from 'database/insurer.model';
 import { Location } from 'database/location.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
@@ -28,7 +29,7 @@ export class SaleDto {
   policyEffectiveAt?: Date;
   policyExpiresAt?: Date;
   monthlyPayment?: number;
-  financerCompany?: string; //code del subdocumento de la financiera dentro de la compañia
+  financerCompany?: Partial<Insurer>; //code del subdocumento de la financiera dentro de la compañia
 
   createdBy?: Partial<User>;
   updatedBy?: Partial<User>;
