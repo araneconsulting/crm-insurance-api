@@ -48,20 +48,6 @@ export class SaleService {
    */
   async findAll(startDate?: Date, endDate?: Date, type?: string): Promise<any> {
     const query = this.saleModel.aggregate();
-    /* const filterConditions = {
-      soldAt: getDateMatchExpressionByDates(startDate, endDate),
-    };
-
-    if (type) {
-      filterConditions['type'] = type;
-    }
-
-    if (!isAdmin(this.req.user) && !isExecutive(this.req.user)) {
-      filterConditions['seller'] = Types.ObjectId(this.req.user.id);
-    }
-
-    query.match(filterConditions);
-
     query
       .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
       .lookup({
@@ -95,6 +81,7 @@ export class SaleService {
       .append([
         {
           $project: {
+            code: '$code',
             items: '$items',
             type: '$type',
             soldAt: '$soldAt',
@@ -138,9 +125,51 @@ export class SaleService {
           },
         },
       ])
-      .sort({ soldAt: -1 }); */
+      .sort({ soldAt: -1 });
 
     return query;
+  }
+
+  /**
+   * @param  {string} code
+   * @param  {} withSeller=false
+   * @param  {} withCustomer=false
+   * @param  {} withInsurers=false
+   * @returns Observable
+   */
+   async findByCode(
+    code: string,
+    withSeller = false,
+    withCustomer = false,
+    layout = SALE_LAYOUT_DEFAULT,
+  ): Promise<Partial<Sale>> {
+    const saleQuery = this.saleModel.findOne({ code: code });
+
+    if (withSeller) {
+      saleQuery.populate('seller', 'roles firstName lastName fullName');
+    }
+
+    if (withCustomer) {
+      saleQuery.populate(
+        'customer',
+        'type contact.firstName contact.lastName business.name name',
+      );
+    }
+
+    let sale: Partial<Sale> = await saleQuery.exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale with code:${code} was not found`);
+    }
+
+    if (layout === SALE_LAYOUT_FULL) {
+      sale.endorsements = await this.saleModel
+        .aggregate()
+        .match({ endorsementReference: Types.ObjectId(sale.id) })
+        .exec();
+    }
+
+    return sale;
   }
 
   /**
@@ -172,7 +201,7 @@ export class SaleService {
     let sale: Partial<Sale> = await saleQuery.exec();
 
     if (!sale) {
-      throw new NotFoundException(`sale:$id was not found`);
+      throw new NotFoundException(`sale:${id} was not found`);
     }
 
     if (layout === SALE_LAYOUT_FULL) {
@@ -242,11 +271,11 @@ export class SaleService {
   }
 
   /**
-   * @param  {string} id
+   * @param  {string} code
    * @param  {UpdateSaleDto} data
    * @returns Promise
    */
-  async update(id: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
+  async update(code: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
     let saleDto: Partial<SaleDto> = { ...updateSaleDto };
 
     if (!saleDto.isChargeItemized) {
@@ -268,10 +297,10 @@ export class SaleService {
       delete saleDto.seller;
     }
 
-    let sale = await this.saleModel.findById(Types.ObjectId(id)).exec();
+    let sale: Partial<Sale> = await this.saleModel.findOne({code:code}).exec();
 
     if (!sale) {
-      throw new NotFoundException(`sale:$id was not found`);
+      throw new NotFoundException(`sale:${code} was not found`);
     }
 
     saleDto = {
@@ -285,7 +314,7 @@ export class SaleService {
     let saleData: any = await setSaleCalculations(saleDto, insurers);
 
     return this.saleModel.findOneAndUpdate(
-      { _id: Types.ObjectId(id) },
+      { _id: Types.ObjectId(sale.id) },
       {
         ...saleData,
       },
@@ -294,13 +323,13 @@ export class SaleService {
   }
 
   /**
-   * @param  {string} id
+   * @param  {string} code
    * @returns Observable
    */
-  deleteById(id: string): Observable<Sale> {
-    return from(this.saleModel.findOneAndDelete({ _id: id }).exec()).pipe(
+  deleteByCode(code: string): Observable<Sale> {
+    return from(this.saleModel.findOneAndDelete({ code: code }).exec()).pipe(
       mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
+      throwIfEmpty(() => new NotFoundException(`sale:${code} was not found`)),
     );
   }
 
@@ -316,8 +345,8 @@ export class SaleService {
    * @returns Observable
    */
 
-  async batchDelete(ids: string[]): Promise<any> {
-    return await from(this.saleModel.deleteMany({ id: { $in: ids } }).exec());
+  async batchDelete(codes: string[]): Promise<any> {
+    return await from(this.saleModel.deleteMany({ codes: { $in: codes } }).exec());
   }
 
   async search(queryParams?: any): Promise<any> {
@@ -602,7 +631,7 @@ export class SaleService {
    * @param  {EndorseSaleDto} endorseSaleDto
    * @returns Promise
    */
-  async endorse(id: string, endorseSaleDto: EndorseSaleDto): Promise<any> {
+  async endorse(endorseSaleDto: EndorseSaleDto): Promise<any> {
     //Store new endorsement with mandatory fields
 
     let saleDto: Partial<SaleDto> = { ...endorseSaleDto };
@@ -680,7 +709,7 @@ export class SaleService {
    * @param  {CreateSaleDto} saleDto
    * @returns Promise
    */
-  async renew(id: string, createSaleDto: CreateSaleDto): Promise<Sale> {
+  async renew(code: string, createSaleDto: CreateSaleDto): Promise<Sale> {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
 
     if (!saleDto.isChargeItemized) {
@@ -693,12 +722,12 @@ export class SaleService {
     }
 
     const updated: Partial<Sale> = await this.saleModel
-      .findOneAndUpdate({ _id: id }, { renewed: true })
+      .findOneAndUpdate({ code: code }, { renewed: true })
       .exec();
 
     if (!updated) {
       throw new NotFoundException(
-        `Cannot renew sale: ${saleDto.endorsementReference} because is missing. `,
+        `Cannot renew sale:${code} because is missing. `,
       );
     }
 

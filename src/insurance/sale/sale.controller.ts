@@ -47,23 +47,24 @@ export class SaleController {
     return res.json(await this.saleService.findAll(startDate, endDate, type));
   }
 
-  @Get(':id')
+  @Get(':code')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
-  async getSaleById(
-    @Param('id', ParseObjectIdPipe) id: string,
+  async getSaleByCode(
+    @Param('code') code: string,
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
     @Query('layout') layout?: string,
   ): Promise<Partial<Sale>> {
-    return await this.saleService.findById(
-      id,
+    return await this.saleService.findByCode(
+      code,
       withSeller,
       withCustomer,
       layout
     );
   }
+
   @Post('/search')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -79,47 +80,47 @@ export class SaleController {
     return await this.saleService.save(sale);
   }
 
-  @Post(':id/endorse')
+  @Post(':code/endorse')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async endorseSale(
     @Req() req: Request,
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('code') code: string,
     @Body() sale: any,
   ): Promise<Sale> {
-    return await this.saleService.endorse(id, sale);
+    return await this.saleService.endorse(sale);
   }
 
-  @Post(':id/renew')
+  @Post(':code/renew')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async renewSale(
     @Req() req: Request,
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('code') code: string,
     @Body() sale: any,
   ): Promise<Sale> {
-    return await this.saleService.renew(id, sale);
+    return await this.saleService.renew(code, sale);
   }
 
-  @Put(':id')
+  @Put(':code')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async updateSale(
     @Req() req: Request,
-    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('code') code: string,
     @Body() sale: UpdateSaleDto,
   ): Promise<Sale> {
-    return await this.saleService.update(id, sale);
+    return await this.saleService.update(code, sale);
   }
 
-  @Delete(':id')
+  @Delete(':code')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  deleteSaleById(@Param('id', ParseObjectIdPipe) id: string): Observable<Sale> {
-    return this.saleService.deleteById(id);
+  deleteSale(@Param('code') code: string): Observable<Sale> {
+    return this.saleService.deleteByCode(code);
   }
 
   @Post('/delete')
@@ -127,7 +128,7 @@ export class SaleController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @UseFilters(MongoFilter)
   async deleteSales(@Req() req: Request, @Body() body: any): Promise<any> {
-    let ids: string[] = body['ids'];
-    return await this.saleService.batchDelete(ids);
+    let codes: string[] = body['codes'];
+    return await this.saleService.batchDelete(codes);
   }
 }
