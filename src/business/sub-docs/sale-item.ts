@@ -18,7 +18,7 @@ export class SaleItem {
 
   @IsNotEmpty()
   product: string;
-  //can be: TRUCKING_LIABILITY, TRUCKING_WCGLUMB, TRUCKING_CARGO, TRUCKING_PHYSICAL_DAMAGE, PERMIT,  AUTO_LIABILITY_FULL, AUTO_LIABILITY_GENERAL...
+  //Available values: see LINES_OF_BUSINESS
 
   @IsNumber()
   profits: number; //Auto calculated (commission % of amount)
@@ -54,20 +54,4 @@ export const DEFAULT_SALE_ITEM = {
   provider: '',
   subprovider: '',
   type: '',
-};
-
-export const DEFAULT_SALE_ITEM_TRUCKING = {
-  product: '',
-  type: '',
-  amount: 0,
-  provider: '',
-  subprovider: '',
-  premium: 0,
-  profits: 0,
-  details: {
-    dotNumber: '',
-    drivers: [],
-    vehicles: [],
-    vinNumbers: [],
-  },
 };

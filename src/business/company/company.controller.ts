@@ -40,8 +40,11 @@ import { UserCatalog } from 'shared/const/catalog/user';
 import { DateCatalog } from 'shared/const/catalog/date';
 import { States } from 'shared/const/catalog/states';
 import { Industries } from 'shared/const/catalog/industries';
-import { productTypes } from 'shared/const/catalog/product-types';
 import { CompanyCatalog } from 'shared/const/catalog/company';
+import { LINES_OF_BUSINESS } from 'shared/const/catalog/lines-of-business';
+import { COVERAGES_TYPES } from 'shared/const/catalog/coverages-types';
+import { ENDORSEMENT_STATUS } from 'shared/const/catalog/endorsement-status';
+import { ENDORSEMENT_TYPES } from 'shared/const/catalog/endorsement-types';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -173,7 +176,10 @@ export class CompanyController {
       dateRanges: DateCatalog.ranges,
       states: States,
       industries: Industries,
-      productTypes: productTypes,
+      linesOfBusiness: LINES_OF_BUSINESS,
+      coverages: COVERAGES_TYPES,
+      endorsementStatus: ENDORSEMENT_STATUS,
+      endorsementTypes: ENDORSEMENT_TYPES,
       locationPayFrequencies: CompanyCatalog.locations.payrollFrequencies,
       locationAvailableCountries: CompanyCatalog.locations.availableCountries,
       employeeRateFrequencies: CompanyCatalog.employeeRateFrequencies,
