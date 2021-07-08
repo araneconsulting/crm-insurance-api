@@ -25,9 +25,5 @@ export class UpdateInsurerDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly subproviders?: string[];
-
-  @IsOptional()
-  @IsNotEmpty()
   readonly type?: string; //BROKER, INDIVIDUAL
 }

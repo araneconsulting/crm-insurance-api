@@ -51,7 +51,7 @@ interface Sale extends Document<any> {
   readonly permits: number; //[auto-calculated] Sum of SaleItem amount where product = Permit
   readonly premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   readonly profits: number; //[auto-calculated] Sum of al SaleItem profits;
-  readonly totalInsurance: number; //[auto-calculated] Sum of al SaleItem premium;
+  readonly downPayment: number; //[auto-calculated] Sum of al SaleItem amount of coverages (not FEE nor PERMIT)
 
   readonly renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   readonly autoRenew: boolean;
@@ -72,7 +72,7 @@ const SaleSchema = new Schema<any>(
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
     endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
-    financerCompany: { type: SchemaTypes.ObjectId, ref: 'Insurer', nullable:true },
+    financerCompany: { type: SchemaTypes.ObjectId, ref: 'Insurer', required:false },
     isEndorsement: { type: SchemaTypes.Boolean, default: false },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },
@@ -100,7 +100,7 @@ const SaleSchema = new Schema<any>(
     permits: { type: SchemaTypes.Number, default: 0, required: false },
     premium: { type: SchemaTypes.Number, default: 0, required: false },
     profits: { type: SchemaTypes.Number, default: 0, required: false },
-    totalInsurance: { type: SchemaTypes.Number, default: 0, required: false },
+    downPayment: { type: SchemaTypes.Number, default: 0, required: false },
     endorsements: [{ type: SchemaTypes.Map, required: false }],
   },
   {

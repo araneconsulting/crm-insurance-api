@@ -39,7 +39,7 @@ export class CreateSaleDto {
 
   @IsOptional()
   @IsNumber()
-  totalInsurance: number;
+  downPayment: number;
 
   @IsOptional()
   @IsNumber()

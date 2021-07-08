@@ -11,7 +11,7 @@ const PERMIT_COMMISION_PERCENT = 0.2;
 const FEE_COMMISION_PERCENT = 0.2;
 export async function setSaleCalculations(
   saleDto: Partial<SaleDto>,
-  providers: Insurer[],
+  brokers: Insurer[],
 ): Promise<Partial<SaleDto>> {
   let sale: Partial<SaleDto> = { ...saleDto };
   let items: SaleItem[] = sale.items;
@@ -19,7 +19,7 @@ export async function setSaleCalculations(
   if (items) {
     let premium = 0;
     let totalCharge = 0;
-    let totalInsurance = 0;
+    let downPayment = 0;
     let profits = 0;
     let permits = 0;
     let fees = 0;
@@ -31,46 +31,44 @@ export async function setSaleCalculations(
       sale.permits = 0;
       sale.premium = 0;
       sale.profits = 0;
-      sale.totalInsurance = 0;
+      sale.downPayment = 0;
       sale.amountReceivable = 0;
 
       sale.items.map((item: SaleItem) => {
+
         switch (item.product) {
           case 'PERMIT':
             permits += item.premium;
             item.profits = PERMIT_COMMISION_PERCENT * item.premium;
             profits += item.profits;
             totalCharge += item.premium;
-            delete item['provider'];
-            delete item['subprovider'];
             break;
           case 'FEE':
             fees += item.premium;
             item.profits = (1 - FEE_COMMISION_PERCENT) * item.premium;
             profits += item.profits;
             totalCharge += item.premium;
-            delete item['provider'];
-            delete item['subprovider'];
             break;
           default:
-            totalInsurance += item.premium || 0;
+            downPayment += item.premium || 0;
             premium += item.premium || 0;
             totalCharge += item.amount;
-
-            //calculate item profits based on broker commissions
-            if (item.provider) {
-              item.profits = calculateProfitByProvider(
-                providers,
-                item.provider,
+            
+            if (item.broker) {
+              //calculate item profits based on broker commissions
+              item.profits = calculateProfitByCarrier(
+                brokers,
+                item.broker,
                 item.premium,
                 sale.type,
               );
               profits += item.profits;
-            } //calculate item profits based on carrier commissions
-            else if (item.subprovider) {
-              item.profits = calculateProfitByProvider(
-                providers,
-                item.subprovider,
+            } 
+            else if (item.carrier) {
+              //calculate item profits based on carrier commissions
+              item.profits = calculateProfitByCarrier(
+                brokers,
+                item.carrier,
                 item.premium,
                 sale.type,
               );
@@ -88,7 +86,7 @@ export async function setSaleCalculations(
       //Do total calculations for itemized
       sale.permits = roundAmount(permits || 0);
       sale.fees = roundAmount(fees || 0);
-      sale.totalInsurance = roundAmount(totalInsurance || 0);
+      sale.downPayment = roundAmount(downPayment || 0);
       sale.profits = roundAmount(profits || 0);
       sale.totalCharge = roundAmount(totalCharge || 0);
       sale.premium = roundAmount(premium || 0);
@@ -97,10 +95,10 @@ export async function setSaleCalculations(
       sale.premium = roundAmount(sale.premium || 0);
       sale.permits = roundAmount(sale.permits || 0);
       sale.fees = roundAmount(sale.fees || 0);
-      sale.totalInsurance = roundAmount(sale.totalInsurance || 0);
+      sale.downPayment = roundAmount(sale.downPayment || 0);
 
       sale.totalCharge = roundAmount(
-        sale.totalInsurance + sale.permits + sale.fees,
+        sale.downPayment + sale.permits + sale.fees,
       );
 
       let insuranceItems = sale.items.filter(
@@ -109,16 +107,14 @@ export async function setSaleCalculations(
 
       let profits = 0;
       if (insuranceItems) {
-        //This assumes that on non-itemized policies, there should be only one provider/subprovider, to take the commission from it, so we take the first one.
+        //This assumes that on non-itemized policies, there should be only one broker/carrier, to take the commission from it, so we take the first one.
 
-        const insurer = items[0].provider
-          ? items[0].provider
-          : items[0].subprovider;
+        const insurer = items[0].carrier;
 
-        profits = calculateProfitByProvider(
-          providers,
+        profits = calculateProfitByCarrier(
+          brokers,
           insurer,
-          sale.totalInsurance,
+          sale.downPayment,
           sale.type,
         );
       }
@@ -172,22 +168,22 @@ export function getDateMatchExpressionByDates(
   } else return { $lte: new Date() };
 }
 
-export function calculateProfitByProvider(
-  providers,
-  providerId: string,
+export function calculateProfitByCarrier(
+  brokers: Partial<Insurer>[],
+  broker: Partial<Insurer>,
   amount: number,
   saleType: string,
 ): number {
   let profits = 0;
 
-  const provider = providers.find(
-    (provider) =>
-      providerId && providerId !== '' && provider.id === providerId.toString(),
+  const foundProvider = brokers.find(
+    (found) =>
+      found  && (found.id === broker.id),
   );
 
   let commission = { percent: 0 };
-  if (provider) {
-    commission = provider.commissions.find(
+  if (foundProvider) {
+    commission = foundProvider.commissions.find(
       (commission) => commission.productType === saleType,
     );
 
@@ -209,4 +205,30 @@ export function titleCase(str) {
       return word.charAt(0).toUpperCase() + word.slice(1);
     })
     .join(' ');
+}
+
+export function sanitizeSale(sale: any) {
+
+  if (!sale.financerCompany){
+    delete sale['financerCompany']
+  }
+
+  sale.items = sale.items.map((item) => {
+    if (item.product === 'FEE' || item.product === 'PERMIT') {
+      delete item['broker'];
+      delete item['carrier'];
+    }
+
+    if (!item.broker) {
+      delete item['broker'];
+    }
+
+    if (!item.carrier) {
+      delete item['carrier'];
+    }
+
+    return {
+      ...item
+    };
+  });
 }

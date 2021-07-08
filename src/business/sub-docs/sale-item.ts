@@ -1,9 +1,9 @@
 import { IsNotEmpty, IsNumber, IsObject, IsOptional } from 'class-validator';
+import { Insurer } from 'database/insurer.model';
 import { Schema, SchemaTypes } from 'mongoose';
 import { nanoid } from 'nanoid';
 
 export class SaleItem {
-
   code?: string;
 
   @IsNumber()
@@ -24,10 +24,10 @@ export class SaleItem {
   profits: number; //Auto calculated (commission % of amount)
 
   @IsOptional()
-  provider: string; //Broker (Insurer) ID
+  broker?: Partial<Insurer>; //Broker (Insurer) ID
 
   @IsOptional()
-  subprovider: string; //Carrier (Insurer) ID
+  carrier?: Partial<Insurer>; //Carrier (Insurer) ID
 
   @IsNotEmpty()
   type: string; //can be:
@@ -40,8 +40,18 @@ export const SaleItemSchema = new Schema<any>({
   premium: { type: SchemaTypes.Number },
   product: { type: SchemaTypes.String },
   profits: { type: SchemaTypes.Number },
-  provider: { type: SchemaTypes.ObjectId, ref: 'Insurer', nullable:true },
-  subprovider: { type: SchemaTypes.ObjectId, ref: 'Insurer', nullable:true },
+  broker: {
+    type: SchemaTypes.ObjectId,
+    ref: 'Insurer',
+    required: false,
+    nullable: true,
+  },
+  carrier: {
+    type: SchemaTypes.ObjectId,
+    ref: 'Insurer',
+    required: false,
+    nullable: true,
+  },
   type: { type: SchemaTypes.String },
 });
 
@@ -51,7 +61,7 @@ export const DEFAULT_SALE_ITEM = {
   product: '',
   premium: 0,
   profits: 0,
-  provider: '',
-  subprovider: '',
+  broker: '',
+  carrier: '',
   type: '',
 };

@@ -68,7 +68,7 @@ export class UpdateSaleDto {
   totalCharge: number; //Sum of all sale item amounts
 
   @IsOptional()
-  totalInsurance: number; //Sum of all sale item amounts
+  downPayment: number; //Sum of all sale item amounts
 
   @IsOptional()
   policyExpiresAt: Date;

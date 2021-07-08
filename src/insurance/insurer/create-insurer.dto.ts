@@ -21,9 +21,5 @@ export class CreateInsurerDto {
 
   @IsOptional()
   @IsNotEmpty()
-  readonly subproviders?: string[];
-
-  @IsOptional()
-  @IsNotEmpty()
   readonly type?: string = 'CARRIER';
 }

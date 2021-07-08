@@ -218,7 +218,7 @@ export class ReportService {
             premium: '$premium',
             amountReceivable: '$amountReceivable',
             totalCharge: '$totalCharge',
-            totalInsurance: '$totalInsurance',
+            downPayment: '$downPayment',
             createdBy: '$createdBy',
             updatedBy: '$updatedBy',
             sellerName: {
@@ -359,7 +359,7 @@ export class ReportService {
         'permits',
         'fees',
         'premium',
-        'totalInsurance',
+        'downPayment',
         'profits',
       ],
       true,
@@ -373,7 +373,7 @@ export class ReportService {
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
       result['premium'] = roundAmount(metric.premium);
-      result['totalInsurance'] = roundAmount(metric.totalInsurance);
+      result['downPayment'] = roundAmount(metric.downPayment);
       result['profits'] = roundAmount(metric.profits);
 
       return result;
@@ -450,7 +450,7 @@ export class ReportService {
       null,
       'SELLER',
       [],
-      ['totalCharge', 'premium', 'totalInsurance', 'permits', 'fees', 'tips'],
+      ['totalCharge', 'premium', 'downPayment', 'permits', 'fees', 'tips'],
       true,
     );
 
@@ -458,7 +458,7 @@ export class ReportService {
       const result = metric._id;
       result['totalCharge'] = roundAmount(metric.totalCharge);
       result['premium'] = roundAmount(metric.premium);
-      result['totalInsurance'] = roundAmount(metric.totalInsurance);
+      result['downPayment'] = roundAmount(metric.downPayment);
       result['tips'] = roundAmount(metric.tips);
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
@@ -497,7 +497,7 @@ export class ReportService {
         const result = {
           ...user._doc,
           totalCharge: userMetrics ? userMetrics.totalCharge : 0,
-          totalInsurance: userMetrics ? userMetrics.totalInsurance : 0,
+          downPayment: userMetrics ? userMetrics.downPayment : 0,
           premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           fees: userMetrics ? userMetrics.fees : 0,
@@ -577,7 +577,7 @@ export class ReportService {
       locationId: user.location ? user.location.id : null,
       totalCharge: userMetrics ? userMetrics.totalCharge : 0,
       premium: userMetrics ? userMetrics.premium : 0,
-      totalInsurance: userMetrics ? userMetrics.totalInsurance : 0,
+      downPayment: userMetrics ? userMetrics.downPayment : 0,
       sellerName: user.firstName + ' ' + user.lastName,
     };
   }

@@ -19,7 +19,7 @@ export class SaleDto {
   soldAt: Date;
   tips: number;
   totalCharge: number; //Sum of all sale item amounts
-  totalInsurance: number; //Sum of items that are neither fee nor permits
+  downPayment: number; //Sum of items that are neither fee nor permits
   type: string; 
   isRenewal: boolean; 
   isChargeItemized: boolean; 

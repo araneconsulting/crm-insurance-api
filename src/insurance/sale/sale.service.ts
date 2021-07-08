@@ -91,7 +91,7 @@ export class SaleService {
             premium: { $round: ['$premium', 2] },
             amountReceivable: { $round: ['$amountReceivable', 2] },
             totalCharge: { $round: ['$totalCharge', 2] },
-            totalInsurance: { $round: ['$totalInsurance', 2] },
+            downPayment: { $round: ['$downPayment', 2] },
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
@@ -223,19 +223,6 @@ export class SaleService {
 
     if (!saleDto.isChargeItemized) {
       saleDto.items = saleDto.items.map((item) => {
-        if (item.product === 'FEE' || item.product === 'PERMIT') {
-          delete item['provider'];
-          delete item['subprovider'];
-        }
-
-        if (item.provider === '') {
-          delete item['provider'];
-        }
-
-        if (item.subprovider === '') {
-          delete item['subprovider'];
-        }
-
         return {
           ...item,
           amount: 0,
@@ -346,7 +333,7 @@ export class SaleService {
    */
 
   async batchDelete(codes: string[]): Promise<any> {
-    return await from(this.saleModel.deleteMany({ codes: { $in: codes } }).exec());
+    return this.saleModel.deleteMany({ code: { $in: codes } }).exec();
   }
 
   async search(queryParams?: any): Promise<any> {
@@ -478,13 +465,13 @@ export class SaleService {
 
       if (broker) {
         conditions['$and'].push({
-          items: { $elemMatch: { provider: Types.ObjectId(broker) } },
+          items: { $elemMatch: { broker: Types.ObjectId(broker) } },
         });
       }
 
       if (carrier) {
         conditions['$and'].push({
-          items: { $elemMatch: { subprovider: Types.ObjectId(carrier) } },
+          items: { $elemMatch: { carrier: Types.ObjectId(carrier) } },
         });
       }
 
@@ -609,13 +596,11 @@ export class SaleService {
           soldAt: '$soldAt',
           status: '$status',
           totalCharge: { $round: ['$totalCharge', 2] },
-          totalInsurance: { $round: ['$totalInsurance', 2] },
+          downPayment: { $round: ['$downPayment', 2] },
           type: '$type',
         },
       },
     ]);
-
-    //console.log(JSON.stringify(query));
 
     query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
 

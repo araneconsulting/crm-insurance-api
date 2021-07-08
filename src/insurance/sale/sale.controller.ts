@@ -16,18 +16,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { HasRoles } from '../../auth/guard/has-roles.decorator';
 import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
-import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
 import { Sale } from '../../database/sale.model';
 import { SaleService } from './sale.service';
 import { Request } from 'express';
-import { User } from 'database/user.model';
-import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 import { UpdateSaleDto } from './dto/update-sale.dto';
-import { ObjectId } from 'mongoose';
+import { sanitizeSale } from './sale.utils';
 
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {
@@ -61,7 +57,7 @@ export class SaleController {
       code,
       withSeller,
       withCustomer,
-      layout
+      layout,
     );
   }
 
@@ -75,8 +71,9 @@ export class SaleController {
   @Post('')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(MongoFilter)
+  //@UseFilters(MongoFilter)
   async createSale(@Req() req: Request, @Body() sale: any): Promise<Sale> {
+    sanitizeSale(sale);
     return await this.saleService.save(sale);
   }
 
@@ -89,6 +86,7 @@ export class SaleController {
     @Param('code') code: string,
     @Body() sale: any,
   ): Promise<Sale> {
+    sanitizeSale(sale);
     return await this.saleService.endorse(sale);
   }
 
@@ -101,6 +99,7 @@ export class SaleController {
     @Param('code') code: string,
     @Body() sale: any,
   ): Promise<Sale> {
+    sanitizeSale(sale);
     return await this.saleService.renew(code, sale);
   }
 
@@ -113,6 +112,7 @@ export class SaleController {
     @Param('code') code: string,
     @Body() sale: UpdateSaleDto,
   ): Promise<Sale> {
+    sanitizeSale(sale);
     return await this.saleService.update(code, sale);
   }
 
