@@ -14,18 +14,17 @@ import { Company } from './company.model';
 import { SaleItem, SaleItemSchema } from 'business/sub-docs/sale-item';
 import { nanoid } from 'nanoid';
 import { Location } from './location.model';
+import { Endorsement } from './endorsement.model';
 
 interface Sale extends Document<any> {
   readonly chargesPaid: number;
   readonly code: string;
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
-  readonly endorsementReference: Partial<Sale>;
   readonly financerCompany: string;
   readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly isChargeItemized: boolean;
-  readonly isEndorsement: boolean;
   readonly isRenewal: boolean;
   readonly monthlyPayment: number;
   readonly policyEffectiveAt: Date;
@@ -42,7 +41,7 @@ interface Sale extends Document<any> {
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
 
-  endorsements?: Partial<Sale>[];
+  endorsements?: Partial<Endorsement>[];
 
   readonly tips: number;
   readonly totalCharge: number; //Sum of all item amount (down payments)
@@ -55,6 +54,19 @@ interface Sale extends Document<any> {
 
   readonly renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   readonly autoRenew: boolean;
+
+    //Only-insurance properties
+    readonly checksumSanity: number;
+    readonly taxesAndFees: number; 
+    readonly totalPayables: number; 
+    readonly totalPaid: number;
+    readonly totalPremium: number; 
+    readonly totalNonPremium: number;
+    readonly totalReceivables: number; 
+    readonly totalReceived: number;
+    readonly financedAmount: number; 
+    readonly agencyCommission: number; 
+    readonly agencyCommissionDetails: Map<string,number>;
 }
 
 type SaleModel = Model<Sale>;
@@ -71,9 +83,8 @@ const SaleSchema = new Schema<any>(
     },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
-    endorsementReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
+    endorsements: { type: SchemaTypes.ObjectId, ref: 'Endorsement' },
     financerCompany: { type: SchemaTypes.ObjectId, ref: 'Insurer', required:false },
-    isEndorsement: { type: SchemaTypes.Boolean, default: false },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },
     items: [{ type: SaleItemSchema, required: true }],
@@ -101,7 +112,19 @@ const SaleSchema = new Schema<any>(
     premium: { type: SchemaTypes.Number, default: 0, required: false },
     profits: { type: SchemaTypes.Number, default: 0, required: false },
     downPayment: { type: SchemaTypes.Number, default: 0, required: false },
-    endorsements: [{ type: SchemaTypes.Map, required: false }],
+
+    checksumSanity: { type: SchemaTypes.Number, default: 0, required: false },
+    taxesAndFees: { type: SchemaTypes.Number, default: 0, required: false },
+    totalPayables: { type: SchemaTypes.Number, default: 0, required: false },
+    totalPaid: { type: SchemaTypes.Number, default: 0, required: false },
+    totalPremium: { type: SchemaTypes.Number, default: 0, required: false },
+    totalNonPremium: { type: SchemaTypes.Number, default: 0, required: false },
+    totalReceivables: { type: SchemaTypes.Number, default: 0, required: false },
+    totalReceived: { type: SchemaTypes.Number, default: 0, required: false },
+    financedAmount: { type: SchemaTypes.Number, default: 0, required: false },
+    agencyCommission: { type: SchemaTypes.Number, default: 0, required: false },
+    agencyCommissionDetails: { type: SchemaTypes.Number, default: 0, required: false },
+    
   },
   {
     timestamps: true,

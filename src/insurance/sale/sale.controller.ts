@@ -24,7 +24,6 @@ import { Request } from 'express';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { sanitizeSale } from './sale.utils';
-
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {
   constructor(private saleService: SaleService) {}
@@ -77,19 +76,6 @@ export class SaleController {
     return await this.saleService.save(sale);
   }
 
-  @Post(':code/endorse')
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @UseFilters(MongoFilter)
-  async endorseSale(
-    @Req() req: Request,
-    @Param('code') code: string,
-    @Body() sale: any,
-  ): Promise<Sale> {
-    sanitizeSale(sale);
-    return await this.saleService.endorse(sale);
-  }
-
   @Post(':code/renew')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -119,8 +105,8 @@ export class SaleController {
   @Delete(':code')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  deleteSale(@Param('code') code: string): Observable<Sale> {
-    return this.saleService.deleteByCode(code);
+  async deleteSale(@Param('code') code: string): Promise<Sale> {
+    return await this.saleService.deleteByCode(code);
   }
 
   @Post('/delete')

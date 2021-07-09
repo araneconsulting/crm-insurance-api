@@ -16,6 +16,8 @@ interface Endorsement extends Document<any> {
   readonly code: string;
   readonly description: string;
 
+  readonly endorsedAt: Date;
+  
   readonly followUpDate: Date;
   readonly followUpPerson: Partial<User>;
   
@@ -27,35 +29,26 @@ interface Endorsement extends Document<any> {
   readonly updatedBy?: Partial<User>;
 
   readonly items?: any[];
-
-  //Only-insurance properties
-  readonly fees: number;
-  readonly permits: number; 
-  readonly premium: number; 
-  readonly profits: number; 
+  readonly accountingClass: string; //Self created from: [CHECKSUM_SANITY, PREMIUM, TAXES_AND_FEES, AGENCY_COMMISSION, RECEIVABLES, PAYABLES, FINANCED_AMOUNT]
 }
 
-type SaleModel = Model<Sale>;
+type EndorsementModel = Model<Endorsement>;
 
-const SaleSchema = new Schema<any>(
+const EndorsementSchema = new Schema<any>(
   {
     amount: { type: SchemaTypes.Number, default: 0, required: false },
     code: {type: SchemaTypes.String,default: () => nanoid(6),required: false,},
     description: { type: SchemaTypes.String },
-    followupDate: { type: SchemaTypes.Date },
+    endorsedAt: { type: SchemaTypes.Date },
+    followUpDate: { type: SchemaTypes.Date },
     followUpPerson: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     policy: { type: SchemaTypes.ObjectId, ref: 'Sale', required: true },
     status: { type: SchemaTypes.String },
     type: { type: SchemaTypes.String },
     items: [{ type: SchemaTypes.Map, required: false }],
-
+    accountingClass: { type: SchemaTypes.String },
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
-
-    fees: { type: SchemaTypes.Number, default: 0, required: false },
-    permits: { type: SchemaTypes.Number, default: 0, required: false },
-    premium: { type: SchemaTypes.Number, default: 0, required: false },
-    profits: { type: SchemaTypes.Number, default: 0, required: false },
   },
   {
     timestamps: true,
@@ -64,9 +57,9 @@ const SaleSchema = new Schema<any>(
   },
 );
 
-SaleSchema.plugin(mongoSoftDelete);
+EndorsementSchema.plugin(mongoSoftDelete);
 
-const saleModelFn: (conn: Connection) => SaleModel = (conn: Connection) =>
-  conn.model<Sale, SaleModel>('Sale', SaleSchema, 'sales');
+const endorsementModelFn: (conn: Connection) => EndorsementModel = (conn: Connection) =>
+  conn.model<Endorsement, EndorsementModel>('Endorsement', EndorsementSchema, 'endorsements');
 
-export { Sale, SaleSchema, SaleModel, saleModelFn };
+export { Endorsement, EndorsementSchema, EndorsementModel, endorsementModelFn };

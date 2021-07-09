@@ -5,6 +5,7 @@ import { Insurer } from 'database/insurer.model';
 import { Location } from 'database/location.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
+import { EndorsementDto } from './endorsement.dto';
 export class CreateSaleDto {
 
   @IsOptional()
@@ -57,13 +58,6 @@ export class CreateSaleDto {
   @IsOptional()
   @IsNotEmpty()
   renewalReference: Partial<Sale>; 
-
-  @IsOptional()
-  isEndorsement: boolean; 
-
-  @IsOptional()
-  @IsNotEmpty()
-  endorsementReference: Partial<Sale>; 
   
   @IsOptional()
   policyEffectiveAt: Date; 
@@ -90,5 +84,7 @@ export class CreateSaleDto {
 
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;
+
+  endorsements?: Partial<EndorsementDto>[];
   
 }

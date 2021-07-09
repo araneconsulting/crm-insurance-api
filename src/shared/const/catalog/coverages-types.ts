@@ -1,5 +1,25 @@
 export const COVERAGES_TYPES = [
   {
+    id: 'CARGO_WILL_PREFILL_ACORD_22_ACORD_25',
+    name: 'Cargo',
+    help: 'Will prefill Acord 22, Acord 25',
+  },
+  {
+    id: 'EXCESS_UMBRELLA_LIABILITY_WILL_PREFILL_ACORD_22_ACORD_25',
+    name: 'Excess/Umbrella Liability',
+    help: 'Will prefill Acord 22, Acord 25',
+  },
+  {
+    id: 'GENERAL_LIABILITY_WILL_PREFILL_ACORD_22_ACORD_25',
+    name: 'General Liability',
+    help: 'Will prefill Acord 22, Acord 25',
+  },
+  {
+    id: 'PHYSICAL_DAMAGE_PHYSICAL_DAMAGE',
+    name: 'Physical Damage',
+    help: 'Physical Damage',
+  },
+  {
     id: 'ACORD_27_ACORD_27',
     name: 'Acord 27',
     help: 'Acord 27',
@@ -18,11 +38,6 @@ export const COVERAGES_TYPES = [
     id: 'BOILER_AND_MACHINERY_EQUIPMENT_BREAKDOWN_WILL_PREFILL_ACORD_24',
     name: 'Boiler And Machinery / Equipment Breakdown',
     help: 'Will prefill Acord 24',
-  },
-  {
-    id: 'CARGO_WILL_PREFILL_ACORD_22_ACORD_25',
-    name: 'Cargo',
-    help: 'Will prefill Acord 22, Acord 25',
   },
   {
     id: 'CONTINGENT_AUTO_LIABILITY_CONTINGENT_AUTO_LIABILITY',
@@ -45,11 +60,6 @@ export const COVERAGES_TYPES = [
     help: 'Will prefill Acord 24',
   },
   {
-    id: 'EXCESS_UMBRELLA_LIABILITY_WILL_PREFILL_ACORD_22_ACORD_25',
-    name: 'Excess/Umbrella Liability',
-    help: 'Will prefill Acord 22, Acord 25',
-  },
-  {
     id: 'FLOOD_COVERAGE___EXCESS_POLICY_WILL_PREFILL_ACORD_29',
     name: 'Flood Coverage / Excess Policy',
     help: 'Will prefill Acord 29',
@@ -68,11 +78,6 @@ export const COVERAGES_TYPES = [
     id: 'GARAGE_LIABILITY_WILL_PREFILL_ACORD_30',
     name: 'Garage Liability',
     help: 'Will prefill Acord 30',
-  },
-  {
-    id: 'GENERAL_LIABILITY_WILL_PREFILL_ACORD_22_ACORD_25',
-    name: 'General Liability',
-    help: 'Will prefill Acord 22, Acord 25',
   },
   {
     id: 'INLAND_MARINE_WILL_PREFILL_ACORD_24',
@@ -108,11 +113,6 @@ export const COVERAGES_TYPES = [
     id: 'OTHER_4_OTHER_4',
     name: 'Other 4',
     help: 'Other 4',
-  },
-  {
-    id: 'PHYSICAL_DAMAGE_PHYSICAL_DAMAGE',
-    name: 'Physical Damage',
-    help: 'Physical Damage',
   },
   {
     id: 'PROPERTY24_WILL_PREFILL_ACORD_24',

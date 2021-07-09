@@ -14,6 +14,7 @@ import { Customer } from 'database/customer.model';
 import { Insurer } from 'database/insurer.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
+import { EndorsementDto } from './endorsement.dto';
 
 export const DEFAULT_COMMISSION = 0.1;
 
@@ -49,13 +50,6 @@ export class UpdateSaleDto {
   @IsOptional()
   @IsNotEmpty()
   renewalReference: Partial<Sale>; 
-
-  @IsOptional()
-  isEndorsement: boolean; 
-
-  @IsOptional()
-  @IsNotEmpty()
-  endorsementReference: Partial<Sale>; 
   
   @IsOptional()
   policyEffectiveAt: Date; 
@@ -92,4 +86,6 @@ export class UpdateSaleDto {
 
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;
+
+  endorsements?: Partial<EndorsementDto>[];
 }

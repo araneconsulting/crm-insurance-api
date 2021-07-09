@@ -15,6 +15,7 @@ import { AuthenticatedRequest } from '../../auth/interface/authenticated-request
 import {
   INSURER_MODEL,
   SALE_MODEL,
+  ENDORSEMENT_MODEL,
   USER_MODEL,
 } from '../../database/database.constants';
 import { CreateSaleDto } from './dto/create-sale.dto';
@@ -23,11 +24,12 @@ import { isAdmin, isExecutive } from 'shared/util/user-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
 import { UpdateSaleDto } from './dto/update-sale.dto';
-import { EndorseSaleDto } from './dto/endorse-sale.dto';
 import { setSaleCalculations } from './sale.utils';
 import { SaleItem } from 'business/sub-docs/sale-item';
 import { Location } from 'database/location.model';
 import { Customer } from 'database/customer.model';
+import { EndorsementDto } from './dto/endorsement.dto';
+import { Endorsement } from 'database/endorsement.model';
 
 const SALE_LAYOUT_DEFAULT = 'NORMAL';
 const SALE_LAYOUT_FULL = 'FULL';
@@ -35,6 +37,7 @@ const SALE_LAYOUT_FULL = 'FULL';
 export class SaleService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
+    @Inject(ENDORSEMENT_MODEL) private endorsementModel: Model<Endorsement>,
     @Inject(INSURER_MODEL) private insurerModel: Model<Insurer>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
@@ -137,7 +140,7 @@ export class SaleService {
    * @param  {} withInsurers=false
    * @returns Observable
    */
-   async findByCode(
+  async findByCode(
     code: string,
     withSeller = false,
     withCustomer = false,
@@ -163,9 +166,8 @@ export class SaleService {
     }
 
     if (layout === SALE_LAYOUT_FULL) {
-      sale.endorsements = await this.saleModel
-        .aggregate()
-        .match({ endorsementReference: Types.ObjectId(sale.id) })
+      sale.endorsements = await this.endorsementModel
+        .find({ policy: sale.id })
         .exec();
     }
 
@@ -205,9 +207,8 @@ export class SaleService {
     }
 
     if (layout === SALE_LAYOUT_FULL) {
-      sale.endorsements = await this.saleModel
-        .aggregate()
-        .match({ endorsementReference: Types.ObjectId(sale.id) })
+      sale.endorsements = await this.endorsementModel
+        .find({ policy: sale.id })
         .exec();
     }
 
@@ -250,6 +251,15 @@ export class SaleService {
     const insurers = await this.insurerModel.find({}).exec();
     let saleData = await setSaleCalculations(saleDto, insurers);
 
+    if (saleData.endorsements) {
+      const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+      delete saleData['endorsements'];
+
+      let endorsementUpsertResult = await processEndorsements(endorsements);
+      console.log(endorsementUpsertResult);
+      console.log('Create sale: endorsements result: ', endorsementUpsertResult);
+    }
+
     return this.saleModel.create({
       ...saleData,
       createdBy: { _id: this.req.user.id },
@@ -284,7 +294,9 @@ export class SaleService {
       delete saleDto.seller;
     }
 
-    let sale: Partial<Sale> = await this.saleModel.findOne({code:code}).exec();
+    let sale: Partial<Sale> = await this.saleModel
+      .findOne({ code: code })
+      .exec();
 
     if (!sale) {
       throw new NotFoundException(`sale:${code} was not found`);
@@ -300,6 +312,14 @@ export class SaleService {
     const insurers = await this.insurerModel.find({}).exec();
     let saleData: any = await setSaleCalculations(saleDto, insurers);
 
+    if (saleData.endorsements) {
+      const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+      delete saleData['endorsements'];
+
+      let endorsementUpsertResult = await processEndorsements(endorsements);
+      console.log('Update sale: endorsements result: ', endorsementUpsertResult);
+    }
+
     return this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(sale.id) },
       {
@@ -313,11 +333,25 @@ export class SaleService {
    * @param  {string} code
    * @returns Observable
    */
-  deleteByCode(code: string): Observable<Sale> {
-    return from(this.saleModel.findOneAndDelete({ code: code }).exec()).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:${code} was not found`)),
+  async deleteByCode(code: string): Promise<Sale> {
+    let sale: Partial<Sale> = await this.saleModel
+      .findOne({ code: code })
+      .exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale:${code} was not found`);
+    }
+
+    const deleteEndorsementsResult = this.endorsementModel
+      .deleteMany({ policy: sale.id })
+      .exec();
+
+    console.log(
+      'Delete all sale endorsements result: ',
+      deleteEndorsementsResult,
     );
+
+    return this.saleModel.findOneAndDelete({ code: code }).exec();
   }
 
   /**
@@ -325,6 +359,7 @@ export class SaleService {
    */
 
   deleteAll(): Observable<any> {
+    this.endorsementModel.deleteMany({}).exec();
     return from(this.saleModel.deleteMany({}).exec());
   }
 
@@ -333,6 +368,8 @@ export class SaleService {
    */
 
   async batchDelete(codes: string[]): Promise<any> {
+    //TODO: Delete all endorsements with (get all policies by codes, then delete all endorsement by policy Id)
+
     return this.saleModel.deleteMany({ code: { $in: codes } }).exec();
   }
 
@@ -420,7 +457,7 @@ export class SaleService {
     let conditions = {};
 
     conditions = {
-      $and: [{ deleted: false }, { renewed: false }, { isEndorsement: false }],
+      $and: [{ deleted: false }, { renewed: false }],
     };
     if (
       saleDateFrom ||
@@ -445,13 +482,19 @@ export class SaleService {
 
       if (effectiveDateFrom || effectiveDateTo) {
         conditions['$and'].push({
-          policyEffectiveAt: getDateMatchExpressionByDates(effectiveDateFrom, effectiveDateTo),
+          policyEffectiveAt: getDateMatchExpressionByDates(
+            effectiveDateFrom,
+            effectiveDateTo,
+          ),
         });
       }
 
       if (expirationDateFrom || expirationDateTo) {
         conditions['$and'].push({
-          policyExpiresAt: getDateMatchExpressionByDates(expirationDateFrom, expirationDateTo),
+          policyExpiresAt: getDateMatchExpressionByDates(
+            expirationDateFrom,
+            expirationDateTo,
+          ),
         });
       }
 
@@ -554,7 +597,6 @@ export class SaleService {
             },
           },
           deleted: '$deleted',
-          isEndorsement: '$isEndorsement',
           isRenewal: '$isRenewal',
           locationName: {
             $function: {
@@ -613,81 +655,18 @@ export class SaleService {
   }
 
   /**
-   * @param  {EndorseSaleDto} endorseSaleDto
+   * @param  {EndorsementDto} endorsementDto
    * @returns Promise
    */
-  async endorse(endorseSaleDto: EndorseSaleDto): Promise<any> {
-    //Store new endorsement with mandatory fields
+  async addEndorsement(endorsementDto: EndorsementDto): Promise<Endorsement> {
+    //TODO: set accountingClass by type value
+    //TODO: update sale calculations based on endorsement
 
-    let saleDto: Partial<SaleDto> = { ...endorseSaleDto };
-
-    if (!saleDto.isChargeItemized) {
-      saleDto.items = saleDto.items.map((item) => ({
-        ...item,
-        amount: 0,
-        premium: 0,
-        profits: 0,
-      }));
-    }
-
-    const insurers = await this.insurerModel.find({}).exec();
-
-    const originalSale: Partial<Sale> = await this.saleModel
-      .findOne({ _id: saleDto.endorsementReference })
-      .exec();
-
-    if (!originalSale) {
-      throw new NotFoundException(
-        `Cannot find endorsed sale: ${saleDto.endorsementReference}`,
-      );
-    }
-
-    let endorsedItems = saleDto.items;
-
-    if (saleDto.items && originalSale.items) {
-      let newEndorsedItems: SaleItem[] = saleDto.items.map((item) => {
-        let originalMatchingItem = originalSale.items.find(
-          (originalItem) => originalItem.product === item.product,
-        );
-        if (originalMatchingItem) {
-          //replace item with difference to original
-          item.premium = item.premium - originalMatchingItem.premium;
-          return { ...item };
-        } else {
-          return item;
-        }
-      });
-      saleDto.items = newEndorsedItems;
-    }
-
-    let saleData = await setSaleCalculations(saleDto, insurers);
-
-    let result = {
-      endorsement: await this.saleModel.create({
-        ...saleData,
-        soldAt: new Date(),
-        createdBy: { _id: this.req.user.id },
-        company: { _id: this.req.user.company },
-      }),
-    };
-
-    let newOriginal = {
-      ...originalSale['_doc'],
-      items: endorsedItems,
-      updatedBy: this.req.user.id,
-    };
-
-    let newOriginalData: any = await setSaleCalculations(newOriginal, insurers);
-
-    result['endorsed'] = await this.saleModel.findOneAndUpdate(
-      { _id: saleDto.endorsementReference },
-      {
-        ...newOriginalData,
-      },
-      { new: true },
-    );
-
-    return result;
+    return this.endorsementModel.create({
+      ...endorsementDto,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    });
   }
 
   /**
@@ -742,4 +721,39 @@ export class SaleService {
       company: { _id: this.req.user.company },
     });
   }
+}
+async function processEndorsements(endorsements: Partial<EndorsementDto>[]) {
+  let endorsementDocs: any[] = [];
+
+  endorsements.forEach((endorsement) => {
+    const markedToDelete = endorsement.markedToDelete;
+    delete endorsement['markedToDelete'];
+
+    if (endorsement.code) {
+      endorsementDocs.push({
+        updateOne: {
+          filter: { code: endorsement.code },
+          update: endorsement,
+          upsert: true,
+        },
+      });
+    } else if (markedToDelete) {
+      endorsementDocs.push({
+        deleteOne: {
+          filter: { code: endorsement.code },
+        },
+      });
+    } else {
+      endorsementDocs.push({
+        insertOne: {
+          document: endorsement,
+        },
+      });
+    }
+  });
+
+  let endorsementUpsertResult = await this.endorsementModel.bulkWrite(
+    endorsementDocs,
+  );
+  return endorsementUpsertResult;
 }

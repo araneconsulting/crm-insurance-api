@@ -9,6 +9,7 @@ import {
   LOCATION_MODEL,
   PAYROLL_MODEL,
   SALE_MODEL,
+  ENDORSEMENT_MODEL,
   USER_MODEL,
 } from './database.constants';
 import { Company, CompanySchema } from './company.model';
@@ -20,6 +21,7 @@ import { Sale, SaleSchema } from './sale.model';
 import { User, UserSchema } from './user.model';
 
 import { userModelFn } from './user.model';
+import { Endorsement, EndorsementSchema } from './endorsement.model';
 
 export const databaseModelsProviders = [
   {
@@ -38,6 +40,12 @@ export const databaseModelsProviders = [
     provide: SALE_MODEL,
     useFactory: (connection: Connection) =>
       connection.model<Sale>('Sale', SaleSchema, 'sales'),
+    inject: [DATABASE_CONNECTION],
+  },
+  {
+    provide: ENDORSEMENT_MODEL,
+    useFactory: (connection: Connection) =>
+      connection.model<Endorsement>('Endorsement', EndorsementSchema, 'endorsements'),
     inject: [DATABASE_CONNECTION],
   },
   {
