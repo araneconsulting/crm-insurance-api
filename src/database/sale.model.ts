@@ -14,7 +14,6 @@ import { Company } from './company.model';
 import { SaleItem, SaleItemSchema } from 'business/sub-docs/sale-item';
 import { nanoid } from 'nanoid';
 import { Location } from './location.model';
-import { Endorsement } from './endorsement.model';
 
 interface Sale extends Document<any> {
   readonly chargesPaid: number;
@@ -40,8 +39,6 @@ interface Sale extends Document<any> {
   readonly policyNumber: string;
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
-
-  endorsements?: Partial<Endorsement>[];
 
   readonly tips: number;
   readonly totalCharge: number; //Sum of all item amount (down payments)
@@ -83,7 +80,6 @@ const SaleSchema = new Schema<any>(
     },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
-    endorsements: { type: SchemaTypes.ObjectId, ref: 'Endorsement' },
     financerCompany: { type: SchemaTypes.ObjectId, ref: 'Insurer', required:false },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },

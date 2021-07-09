@@ -17,6 +17,7 @@ import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 import { EndorsementDto } from './endorsement.dto';
 export class SaleDto {
+  id: string;
   code: string;
   amountReceivable?: number;
   chargesPaid: number;

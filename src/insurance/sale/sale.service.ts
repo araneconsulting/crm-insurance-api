@@ -159,7 +159,7 @@ export class SaleService {
       );
     }
 
-    let sale: Partial<Sale> = await saleQuery.exec();
+    let sale: Partial<any> = await saleQuery.exec();
 
     if (!sale) {
       throw new NotFoundException(`sale with code:${code} was not found`);
@@ -186,7 +186,7 @@ export class SaleService {
     withSeller = false,
     withCustomer = false,
     layout = SALE_LAYOUT_DEFAULT,
-  ): Promise<Partial<Sale>> {
+  ): Promise<Partial<any>> {
     const saleQuery = this.saleModel.findOne({ _id: id });
 
     if (withSeller) {
@@ -200,7 +200,7 @@ export class SaleService {
       );
     }
 
-    let sale: Partial<Sale> = await saleQuery.exec();
+    let sale: Partial<any> = await saleQuery.exec();
 
     if (!sale) {
       throw new NotFoundException(`sale:${id} was not found`);
@@ -253,8 +253,10 @@ export class SaleService {
 
     if (saleData.endorsements) {
       const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+      
       delete saleData['endorsements'];
 
+      //TODO: enviar el policyId a processEndorsements y setearselo a los nuevos a crear
       let endorsementUpsertResult = await processEndorsements(endorsements);
       console.log(endorsementUpsertResult);
       console.log('Create sale: endorsements result: ', endorsementUpsertResult);
