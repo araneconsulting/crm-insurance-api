@@ -45,6 +45,7 @@ import { LINES_OF_BUSINESS } from 'shared/const/catalog/lines-of-business';
 import { COVERAGES_TYPES } from 'shared/const/catalog/coverages-types';
 import { ENDORSEMENT_STATUS } from 'shared/const/catalog/endorsement-status';
 import { ENDORSEMENT_TYPES } from 'shared/const/catalog/endorsement-types';
+import { PERMIT_TYPES } from 'shared/const/catalog/permits-types';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -164,25 +165,26 @@ export class CompanyController {
     const insurers: any = await this.insurerService.getCatalog(entitiesFilter);
 
     return res.json({
-      company: await this.companyService.findById(user.company.toString()),
-      users: await this.userService.getCatalog(entitiesFilter),
-      employees: await this.userService.getCatalog(employeesFilter),
-      locations: await this.locationService.getCatalog(entitiesFilter),
-      customers: await this.customerService.getCatalog(entitiesFilter),
-      carriers: insurers.carriers,
       brokers: insurers.brokers,
-      financers: insurers.financers,
-      roles: UserCatalog.roles,
-      dateRanges: DateCatalog.ranges,
-      states: States,
-      industries: Industries,
-      linesOfBusiness: LINES_OF_BUSINESS,
+      carriers: insurers.carriers,
+      company: await this.companyService.findById(user.company.toString()),
       coverages: COVERAGES_TYPES,
+      customers: await this.customerService.getCatalog(entitiesFilter),
+      dateRanges: DateCatalog.ranges,
+      employees: await this.userService.getCatalog(employeesFilter),
       endorsementStatus: ENDORSEMENT_STATUS,
       endorsementTypes: ENDORSEMENT_TYPES,
-      locationPayFrequencies: CompanyCatalog.locations.payrollFrequencies,
-      locationAvailableCountries: CompanyCatalog.locations.availableCountries,
       employeeRateFrequencies: CompanyCatalog.employeeRateFrequencies,
+      financers: insurers.financers,
+      industries: Industries,
+      linesOfBusiness: LINES_OF_BUSINESS,
+      locations: await this.locationService.getCatalog(entitiesFilter),
+      locationAvailableCountries: CompanyCatalog.locations.availableCountries,
+      locationPayFrequencies: CompanyCatalog.locations.payrollFrequencies,
+      permitTypes: PERMIT_TYPES,
+      roles: UserCatalog.roles,
+      states: States,
+      users: await this.userService.getCatalog(entitiesFilter),
     });
   }
 }
