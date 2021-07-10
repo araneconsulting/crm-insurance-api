@@ -1,4 +1,7 @@
-import { BusinessInfo, BusinessInfoSchema } from 'business/sub-docs/business-info';
+import {
+  BusinessInfo,
+  BusinessInfoSchema,
+} from 'business/sub-docs/business-info';
 import { IsPhoneNumber } from 'class-validator';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
@@ -29,7 +32,11 @@ type CompanyModel = Model<Company>;
 
 const CompanySchema = new Schema<any>(
   {
-    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
+    code: {
+      type: SchemaTypes.String,
+      default: () => nanoid(6),
+      required: false,
+    },
     address: {
       type: AddressSchema,
       default: {
@@ -48,7 +55,11 @@ const CompanySchema = new Schema<any>(
       dropDups: true,
     },
     fax: { type: SchemaTypes.String },
-    financerCompanies: [BusinessInfoSchema],
+    financerCompanies: {
+      type: [BusinessInfoSchema],
+      required: false,
+      default: [],
+    },
     industry: { type: SchemaTypes.String },
     logo: { type: SchemaTypes.String },
     name: {
@@ -57,7 +68,7 @@ const CompanySchema = new Schema<any>(
       required: true,
       dropDups: true,
     },
-    otherPhones: [{ type: SchemaTypes.String, required: false }],
+    otherPhones: { type: [SchemaTypes.String], required: false },
     primaryPhone: { type: SchemaTypes.String },
     primaryPhoneExtension: { type: SchemaTypes.String },
     secondaryPhone: { type: SchemaTypes.String },

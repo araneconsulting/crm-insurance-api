@@ -58,7 +58,11 @@ type UserModel = Model<User>;
 
 const UserSchema = new Schema<any>(
   {
-    code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
+    code: {
+      type: SchemaTypes.String,
+      default: () => nanoid(6),
+      required: false,
+    },
     address: {
       type: AddressSchema,
       default: {
@@ -121,7 +125,7 @@ const UserSchema = new Schema<any>(
       dropDups: true,
     },
     phone: { type: SchemaTypes.String, required: false },
-    roles: [{ type: SchemaTypes.String }],
+    roles: { type: [SchemaTypes.String] },
     timezone: { type: SchemaTypes.String, default: 'CDT' },
     username: {
       type: SchemaTypes.String,

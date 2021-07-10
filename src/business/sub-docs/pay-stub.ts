@@ -28,7 +28,7 @@ export class PayStub {
 
 export const PayStubSchema = new Schema<any>({
   code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
-  addons: [{ type: PayAddonSchema }],
+  addons: { type: [PayAddonSchema] },
   employee: { type: SchemaTypes.ObjectId, ref: 'User' },
   employeeName: SchemaTypes.String,
   normalHoursWorked: SchemaTypes.Number,

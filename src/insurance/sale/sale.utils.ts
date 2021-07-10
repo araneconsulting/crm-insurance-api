@@ -35,7 +35,6 @@ export async function setSaleCalculations(
       sale.amountReceivable = 0;
 
       sale.items.map((item: SaleItem) => {
-
         switch (item.product) {
           case 'PERMIT':
             permits += item.premium;
@@ -53,7 +52,7 @@ export async function setSaleCalculations(
             downPayment += item.premium || 0;
             premium += item.premium || 0;
             totalCharge += item.amount;
-            
+
             if (item.broker) {
               //calculate item profits based on broker commissions
               item.profits = calculateProfitByCarrier(
@@ -63,8 +62,7 @@ export async function setSaleCalculations(
                 sale.type,
               );
               profits += item.profits;
-            } 
-            else if (item.carrier) {
+            } else if (item.carrier) {
               //calculate item profits based on carrier commissions
               item.profits = calculateProfitByCarrier(
                 brokers,
@@ -177,8 +175,7 @@ export function calculateProfitByCarrier(
   let profits = 0;
 
   const foundProvider = brokers.find(
-    (found) =>
-      found  && (found.id === broker.id),
+    (found) => found && found.id === broker.id,
   );
 
   let commission = { percent: 0 };
@@ -208,27 +205,28 @@ export function titleCase(str) {
 }
 
 export function sanitizeSale(sale: any) {
-
-  if (!sale.financerCompany){
-    delete sale['financerCompany']
+  if (!sale.financerCompany) {
+    delete sale['financerCompany'];
   }
 
-  sale.items = sale.items.map((item) => {
-    if (item.product === 'FEE' || item.product === 'PERMIT') {
-      delete item['broker'];
-      delete item['carrier'];
-    }
+  if (sale.items) {
+    sale.items = sale.items.map((item) => {
+      if (item.product === 'FEE' || item.product === 'PERMIT') {
+        delete item['broker'];
+        delete item['carrier'];
+      }
 
-    if (!item.broker) {
-      delete item['broker'];
-    }
+      if (!item.broker) {
+        delete item['broker'];
+      }
 
-    if (!item.carrier) {
-      delete item['carrier'];
-    }
+      if (!item.carrier) {
+        delete item['carrier'];
+      }
 
-    return {
-      ...item
-    };
-  });
+      return {
+        ...item,
+      };
+    });
+  }
 }

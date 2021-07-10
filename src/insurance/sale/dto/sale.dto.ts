@@ -1,13 +1,4 @@
 import { SaleItem } from 'business/sub-docs/sale-item';
-import {
-  IsArray,
-  IsDateString,
-  IsMongoId,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
 import { Company } from 'database/company.model';
 import { Customer } from 'database/customer.model';
 import { Endorsement } from 'database/endorsement.model';
@@ -15,9 +6,7 @@ import { Insurer } from 'database/insurer.model';
 import { Location } from 'database/location.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { EndorsementDto } from './endorsement.dto';
 export class SaleDto {
-  id: string;
   code: string;
   amountReceivable?: number;
   chargesPaid: number;
@@ -54,5 +43,5 @@ export class SaleDto {
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;
 
-  endorsements?: Partial<EndorsementDto>[];
+  endorsements?: Partial<Endorsement>[];
 }

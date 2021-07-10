@@ -1,9 +1,11 @@
+import { Company } from 'database/company.model';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 
 export class EndorsementDto {
   amount: number;
   code: string;
+  company: Partial<Company>
   description?: string;
 
   markedToDelete: boolean = false;

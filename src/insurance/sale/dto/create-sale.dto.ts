@@ -50,7 +50,7 @@ export class CreateSaleDto {
   premium: number;
 
   @IsArray()
-  items: SaleItem[];
+  items?: SaleItem[];
 
   @IsOptional()
   isRenewal: boolean; 

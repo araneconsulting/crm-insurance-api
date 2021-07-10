@@ -145,7 +145,7 @@ export class SaleService {
     withSeller = false,
     withCustomer = false,
     layout = SALE_LAYOUT_DEFAULT,
-  ): Promise<Partial<Sale>> {
+  ): Promise<Partial<SaleDto>> {
     const saleQuery = this.saleModel.findOne({ code: code });
 
     if (withSeller) {
@@ -159,19 +159,19 @@ export class SaleService {
       );
     }
 
-    let sale: Partial<any> = await saleQuery.exec();
+    const sale: Partial<Sale> = await saleQuery.exec();
 
     if (!sale) {
       throw new NotFoundException(`sale with code:${code} was not found`);
     }
 
-    if (layout === SALE_LAYOUT_FULL) {
-      sale.endorsements = await this.endorsementModel
-        .find({ policy: sale.id })
-        .exec();
-    }
+    let saleDto: Partial<SaleDto> = sale;
 
-    return sale;
+    saleDto.endorsements = await this.endorsementModel
+      .find({ policy: sale._id })
+      .exec();
+
+    return saleDto;
   }
 
   /**
@@ -219,7 +219,7 @@ export class SaleService {
    * @param  {CreateSaleDto} saleDto
    * @returns Promise
    */
-  async save(createSaleDto: CreateSaleDto): Promise<Sale> {
+  async save(createSaleDto: CreateSaleDto): Promise<Partial<SaleDto>> {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
 
     if (!saleDto.isChargeItemized) {
@@ -251,33 +251,36 @@ export class SaleService {
     const insurers = await this.insurerModel.find({}).exec();
     let saleData = await setSaleCalculations(saleDto, insurers);
 
-    if (saleData.endorsements) {
-      const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
-      
-      delete saleData['endorsements'];
+    const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
 
-      //TODO: enviar el policyId a processEndorsements y setearselo a los nuevos a crear
-      let endorsementUpsertResult = await processEndorsements(endorsements);
-      console.log(endorsementUpsertResult);
-      console.log('Create sale: endorsements result: ', endorsementUpsertResult);
+    if (endorsements) {
+      delete saleData['endorsements'];
     }
 
-    return this.saleModel.create({
+    const created: any = await this.saleModel.create({
       ...saleData,
       createdBy: { _id: this.req.user.id },
       company: { _id: this.req.user.company },
     });
+
+    const createdSaleDto: Partial<SaleDto> = { ...created['_doc'] };
+
+
+    await this.processEndorsements(endorsements, created, createdSaleDto);
+
+    return createdSaleDto;
   }
 
+  
   /**
    * @param  {string} code
    * @param  {UpdateSaleDto} data
    * @returns Promise
    */
-  async update(code: string, updateSaleDto: UpdateSaleDto): Promise<Sale> {
+  async update(code: string, updateSaleDto: UpdateSaleDto): Promise<Partial<SaleDto>> {
     let saleDto: Partial<SaleDto> = { ...updateSaleDto };
 
-    if (!saleDto.isChargeItemized) {
+    if (!saleDto.isChargeItemized && saleDto.items) {
       saleDto.items = saleDto.items.map((item) => ({
         ...item,
         amount: 0,
@@ -312,23 +315,26 @@ export class SaleService {
     };
 
     const insurers = await this.insurerModel.find({}).exec();
-    let saleData: any = await setSaleCalculations(saleDto, insurers);
+    const saleData: any = await setSaleCalculations(saleDto, insurers);
 
-    if (saleData.endorsements) {
-      const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+    const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+    if (endorsements) {
       delete saleData['endorsements'];
-
-      let endorsementUpsertResult = await processEndorsements(endorsements);
-      console.log('Update sale: endorsements result: ', endorsementUpsertResult);
     }
 
-    return this.saleModel.findOneAndUpdate(
+    const updated = await this.saleModel.findOneAndUpdate(
       { _id: Types.ObjectId(sale.id) },
       {
         ...saleData,
       },
       { new: true },
     );
+
+    const updatedSaleDto: Partial<SaleDto> = { ...updated['_doc'] };
+
+    await this.processEndorsements(endorsements, updated, updatedSaleDto);
+
+    return updatedSaleDto;
   }
 
   /**
@@ -675,7 +681,7 @@ export class SaleService {
    * @param  {CreateSaleDto} saleDto
    * @returns Promise
    */
-  async renew(code: string, createSaleDto: CreateSaleDto): Promise<Sale> {
+  async renew(code: string, createSaleDto: CreateSaleDto): Promise<Partial<SaleDto>> {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
 
     if (!saleDto.isChargeItemized) {
@@ -717,45 +723,93 @@ export class SaleService {
     const insurers = await this.insurerModel.find({}).exec();
     let saleData = await setSaleCalculations(saleDto, insurers);
 
-    return this.saleModel.create({
+    const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+
+    if (endorsements) {
+      delete saleData['endorsements'];
+    }    
+
+    let created: any = this.saleModel.create({
       ...saleData,
       createdBy: { _id: this.req.user.id },
       company: { _id: this.req.user.company },
     });
+
+    const createdSaleDto: Partial<SaleDto> = { ...created['_doc'] };
+
+    await this.processEndorsements(endorsements, created, createdSaleDto);
+
+    return createdSaleDto;
+
   }
-}
-async function processEndorsements(endorsements: Partial<EndorsementDto>[]) {
-  let endorsementDocs: any[] = [];
 
-  endorsements.forEach((endorsement) => {
-    const markedToDelete = endorsement.markedToDelete;
-    delete endorsement['markedToDelete'];
+  async upsertAndDeleteEndorsements(
+    endorsements: Partial<EndorsementDto>[],
+    policy: Partial<Sale>,
+  ) {
+    let endorsementDocs: any[] = [];
 
-    if (endorsement.code) {
-      endorsementDocs.push({
-        updateOne: {
-          filter: { code: endorsement.code },
-          update: endorsement,
-          upsert: true,
-        },
-      });
-    } else if (markedToDelete) {
-      endorsementDocs.push({
-        deleteOne: {
-          filter: { code: endorsement.code },
-        },
-      });
-    } else {
-      endorsementDocs.push({
-        insertOne: {
-          document: endorsement,
-        },
-      });
+    const user = this.req.user.id;
+    const company = this.req.user.company;
+
+    endorsements.forEach((endorsement) => {
+      const markedToDelete = endorsement.markedToDelete;
+      delete endorsement['markedToDelete'];
+
+      if (endorsement.code) {
+        endorsement = {
+          ...endorsement,
+          updatedBy: user,
+        };
+        endorsementDocs.push({
+          updateOne: {
+            filter: { code: endorsement.code },
+            update: endorsement,
+            upsert: true,
+          },
+        });
+      } else if (markedToDelete) {
+        endorsementDocs.push({
+          deleteOne: {
+            filter: { code: endorsement.code },
+          },
+        });
+      } else {
+        endorsement = {
+          ...endorsement,
+          createdBy: user,
+          company: company,
+          policy: policy,
+        };
+        endorsementDocs.push({
+          insertOne: {
+            document: endorsement,
+          },
+        });
+      }
+    });
+
+    let endorsementUpsertResult = await this.endorsementModel.bulkWrite(
+      endorsementDocs,
+    );
+    return endorsementUpsertResult;
+  }
+
+  private async processEndorsements(endorsements: Partial<EndorsementDto>[], sale: any, saleDto: Partial<SaleDto>) {
+    if (endorsements) {
+      const endorsementUpsertResult = await this.upsertAndDeleteEndorsements(
+        endorsements,
+        sale
+      );
+
+      if (endorsementUpsertResult.result['ok'] !== endorsements.length) {
+        console.log('Endorsement upsert failed at least in one of them');
+      }
+
+      saleDto.endorsements = await this.endorsementModel
+        .find({ policy: sale.id })
+        .exec();
     }
-  });
+  }
 
-  let endorsementUpsertResult = await this.endorsementModel.bulkWrite(
-    endorsementDocs,
-  );
-  return endorsementUpsertResult;
 }

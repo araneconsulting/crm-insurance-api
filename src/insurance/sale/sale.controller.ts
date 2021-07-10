@@ -24,6 +24,7 @@ import { Request } from 'express';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { sanitizeSale } from './sale.utils';
+import { SaleDto } from './dto/sale.dto';
 @Controller({ path: 'sales', scope: Scope.REQUEST })
 export class SaleController {
   constructor(private saleService: SaleService) {}
@@ -51,7 +52,7 @@ export class SaleController {
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
     @Query('layout') layout?: string,
-  ): Promise<Partial<Sale>> {
+  ): Promise<Partial<SaleDto>> {
     return await this.saleService.findByCode(
       code,
       withSeller,
@@ -71,7 +72,7 @@ export class SaleController {
   @HttpCode(201)
   @UseGuards(JwtAuthGuard, RolesGuard)
   //@UseFilters(MongoFilter)
-  async createSale(@Req() req: Request, @Body() sale: any): Promise<Sale> {
+  async createSale(@Req() req: Request, @Body() sale: any): Promise<Partial<SaleDto>> {
     sanitizeSale(sale);
     return await this.saleService.save(sale);
   }
@@ -84,7 +85,7 @@ export class SaleController {
     @Req() req: Request,
     @Param('code') code: string,
     @Body() sale: any,
-  ): Promise<Sale> {
+  ): Promise<Partial<SaleDto>> {
     sanitizeSale(sale);
     return await this.saleService.renew(code, sale);
   }
@@ -97,7 +98,7 @@ export class SaleController {
     @Req() req: Request,
     @Param('code') code: string,
     @Body() sale: UpdateSaleDto,
-  ): Promise<Sale> {
+  ): Promise<Partial<SaleDto>> {
     sanitizeSale(sale);
     return await this.saleService.update(code, sale);
   }

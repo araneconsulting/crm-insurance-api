@@ -1,12 +1,4 @@
-import {
-  Connection,
-  Date,
-  Document,
-  Model,
-  ObjectId,
-  Schema,
-  SchemaTypes,
-} from 'mongoose';
+import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
 import { Customer } from './customer.model';
 import { User } from './user.model';
 import * as mongoSoftDelete from 'mongoosejs-soft-delete';
@@ -14,13 +6,14 @@ import { Company } from './company.model';
 import { SaleItem, SaleItemSchema } from 'business/sub-docs/sale-item';
 import { nanoid } from 'nanoid';
 import { Location } from './location.model';
+import { Insurer } from './insurer.model';
 
 interface Sale extends Document<any> {
   readonly chargesPaid: number;
   readonly code: string;
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
-  readonly financerCompany: string;
+  readonly financerCompany: Partial<Insurer>;
   readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly isChargeItemized: boolean;
@@ -52,18 +45,18 @@ interface Sale extends Document<any> {
   readonly renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   readonly autoRenew: boolean;
 
-    //Only-insurance properties
-    readonly checksumSanity: number;
-    readonly taxesAndFees: number; 
-    readonly totalPayables: number; 
-    readonly totalPaid: number;
-    readonly totalPremium: number; 
-    readonly totalNonPremium: number;
-    readonly totalReceivables: number; 
-    readonly totalReceived: number;
-    readonly financedAmount: number; 
-    readonly agencyCommission: number; 
-    readonly agencyCommissionDetails: Map<string,number>;
+  //Only-insurance properties
+  readonly checksumSanity: number;
+  readonly taxesAndFees: number;
+  readonly totalPayables: number;
+  readonly totalPaid: number;
+  readonly totalPremium: number;
+  readonly totalNonPremium: number;
+  readonly totalReceivables: number;
+  readonly totalReceived: number;
+  readonly financedAmount: number;
+  readonly agencyCommission: number;
+  readonly agencyCommissionDetails: Map<string, number>;
 }
 
 type SaleModel = Model<Sale>;
@@ -80,10 +73,14 @@ const SaleSchema = new Schema<any>(
     },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     customer: { type: SchemaTypes.ObjectId, ref: 'Customer', required: true },
-    financerCompany: { type: SchemaTypes.ObjectId, ref: 'Insurer', required:false },
+    financerCompany: {
+      type: SchemaTypes.ObjectId,
+      ref: 'Insurer',
+      required: false,
+    },
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },
-    items: [{ type: SaleItemSchema, required: true }],
+    items: { type: [SaleItemSchema], required: false, default: [] },
     location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     monthlyPayment: { type: SchemaTypes.Number },
     policyExpiresAt: { type: SchemaTypes.Date },
@@ -119,8 +116,11 @@ const SaleSchema = new Schema<any>(
     totalReceived: { type: SchemaTypes.Number, default: 0, required: false },
     financedAmount: { type: SchemaTypes.Number, default: 0, required: false },
     agencyCommission: { type: SchemaTypes.Number, default: 0, required: false },
-    agencyCommissionDetails: { type: SchemaTypes.Number, default: 0, required: false },
-    
+    agencyCommissionDetails: {
+      type: SchemaTypes.Number,
+      default: 0,
+      required: false,
+    },
   },
   {
     timestamps: true,

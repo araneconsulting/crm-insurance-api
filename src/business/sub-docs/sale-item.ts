@@ -54,14 +54,3 @@ export const SaleItemSchema = new Schema<any>({
   },
   type: { type: SchemaTypes.String },
 });
-
-export const DEFAULT_SALE_ITEM = {
-  amount: 0,
-  details: '',
-  product: '',
-  premium: 0,
-  profits: 0,
-  broker: '',
-  carrier: '',
-  type: '',
-};

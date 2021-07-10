@@ -32,7 +32,6 @@ interface Payroll extends Document<any> {
 
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
-  
 }
 
 type PayrollModel = Model<Payroll>;
@@ -50,9 +49,9 @@ const PayrollSchema = new Schema<any>(
     payExecutedAt: { type: SchemaTypes.Date },
     payPeriodStartedAt: { type: SchemaTypes.Date },
     payPeriodEndedAt: { type: SchemaTypes.Date },
-    payStubs: [{ type: PayStubSchema, required: false, default: [] }],
+    payStubs: { type: [PayStubSchema], required: false, default: [] },
     scope: { type: SchemaTypes.String }, //can be Company (C), Location (L), Individual (I)
-    status: { type: SchemaTypes.String, default: 'IN-PROGRESS' },//can be: IN-PROGRESS, EXECUTED
+    status: { type: SchemaTypes.String, default: 'IN-PROGRESS' }, //can be: IN-PROGRESS, EXECUTED
 
     totalRegularSalary: { type: SchemaTypes.Number, default: 0 },
     totalTips: { type: SchemaTypes.Number, default: 0 },
@@ -67,7 +66,6 @@ const PayrollSchema = new Schema<any>(
 
     createdBy: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
     updatedBy: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
-    
   },
   {
     timestamps: true,

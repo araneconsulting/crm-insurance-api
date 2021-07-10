@@ -41,8 +41,9 @@ export class UpdateSaleDto {
   @IsNumber()
   premium: number;
 
+  @IsOptional()
   @IsArray()
-  items: SaleItem[];
+  items?: SaleItem[];
 
   @IsOptional()
   isRenewal: boolean; 
