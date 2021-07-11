@@ -46,6 +46,8 @@ import { COVERAGES_TYPES } from 'shared/const/catalog/coverages-types';
 import { ENDORSEMENT_STATUS } from 'shared/const/catalog/endorsement-status';
 import { ENDORSEMENT_TYPES } from 'shared/const/catalog/endorsement-types';
 import { PERMIT_TYPES } from 'shared/const/catalog/permits-types';
+import { ENDORSEMENT_ITEMS } from 'shared/const/catalog/endorsement-items';
+import { ENDORSEMENT_ITEM_TYPES } from 'shared/const/catalog/endorsement-item-types';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -174,6 +176,8 @@ export class CompanyController {
       employees: await this.userService.getCatalog(employeesFilter),
       endorsementStatus: ENDORSEMENT_STATUS,
       endorsementTypes: ENDORSEMENT_TYPES,
+      endorsementItems: ENDORSEMENT_ITEMS,
+      endorsementItemTypes: ENDORSEMENT_ITEM_TYPES,
       employeeRateFrequencies: CompanyCatalog.employeeRateFrequencies,
       financers: insurers.financers,
       industries: Industries,
