@@ -6,19 +6,19 @@ import { Sale } from './sale.model';
 import { Company } from './company.model';
 
 interface Endorsement extends Document<any> {
-  readonly amount: number;
+  readonly amount?: number;
   readonly code: string;
   readonly company: Partial<Company>;
-  readonly description: string;
+  readonly description?: string;
 
-  readonly endorsedAt: Date;
+  readonly endorsedAt?: Date;
 
-  readonly followUpDate: Date;
-  readonly followUpPerson: Partial<User>;
+  readonly followUpDate?: Date;
+  readonly followUpPerson?: Partial<User>;
 
   readonly policy: Partial<Sale>;
-  readonly status: string; //Available values: src/shared/const/catalog/endorsement-status.ts
-  readonly type: string; //Available values: src/shared/const/catalog/endorsement-type.ts
+  readonly status?: string; //Available values: src/shared/const/catalog/endorsement-status.ts
+  readonly type?: string; //Available values: src/shared/const/catalog/endorsement-type.ts
 
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
