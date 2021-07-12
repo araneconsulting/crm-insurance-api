@@ -6,9 +6,10 @@ import { Company } from 'database/company.model';
 import { User } from 'database/user.model';
 import { Sale } from 'database/sale.model';
 
-interface EndorsementItem {
+export interface EndorsementItem {
   amount: number;
   code: string;
+  commissionUnit: string;
   company: Partial<Company>;
   description: string;
 
@@ -36,11 +37,12 @@ export const EndorsementItemSchema = new Schema<any>(
       default: () => nanoid(6),
       required: false,
     },
+    commissionUnit: { type: SchemaTypes.String, default:"$" },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
     description: { type: SchemaTypes.String },
     endorsedAt: { type: SchemaTypes.Date },
     followUpDate: { type: SchemaTypes.Date },
-    followUpPerson: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
+    followUpPerson: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     policy: { type: SchemaTypes.ObjectId, ref: 'Sale', required: true },
     endorsement: { type: SchemaTypes.ObjectId, ref: 'Endorsement', required: true },
     status: { type: SchemaTypes.String },

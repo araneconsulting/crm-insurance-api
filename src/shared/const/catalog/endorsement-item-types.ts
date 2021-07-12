@@ -1,17 +1,23 @@
 export const ENDORSEMENT_ITEM_TYPES = {
-  payables_receivables: [
+  PAYABLE: [
     { name: 'Down Payment', id: 'DOWN_PAYMENT' },
     { name: 'Paid in Full', id: 'PAID_IN_FULL' },
     { name: 'Installment', id: 'INSTALLMENT' },
     { name: 'Other', id: 'OTHER' },
   ],
-  financing_direct_bill: [
+  RECEIVABLE: [
+    { name: 'Down Payment', id: 'DOWN_PAYMENT' },
+    { name: 'Paid in Full', id: 'PAID_IN_FULL' },
+    { name: 'Installment', id: 'INSTALLMENT' },
+    { name: 'Other', id: 'OTHER' },
+  ],
+  FINANCING_DIRECT_BILL: [
     { name: 'Direct Bill', id: 'DIRECT_BILL' },
     { name: 'Inside Financing', id: 'INSIDE_FINANCING' },
     { name: 'Outside Financing', id: 'OUTSIDE_FINANCING' },
     { name: 'Other', id: 'OTHER' },
   ],
-  fees_taxes: [
+  FEE_TAX: [
     { name: 'Agency Fee', id: 'AGENCY_FEE' },
     { name: 'Carrier Policy Fee', id: 'CARRIER_POLICY_FEE' },
     { name: 'Broker/MGA Fee', id: 'BROKER_MGA_FEE' },
@@ -44,5 +50,17 @@ export const ENDORSEMENT_ITEM_TYPES = {
     { name: 'Fire Marshall Tax', id: 'FIRE_MARSHALL_TAX' },
     { name: 'Filing Fee', id: 'FILING_FEE' },
     { name: 'Other', id: 'OTHER' },
+  ],
+  AGENCY_COMMISSION: [
+    { name: 'Gross', id: 'GROSS' },
+    { name: 'Monthly - Net', id: 'MONTHLY_NET' },
+    { name: 'Net', id: 'NET' },
+    { name: 'Month Earned', id: 'MONTH_EARNED' },
+  ],
+  AGENTS_COMMISSION: [
+    { name: 'From Agency Commission', id: 'FROM_AGENCY_COMMISSION' },
+    { name: 'From Base Premium', id: 'FROM_BASE_PREMIUM' },
+    { name: 'From Finance Company Incentive', id: 'FROM_FINANCE_COMPANY_INCENTIVE' },
+    { name: 'Fee', id: 'FEE' },
   ],
 };

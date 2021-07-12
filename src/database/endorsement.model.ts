@@ -4,6 +4,7 @@ import * as mongoSoftDelete from 'mongoosejs-soft-delete';
 import { nanoid } from 'nanoid';
 import { Sale } from './sale.model';
 import { Company } from './company.model';
+import { EndorsementItem } from 'business/sub-docs/endorsement-item';
 
 interface Endorsement extends Document<any> {
   readonly amount?: number;
@@ -23,7 +24,7 @@ interface Endorsement extends Document<any> {
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
 
-  readonly items?: any[];
+  readonly items?: EndorsementItem[];
   readonly accountingClass: string; //Self created from: [CHECKSUM_SANITY, PREMIUM, TAXES_AND_FEES, AGENCY_COMMISSION, RECEIVABLES, PAYABLES, FINANCED_AMOUNT]
 }
 
