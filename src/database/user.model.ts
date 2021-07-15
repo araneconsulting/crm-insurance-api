@@ -168,13 +168,16 @@ async function preSaveHook(next) {
 UserSchema.pre<User>('save', preSaveHook);
 
 UserSchema.pre('findOneAndUpdate', async function (this) {
-  let update = { ...this.getUpdate() };
+
+  let updateAction: any = this.getUpdate();
+
+  let update:any = { ...updateAction };
 
   // Only run this function if password was modified
   if (update.password) {
     // Hash the password
     const salt = genSaltSync();
-    update.password = await hash(this.getUpdate().password, salt);
+    update.password = await hash(updateAction.password, salt);
     this.setUpdate(update);
   }
 });

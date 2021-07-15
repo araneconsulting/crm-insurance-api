@@ -145,7 +145,7 @@ export class SaleService {
     withSeller = false,
     withCustomer = false,
     layout = SALE_LAYOUT_DEFAULT,
-  ): Promise<Partial<SaleDto>> {
+  ): Promise<any> {
     const saleQuery = this.saleModel.findOne({ code: code });
 
     if (withSeller) {
@@ -165,11 +165,13 @@ export class SaleService {
       throw new NotFoundException(`sale with code:${code} was not found`);
     }
 
-    let saleDto: Partial<SaleDto> = sale;
+    let saleDto: Partial<SaleDto> = {...sale['_doc']};
 
     saleDto.endorsements = await this.endorsementModel
       .find({ policy: sale._id })
       .exec();
+
+      console.log('endorsements:', saleDto.endorsements);
 
     return saleDto;
   }

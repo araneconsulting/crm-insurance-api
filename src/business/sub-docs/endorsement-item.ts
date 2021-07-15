@@ -9,14 +9,14 @@ import { Sale } from 'database/sale.model';
 export interface EndorsementItem {
   amount: number;
   code: string;
-  commissionUnit: string;
+  commissionUnit?: string;
   company: Partial<Company>;
-  description: string;
+  description?: string;
 
   endorsedAt: Date;
 
   followUpDate: Date;
-  followUpPerson: Partial<User>;
+  followUpPerson?: Partial<User>;
 
   policy: Partial<Sale>;
   endorsement: Partial<Endorsement>;
@@ -39,8 +39,8 @@ export const EndorsementItemSchema = new Schema<any>(
     },
     commissionUnit: { type: SchemaTypes.String, default:"$" },
     company: { type: SchemaTypes.ObjectId, ref: 'Company', required: true },
-    description: { type: SchemaTypes.String },
-    endorsedAt: { type: SchemaTypes.Date },
+    description: { type: SchemaTypes.String, default:'' },
+    endorsedAt: { type: SchemaTypes.Date, default:new Date() },
     followUpDate: { type: SchemaTypes.Date },
     followUpPerson: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     policy: { type: SchemaTypes.ObjectId, ref: 'Sale', required: true },

@@ -52,13 +52,15 @@ export class SaleController {
     @Query('withSeller', new DefaultValuePipe(false)) withSeller?: boolean,
     @Query('withCustomer', new DefaultValuePipe(false)) withCustomer?: boolean,
     @Query('layout') layout?: string,
-  ): Promise<Partial<SaleDto>> {
-    return await this.saleService.findByCode(
+  ): Promise<any> {
+    const result = await this.saleService.findByCode(
       code,
       withSeller,
       withCustomer,
       layout,
     );
+    console.log(result);
+    return result;
   }
 
   @Post('/search')
