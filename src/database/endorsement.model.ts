@@ -42,7 +42,7 @@ const EndorsementSchema = new Schema<any>(
     description: { type: SchemaTypes.String },
     endorsedAt: { type: SchemaTypes.Date },
     followUpDate: { type: SchemaTypes.Date },
-    followUpPerson: { type: SchemaTypes.ObjectId, ref: 'User', required: true },
+    followUpPerson: { type: SchemaTypes.ObjectId, ref: 'User', required: false },
     policy: { type: SchemaTypes.ObjectId, ref: 'Sale', required: true },
     status: { type: SchemaTypes.String },
     type: { type: SchemaTypes.String },

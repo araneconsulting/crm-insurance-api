@@ -755,6 +755,20 @@ export class SaleService {
     const company = this.req.user.company;
 
     endorsements.forEach((endorsement) => {
+
+      if (!endorsement.followUpPerson || endorsement.followUpPerson===''){
+        delete endorsement['followUpPerson'];
+      }
+
+      if (endorsement.items){
+        endorsement.items = endorsement.items.map(item => {
+          if (!item.followUpPerson || item.followUpPerson===''){
+            delete item['followUpPerson'];
+          }
+          return item;
+        })
+      }
+
       const markedToDelete = endorsement.markedToDelete;
       delete endorsement['markedToDelete'];
 
@@ -806,6 +820,7 @@ export class SaleService {
 
       if (endorsementUpsertResult.result['ok'] !== endorsements.length) {
         console.log('Endorsement upsert failed at least in one of them');
+        console.log('Results: ', endorsementUpsertResult);
       }
 
       saleDto.endorsements = await this.endorsementModel
