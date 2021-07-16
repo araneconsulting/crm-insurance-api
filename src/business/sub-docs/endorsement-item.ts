@@ -26,7 +26,7 @@ export interface EndorsementItem {
   createdBy?: Partial<User>;
   updatedBy?: Partial<User>;
 
-  accountingClass: string; //Self created from: [CHECKSUM_SANITY, PREMIUM, TAXES_AND_FEES, AGENCY_COMMISSION, RECEIVABLES, PAYABLES, FINANCED_AMOUNT]
+  accountingClass: string; //Self created from: [CHECKSUM_SANITY, PREMIUM, TAX_AND_FEE, AGENCY_COMMISSION, AGENT_COMMISSION, RECEIVABLE, PAYABLE, FINANCED_AMOUNT]
 }
 
 export const EndorsementItemSchema = new Schema<any>(
