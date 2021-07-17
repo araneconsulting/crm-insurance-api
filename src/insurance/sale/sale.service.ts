@@ -46,10 +46,10 @@ export class SaleService {
   /**
    * @param  {string} startDate?
    * @param  {string} endDate?
-   * @param  {string} type?
+   * @param  {string} lineOfBusiness?
    * @returns Promise
    */
-  async findAll(startDate?: Date, endDate?: Date, type?: string): Promise<any> {
+  async findAll(): Promise<any> {
     const query = this.saleModel.aggregate();
     query
       .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
@@ -86,7 +86,7 @@ export class SaleService {
           $project: {
             code: '$code',
             items: '$items',
-            type: '$type',
+            lineOfBusiness: '$lineOfBusiness',
             soldAt: '$soldAt',
             fees: { $round: ['$fees', 2] },
             tips: { $round: ['$tips', 2] },
@@ -426,6 +426,12 @@ export class SaleService {
       delete queryParams.filter['expirationDateTo'];
     }
 
+    let lineOfBusiness = null;
+    if (queryParams.filter.hasOwnProperty('lineOfBusiness')) {
+      lineOfBusiness = queryParams.filter.lineOfBusiness;
+      delete queryParams.filter['lineOfBusiness'];
+    }
+
     let type = null;
     if (queryParams.filter.hasOwnProperty('type')) {
       type = queryParams.filter.type;
@@ -476,6 +482,7 @@ export class SaleService {
       effectiveDateTo ||
       expirationDateFrom ||
       expirationDateTo ||
+      lineOfBusiness ||
       type ||
       insured ||
       carrier ||
@@ -510,6 +517,10 @@ export class SaleService {
 
       if (type) {
         conditions['$and'].push({ type: type });
+      }
+
+      if (lineOfBusiness) {
+        conditions['$and'].push({ lineOfBusiness: lineOfBusiness });
       }
 
       if (insured) {
@@ -621,7 +632,7 @@ export class SaleService {
           policyEffectiveAt: '$policyEffectiveAt',
           policyExpiresAt: '$policyExpiresAt',
           premium: { $round: ['$premium', 2] },
-          productName: {
+          coverages: {
             $function: {
               body: function (items: SaleItem[]) {
                 return [
@@ -649,6 +660,7 @@ export class SaleService {
           status: '$status',
           totalCharge: { $round: ['$totalCharge', 2] },
           downPayment: { $round: ['$downPayment', 2] },
+          lineOfBusiness: '$lineOfBusiness',
           type: '$type',
         },
       },

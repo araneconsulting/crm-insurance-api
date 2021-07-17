@@ -59,7 +59,7 @@ export async function setSaleCalculations(
                 brokers,
                 item.broker,
                 item.premium,
-                sale.type,
+                sale.lineOfBusiness,
               );
               profits += item.profits;
             } else if (item.carrier) {
@@ -68,7 +68,7 @@ export async function setSaleCalculations(
                 brokers,
                 item.carrier,
                 item.premium,
-                sale.type,
+                sale.lineOfBusiness,
               );
               profits += item.profits;
             } else {
@@ -113,7 +113,7 @@ export async function setSaleCalculations(
           brokers,
           insurer,
           sale.downPayment,
-          sale.type,
+          sale.lineOfBusiness,
         );
       }
 
@@ -170,7 +170,7 @@ export function calculateProfitByCarrier(
   brokers: Partial<Insurer>[],
   broker: Partial<Insurer>,
   amount: number,
-  saleType: string,
+  lineOfBusiness: string,
 ): number {
   let profits = 0;
 
@@ -181,7 +181,7 @@ export function calculateProfitByCarrier(
   let commission = { percent: 0 };
   if (foundProvider) {
     commission = foundProvider.commissions.find(
-      (commission) => commission.productType === saleType,
+      (commission) => commission.lineOfBusiness === lineOfBusiness,
     );
 
     if (commission) {

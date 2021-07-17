@@ -14,10 +14,11 @@ interface Sale extends Document<any> {
   readonly company: Partial<Company>;
   readonly customer: Partial<Customer>;
   readonly financerCompany: Partial<Insurer>;
-  readonly location: Partial<Location>;
   readonly items: SaleItem[]; //Contains all info about Sale
   readonly isChargeItemized: boolean;
   readonly isRenewal: boolean;
+  readonly lineOfBusiness: string;
+  readonly location: Partial<Location>;
   readonly monthlyPayment: number;
   readonly policyEffectiveAt: Date;
   readonly policyExpiresAt: Date;
@@ -81,6 +82,7 @@ const SaleSchema = new Schema<any>(
     isRenewal: { type: SchemaTypes.Boolean, default: false },
     isChargeItemized: { type: SchemaTypes.Boolean, default: true },
     items: { type: [SaleItemSchema], required: false, default: [] },
+    lineOfBusiness: { type: SchemaTypes.String },
     location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     monthlyPayment: { type: SchemaTypes.Number },
     policyExpiresAt: { type: SchemaTypes.Date },

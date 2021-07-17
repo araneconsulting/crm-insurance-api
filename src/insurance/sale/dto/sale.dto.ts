@@ -12,6 +12,7 @@ export class SaleDto {
   chargesPaid: number;
   company: Partial<Company>;
   customer: Partial<Customer>;
+  lineOfBusiness: string;
   location?: Partial<Location>;
   items: SaleItem[]; //Contains all info about Sale
   seller: Partial<User>;

@@ -8,7 +8,10 @@ import { User } from 'database/user.model';
 import { EndorsementDto } from './endorsement.dto';
 export class CreateSaleDto {
 
-  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  lineOfBusiness: string;
+  
   @IsString()
   @IsNotEmpty()
   type: string;

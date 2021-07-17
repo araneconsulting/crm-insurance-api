@@ -55,7 +55,6 @@ export class EmployeeInfo {
 
 export const EmployeeInfoSchema = new Schema<any>({
   code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
-  productType: { type: SchemaTypes.String },
   endedAt: { type: SchemaTypes.String },
   position: { type: SchemaTypes.String },
   payFrequency: { type: SchemaTypes.String },

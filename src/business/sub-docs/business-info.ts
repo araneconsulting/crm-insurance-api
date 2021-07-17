@@ -66,27 +66,4 @@ export const BusinessInfoSchema = new Schema<any>({
   website: { type: SchemaTypes.String },
 });
 
-export const DEFAULT_BUSINESS_INFO = {
-  address: {
-    address1: '',
-    address2: '',
-    city: '',
-    state: '',
-    country: 'US',
-    zip: '',
-  },
-  email: '',
-  fax: '',
-  industry: '',
-  logo: '',
-  name: '',
-  otherPhones: [],
-  primaryPhone: '',
-  primaryPhoneExtension: '',
-  secondaryPhone: '',
-  secondaryPhoneExtension: '',
-  sector: '', // can be: Financial, Technology, Healthcare, etc
-  startedAt: '',
-  type: '',
-  website: '',
-};
+
