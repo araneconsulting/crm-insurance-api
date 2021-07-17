@@ -8,9 +8,8 @@ import {
 import { REQUEST } from '@nestjs/core';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
-import { Model, Types } from 'mongoose';
-import { EMPTY, from, Observable, of } from 'rxjs';
-import { mergeMap, throwIfEmpty } from 'rxjs/operators';
+import { Aggregate, Model, Types } from 'mongoose';
+import { from, Observable } from 'rxjs';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import {
   INSURER_MODEL,
@@ -165,13 +164,11 @@ export class SaleService {
       throw new NotFoundException(`sale with code:${code} was not found`);
     }
 
-    let saleDto: Partial<SaleDto> = {...sale['_doc']};
+    let saleDto: Partial<SaleDto> = { ...sale['_doc'] };
 
     saleDto.endorsements = await this.endorsementModel
       .find({ policy: sale._id })
       .exec();
-
-      console.log('endorsements:', saleDto.endorsements);
 
     return saleDto;
   }
@@ -267,19 +264,20 @@ export class SaleService {
 
     const createdSaleDto: Partial<SaleDto> = { ...created['_doc'] };
 
-
     await this.processEndorsements(endorsements, created, createdSaleDto);
 
     return createdSaleDto;
   }
 
-  
   /**
    * @param  {string} code
    * @param  {UpdateSaleDto} data
    * @returns Promise
    */
-  async update(code: string, updateSaleDto: UpdateSaleDto): Promise<Partial<SaleDto>> {
+  async update(
+    code: string,
+    updateSaleDto: UpdateSaleDto,
+  ): Promise<Partial<SaleDto>> {
     let saleDto: Partial<SaleDto> = { ...updateSaleDto };
 
     if (!saleDto.isChargeItemized && saleDto.items) {
@@ -387,86 +385,12 @@ export class SaleService {
     const sortCriteria = {};
     sortCriteria[queryParams.sortField] =
       queryParams.sortOrder === 'desc' ? -1 : 1;
+
     const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
     const limitCriteria = queryParams.pageSize;
 
-    let saleDateFrom = null;
-    let saleDateTo = null;
-    if (
-      queryParams.filter.hasOwnProperty('saleDateFrom') ||
-      queryParams.filter.hasOwnProperty('saleDateTo')
-    ) {
-      saleDateFrom = queryParams.filter.saleDateFrom;
-      saleDateTo = queryParams.filter.saleDateTo;
-      delete queryParams.filter['saleDateFrom'];
-      delete queryParams.filter['saleDateTo'];
-    }
-
-    let effectiveDateFrom = null;
-    let effectiveDateTo = null;
-    if (
-      queryParams.filter.hasOwnProperty('effectiveDateFrom') ||
-      queryParams.filter.hasOwnProperty('effectiveDateTo')
-    ) {
-      effectiveDateFrom = queryParams.filter.effectiveDateFrom;
-      effectiveDateTo = queryParams.filter.effectiveDateTo;
-      delete queryParams.filter['effectiveDateFrom'];
-      delete queryParams.filter['effectiveDateTo'];
-    }
-
-    let expirationDateFrom = null;
-    let expirationDateTo = null;
-    if (
-      queryParams.filter.hasOwnProperty('expirationDateFrom') ||
-      queryParams.filter.hasOwnProperty('expirationDateTo')
-    ) {
-      expirationDateFrom = queryParams.filter.expirationDateFrom;
-      expirationDateTo = queryParams.filter.expirationDateTo;
-      delete queryParams.filter['expirationDateFrom'];
-      delete queryParams.filter['expirationDateTo'];
-    }
-
-    let lineOfBusiness = null;
-    if (queryParams.filter.hasOwnProperty('lineOfBusiness')) {
-      lineOfBusiness = queryParams.filter.lineOfBusiness;
-      delete queryParams.filter['lineOfBusiness'];
-    }
-
-    let type = null;
-    if (queryParams.filter.hasOwnProperty('type')) {
-      type = queryParams.filter.type;
-      delete queryParams.filter['type'];
-    }
-
-    let insured = null;
-    if (queryParams.filter.hasOwnProperty('insured')) {
-      insured = queryParams.filter.insured;
-      delete queryParams.filter['insured'];
-    }
-
-    let carrier = null;
-    if (queryParams.filter.hasOwnProperty('carrier')) {
-      carrier = queryParams.filter.carrier;
-      delete queryParams.filter['carrier'];
-    }
-
-    let broker = null;
-    if (queryParams.filter.hasOwnProperty('broker')) {
-      broker = queryParams.filter.broker;
-      delete queryParams.filter['broker'];
-    }
-
-    let status = null;
-    if (queryParams.filter.hasOwnProperty('status')) {
-      status = queryParams.filter.status;
-      delete queryParams.filter['status'];
-    }
-
-    let location = null;
-    if (queryParams.filter.hasOwnProperty('location')) {
-      location = queryParams.filter.location;
-      delete queryParams.filter['location'];
-    }
+    const queryFilters: Object = {};
+    extractParamFilters(queryParams, queryFilters);
 
     let fixedQueries = [];
     let filterQueries = [];
@@ -475,77 +399,12 @@ export class SaleService {
     conditions = {
       $and: [{ deleted: false }, { renewed: false }],
     };
+
     if (
-      saleDateFrom ||
-      saleDateTo ||
-      effectiveDateFrom ||
-      effectiveDateTo ||
-      expirationDateFrom ||
-      expirationDateTo ||
-      lineOfBusiness ||
-      type ||
-      insured ||
-      carrier ||
-      broker ||
-      status ||
-      location ||
+      Object.keys(queryFilters).length > 0 ||
       (queryParams.filter && Object.keys(queryParams.filter).length > 0)
     ) {
-      if (saleDateFrom || saleDateTo) {
-        conditions['$and'].push({
-          soldAt: getDateMatchExpressionByDates(saleDateFrom, saleDateTo),
-        });
-      }
-
-      if (effectiveDateFrom || effectiveDateTo) {
-        conditions['$and'].push({
-          policyEffectiveAt: getDateMatchExpressionByDates(
-            effectiveDateFrom,
-            effectiveDateTo,
-          ),
-        });
-      }
-
-      if (expirationDateFrom || expirationDateTo) {
-        conditions['$and'].push({
-          policyExpiresAt: getDateMatchExpressionByDates(
-            expirationDateFrom,
-            expirationDateTo,
-          ),
-        });
-      }
-
-      if (type) {
-        conditions['$and'].push({ type: type });
-      }
-
-      if (lineOfBusiness) {
-        conditions['$and'].push({ lineOfBusiness: lineOfBusiness });
-      }
-
-      if (insured) {
-        conditions['$and'].push({ 'customer._id': Types.ObjectId(insured) });
-      }
-
-      if (broker) {
-        conditions['$and'].push({
-          items: { $elemMatch: { broker: Types.ObjectId(broker) } },
-        });
-      }
-
-      if (carrier) {
-        conditions['$and'].push({
-          items: { $elemMatch: { carrier: Types.ObjectId(carrier) } },
-        });
-      }
-
-      if (status) {
-        conditions['$and'].push({ status: status });
-      }
-
-      if (location) {
-        conditions['$and'].push({ 'location._id': Types.ObjectId(location) });
-      }
+      this.buildQueryConditions(conditions, queryFilters);
 
       if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
         filterQueries = Object.keys(queryParams.filter).map((key) => {
@@ -562,37 +421,9 @@ export class SaleService {
       conditions['$or'] = [...filterQueries, ...fixedQueries];
     }
 
-    const query = this.saleModel.aggregate();
+    let query = this.saleModel.aggregate();
 
-    query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true }).lookup({
-      from: 'users',
-      localField: 'seller',
-      foreignField: '_id',
-      as: 'seller',
-    });
-    query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
-
-    query
-      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'customers',
-        localField: 'customer',
-        foreignField: '_id',
-        as: 'customer',
-      });
-
-    query.unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
-
-    query
-      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'locations',
-        localField: 'location',
-        foreignField: '_id',
-        as: 'location',
-      });
-
-    query.unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+    query = this.unwindReferenceFields(query);
 
     if (conditions) {
       query.match(conditions);
@@ -676,6 +507,114 @@ export class SaleService {
     };
   }
 
+  private unwindReferenceFields(query: Aggregate<any[]>) {
+    query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true }).lookup({
+      from: 'users',
+      localField: 'seller',
+      foreignField: '_id',
+      as: 'seller',
+    });
+    query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
+
+    query
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'customers',
+        localField: 'customer',
+        foreignField: '_id',
+        as: 'customer',
+      });
+
+    query.unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
+
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
+      .lookup({
+        from: 'locations',
+        localField: 'location',
+        foreignField: '_id',
+        as: 'location',
+      });
+
+    query.unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+
+    return query;
+  }
+
+  private buildQueryConditions(conditions: any, queryFilters: Object) {
+    if (queryFilters['saleDateFrom'] || queryFilters['saleDateTo']) {
+      conditions['$and'].push({
+        soldAt: getDateMatchExpressionByDates(
+          queryFilters['saleDateFrom'],
+          queryFilters['saleDateTo'],
+        ),
+      });
+    }
+
+    if (queryFilters['effectiveDateFrom'] || queryFilters['effectiveDateTo']) {
+      conditions['$and'].push({
+        policyEffectiveAt: getDateMatchExpressionByDates(
+          queryFilters['effectiveDateFrom'],
+          queryFilters['effectiveDateTo'],
+        ),
+      });
+    }
+
+    if (
+      queryFilters['expirationDateFrom'] ||
+      queryFilters['expirationDateTo']
+    ) {
+      conditions['$and'].push({
+        policyExpiresAt: getDateMatchExpressionByDates(
+          queryFilters['expirationDateFrom'],
+          queryFilters['expirationDateTo'],
+        ),
+      });
+    }
+
+    if (queryFilters['type']) {
+      conditions['$and'].push({ type: queryFilters['type'] });
+    }
+
+    if (queryFilters['lineOfBusiness']) {
+      conditions['$and'].push({
+        lineOfBusiness: queryFilters['lineOfBusiness'],
+      });
+    }
+
+    if (queryFilters['insured']) {
+      conditions['$and'].push({
+        'customer._id': Types.ObjectId(queryFilters['insured']),
+      });
+    }
+
+    if (queryFilters['broker']) {
+      conditions['$and'].push({
+        items: {
+          $elemMatch: { broker: Types.ObjectId(queryFilters['broker']) },
+        },
+      });
+    }
+
+    if (queryFilters['carrier']) {
+      conditions['$and'].push({
+        items: {
+          $elemMatch: { carrier: Types.ObjectId(queryFilters['carrier']) },
+        },
+      });
+    }
+
+    if (queryFilters['status']) {
+      conditions['$and'].push({ status: queryFilters['status'] });
+    }
+
+    if (queryFilters['location']) {
+      conditions['$and'].push({
+        'location._id': Types.ObjectId(queryFilters['location']),
+      });
+    }
+  }
+
   /**
    * @param  {EndorsementDto} endorsementDto
    * @returns Promise
@@ -695,7 +634,10 @@ export class SaleService {
    * @param  {CreateSaleDto} saleDto
    * @returns Promise
    */
-  async renew(code: string, createSaleDto: CreateSaleDto): Promise<Partial<SaleDto>> {
+  async renew(
+    code: string,
+    createSaleDto: CreateSaleDto,
+  ): Promise<Partial<SaleDto>> {
     let saleDto: Partial<SaleDto> = { ...createSaleDto };
 
     if (!saleDto.isChargeItemized) {
@@ -741,7 +683,7 @@ export class SaleService {
 
     if (endorsements) {
       delete saleData['endorsements'];
-    }    
+    }
 
     let created: any = this.saleModel.create({
       ...saleData,
@@ -754,7 +696,6 @@ export class SaleService {
     await this.processEndorsements(endorsements, created, createdSaleDto);
 
     return createdSaleDto;
-
   }
 
   async upsertAndDeleteEndorsements(
@@ -767,18 +708,17 @@ export class SaleService {
     const company = this.req.user.company;
 
     endorsements.forEach((endorsement) => {
-
-      if (!endorsement.followUpPerson || endorsement.followUpPerson===''){
+      if (!endorsement.followUpPerson || endorsement.followUpPerson === '') {
         delete endorsement['followUpPerson'];
       }
 
-      if (endorsement.items){
-        endorsement.items = endorsement.items.map(item => {
-          if (!item.followUpPerson || item.followUpPerson===''){
+      if (endorsement.items) {
+        endorsement.items = endorsement.items.map((item) => {
+          if (!item.followUpPerson || item.followUpPerson === '') {
             delete item['followUpPerson'];
           }
           return item;
-        })
+        });
       }
 
       const markedToDelete = endorsement.markedToDelete;
@@ -823,11 +763,15 @@ export class SaleService {
     return endorsementUpsertResult;
   }
 
-  private async processEndorsements(endorsements: Partial<EndorsementDto>[], sale: any, saleDto: Partial<SaleDto>) {
+  private async processEndorsements(
+    endorsements: Partial<EndorsementDto>[],
+    sale: any,
+    saleDto: Partial<SaleDto>,
+  ) {
     if (endorsements) {
       const endorsementUpsertResult = await this.upsertAndDeleteEndorsements(
         endorsements,
-        sale
+        sale,
       );
 
       if (endorsementUpsertResult.result['ok'] !== endorsements.length) {
@@ -840,5 +784,70 @@ export class SaleService {
         .exec();
     }
   }
+}
+function extractParamFilters(queryParams: any, queryFilters): any {
+  if (
+    queryParams.filter.hasOwnProperty('saleDateFrom') ||
+    queryParams.filter.hasOwnProperty('saleDateTo')
+  ) {
+    queryFilters['saleDateFrom'] = queryParams.filter.saleDateFrom;
+    queryFilters['saleDateTo'] = queryParams.filter.saleDateTo;
+    delete queryParams.filter['saleDateFrom'];
+    delete queryParams.filter['saleDateTo'];
+  }
 
+  if (
+    queryParams.filter.hasOwnProperty('effectiveDateFrom') ||
+    queryParams.filter.hasOwnProperty('effectiveDateTo')
+  ) {
+    queryFilters['effectiveDateFrom'] = queryParams.filter.effectiveDateFrom;
+    queryFilters['effectiveDateTo'] = queryParams.filter.effectiveDateTo;
+    delete queryParams.filter['effectiveDateFrom'];
+    delete queryParams.filter['effectiveDateTo'];
+  }
+
+  if (
+    queryParams.filter.hasOwnProperty('expirationDateFrom') ||
+    queryParams.filter.hasOwnProperty('expirationDateTo')
+  ) {
+    queryFilters['expirationDateFrom'] = queryParams.filter.expirationDateFrom;
+    queryFilters['expirationDateTo'] = queryParams.filter.expirationDateTo;
+    delete queryParams.filter['expirationDateFrom'];
+    delete queryParams.filter['expirationDateTo'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('lineOfBusiness')) {
+    queryFilters['lineOfBusiness'] = queryParams.filter.lineOfBusiness;
+    delete queryParams.filter['lineOfBusiness'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('type')) {
+    queryFilters['type'] = queryParams.filter.type;
+    delete queryParams.filter['type'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('insured')) {
+    queryFilters['insured'] = queryParams.filter.insured;
+    delete queryParams.filter['insured'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('carrier')) {
+    queryFilters['carrier'] = queryParams.filter.carrier;
+    delete queryParams.filter['carrier'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('broker')) {
+    queryFilters['broker'] = queryParams.filter.broker;
+    delete queryParams.filter['broker'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('status')) {
+    queryFilters['status'] = queryParams.filter.status;
+    delete queryParams.filter['status'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('location')) {
+    queryFilters['location'] = queryParams.filter.location;
+    delete queryParams.filter['location'];
+  }
 }
