@@ -35,19 +35,19 @@ export async function setSaleCalculations(
       sale.amountReceivable = 0;
 
       sale.items.map((item: SaleItem) => {
-        switch (item.product) {
+        switch (sale.type) {
           case 'PERMIT':
-            permits += item.premium;
-            item.profits = PERMIT_COMMISION_PERCENT * item.premium;
+            permits += item.amount;
+            item.profits = PERMIT_COMMISION_PERCENT * item.amount;
             profits += item.profits;
-            totalCharge += item.premium;
+            totalCharge += item.amount;
             break;
-          case 'FEE':
+          /* case 'FEE':
             fees += item.premium;
             item.profits = (1 - FEE_COMMISION_PERCENT) * item.premium;
             profits += item.profits;
             totalCharge += item.premium;
-            break;
+            break; */
           default:
             downPayment += item.premium || 0;
             premium += item.premium || 0;
@@ -76,6 +76,7 @@ export async function setSaleCalculations(
                 `Carrier/MGA at least one of them is required for this product.`,
               );
             }
+            break;
         }
       });
     }
@@ -104,7 +105,7 @@ export async function setSaleCalculations(
       );
 
       let profits = 0;
-      if (insuranceItems) {
+      if (insuranceItems && sale.type === 'POLICY') {
         //This assumes that on non-itemized policies, there should be only one broker/carrier, to take the commission from it, so we take the first one.
 
         const insurer = items[0].carrier;
