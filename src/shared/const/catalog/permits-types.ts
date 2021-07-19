@@ -18,7 +18,7 @@ export const PERMIT_TYPES = [
     id: 'EIN',
     description: 'Application to obtain Employer ID Number (Tax ID)',
     amount: 0,
-    type: 'APPLICATION'
+    type: 'REGISTRATION'
   },
   {
     product: 'UCR',
