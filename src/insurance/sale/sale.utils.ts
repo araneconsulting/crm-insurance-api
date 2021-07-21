@@ -5,7 +5,7 @@ import { Insurer } from 'database/insurer.model';
 import { roundAmount } from 'shared/util/math-functions';
 import { SaleDto } from './dto/sale.dto';
 import * as DateFactory from 'shared/util/date-functions';
-import { Number } from 'mongoose';
+import { Aggregate, Number, Types } from 'mongoose';
 
 const PERMIT_COMMISION_PERCENT = 0.2;
 const FEE_COMMISION_PERCENT = 0.2;
@@ -231,3 +231,223 @@ export function sanitizeSale(sale: any) {
     });
   }
 }
+
+export function extractParamFilters(queryParams: any): Object {
+  const queryFilters = {};
+  if (
+    queryParams.filter.hasOwnProperty('saleDateFrom') ||
+    queryParams.filter.hasOwnProperty('saleDateTo')
+  ) {
+    queryFilters['saleDateFrom'] = queryParams.filter.saleDateFrom;
+    queryFilters['saleDateTo'] = queryParams.filter.saleDateTo;
+    delete queryParams.filter['saleDateFrom'];
+    delete queryParams.filter['saleDateTo'];
+  }
+
+  if (
+    queryParams.filter.hasOwnProperty('effectiveDateFrom') ||
+    queryParams.filter.hasOwnProperty('effectiveDateTo')
+  ) {
+    queryFilters['effectiveDateFrom'] = queryParams.filter.effectiveDateFrom;
+    queryFilters['effectiveDateTo'] = queryParams.filter.effectiveDateTo;
+    delete queryParams.filter['effectiveDateFrom'];
+    delete queryParams.filter['effectiveDateTo'];
+  }
+
+  if (
+    queryParams.filter.hasOwnProperty('expirationDateFrom') ||
+    queryParams.filter.hasOwnProperty('expirationDateTo')
+  ) {
+    queryFilters['expirationDateFrom'] = queryParams.filter.expirationDateFrom;
+    queryFilters['expirationDateTo'] = queryParams.filter.expirationDateTo;
+    delete queryParams.filter['expirationDateFrom'];
+    delete queryParams.filter['expirationDateTo'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('lineOfBusiness')) {
+    queryFilters['lineOfBusiness'] = queryParams.filter.lineOfBusiness;
+    delete queryParams.filter['lineOfBusiness'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('type')) {
+    queryFilters['type'] = queryParams.filter.type;
+    delete queryParams.filter['type'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('insured')) {
+    queryFilters['insured'] = queryParams.filter.insured;
+    delete queryParams.filter['insured'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('carrier')) {
+    queryFilters['carrier'] = queryParams.filter.carrier;
+    delete queryParams.filter['carrier'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('broker')) {
+    queryFilters['broker'] = queryParams.filter.broker;
+    delete queryParams.filter['broker'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('status')) {
+    queryFilters['status'] = queryParams.filter.status;
+    delete queryParams.filter['status'];
+  }
+
+  if (queryParams.filter.hasOwnProperty('location')) {
+    queryFilters['location'] = queryParams.filter.location;
+    delete queryParams.filter['location'];
+  }
+  return queryFilters;
+}
+
+export function unwindReferenceFields(
+  query: Aggregate<any[]>,
+): Aggregate<any[]> {
+  query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true }).lookup({
+    from: 'users',
+    localField: 'seller',
+    foreignField: '_id',
+    as: 'seller',
+  });
+  query.unwind({ path: '$seller', preserveNullAndEmptyArrays: true });
+
+  query.unwind({ path: '$customer', preserveNullAndEmptyArrays: true }).lookup({
+    from: 'customers',
+    localField: 'customer',
+    foreignField: '_id',
+    as: 'customer',
+  });
+
+  query.unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
+
+  query.unwind({ path: '$location', preserveNullAndEmptyArrays: true }).lookup({
+    from: 'locations',
+    localField: 'location',
+    foreignField: '_id',
+    as: 'location',
+  });
+
+  query.unwind({ path: '$location', preserveNullAndEmptyArrays: true });
+
+  return query;
+}
+
+
+
+export function setSortCriteria(queryParams: any) {
+  const sortCriteria = {};
+  sortCriteria[queryParams.sortField] =
+    queryParams.sortOrder === 'desc' ? -1 : 1;
+  return sortCriteria;
+}
+
+export function buildQueryConditions(queryParams: any, queryFilters: Object) {
+  let fixedQueries = [];
+  let filterQueries = [];
+  let conditions = {};
+
+  conditions = {
+    $and: [{ deleted: false }, { renewed: false }],
+  };
+
+  if (
+    Object.keys(queryFilters).length > 0 ||
+    (queryParams.filter && Object.keys(queryParams.filter).length > 0)
+  ) {
+    setFiltersByParams(conditions, queryFilters);
+    setFilterByQueryString(queryParams, filterQueries);
+  }
+
+  if (filterQueries.length || fixedQueries.length) {
+    conditions['$or'] = [...filterQueries, ...fixedQueries];
+  }
+  return conditions;
+}
+
+export function setFiltersByParams(
+  conditions: any,
+  queryFilters: Object,
+): void {
+  if (queryFilters['saleDateFrom'] || queryFilters['saleDateTo']) {
+    conditions['$and'].push({
+      soldAt: getDateMatchExpressionByDates(
+        queryFilters['saleDateFrom'],
+        queryFilters['saleDateTo'],
+      ),
+    });
+  }
+
+  if (queryFilters['effectiveDateFrom'] || queryFilters['effectiveDateTo']) {
+    conditions['$and'].push({
+      policyEffectiveAt: getDateMatchExpressionByDates(
+        queryFilters['effectiveDateFrom'],
+        queryFilters['effectiveDateTo'],
+      ),
+    });
+  }
+
+  if (queryFilters['expirationDateFrom'] || queryFilters['expirationDateTo']) {
+    conditions['$and'].push({
+      policyExpiresAt: getDateMatchExpressionByDates(
+        queryFilters['expirationDateFrom'],
+        queryFilters['expirationDateTo'],
+      ),
+    });
+  }
+
+  if (queryFilters['type']) {
+    conditions['$and'].push({ type: queryFilters['type'] });
+  }
+
+  if (queryFilters['lineOfBusiness']) {
+    conditions['$and'].push({
+      lineOfBusiness: queryFilters['lineOfBusiness'],
+    });
+  }
+
+  if (queryFilters['insured']) {
+    conditions['$and'].push({
+      'customer._id': Types.ObjectId(queryFilters['insured']),
+    });
+  }
+
+  if (queryFilters['broker']) {
+    conditions['$and'].push({
+      items: {
+        $elemMatch: { broker: Types.ObjectId(queryFilters['broker']) },
+      },
+    });
+  }
+
+  if (queryFilters['carrier']) {
+    conditions['$and'].push({
+      items: {
+        $elemMatch: { carrier: Types.ObjectId(queryFilters['carrier']) },
+      },
+    });
+  }
+
+  if (queryFilters['status']) {
+    conditions['$and'].push({ status: queryFilters['status'] });
+  }
+
+  if (queryFilters['location']) {
+    conditions['$and'].push({
+      'location._id': Types.ObjectId(queryFilters['location']),
+    });
+  }
+}
+
+export function setFilterByQueryString(queryParams: any, filterQueries: any[]) {
+  if (queryParams.filter && Object.keys(queryParams.filter).length > 0) {
+    filterQueries = Object.keys(queryParams.filter).map((key) => {
+      return {
+        [key]: {
+          $regex: new RegExp('.*' + queryParams.filter[key] + '.*', 'i'),
+        },
+      };
+    });
+  }
+}
+
