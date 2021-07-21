@@ -53,7 +53,7 @@ export class UpdateSaleDto {
   renewalReference: Partial<Sale>; 
   
   @IsOptional()
-  policyEffectiveAt: Date; 
+  effectiveAt: Date; 
 
   @IsOptional()
   @IsNotEmpty()
@@ -66,7 +66,7 @@ export class UpdateSaleDto {
   downPayment: number; //Sum of all sale item amounts
 
   @IsOptional()
-  policyExpiresAt: Date;
+  expiresAt: Date;
 
   @IsOptional()
   monthlyPayment: number;
@@ -76,14 +76,14 @@ export class UpdateSaleDto {
 
   @IsOptional()
   @IsDateString()
-  policyCancelledAt?: Date;
+  cancelledAt?: Date;
 
   @IsOptional()
   @IsString()
   status?: string;
 
   @IsOptional()
-  policyNumber: string;
+  number: string;
 
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;

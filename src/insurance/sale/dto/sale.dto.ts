@@ -24,8 +24,8 @@ export class SaleDto {
   isRenewal: boolean;
   isChargeItemized: boolean;
   renewalReference?: Partial<Sale>;
-  policyEffectiveAt?: Date;
-  policyExpiresAt?: Date;
+  effectiveAt?: Date;
+  expiresAt?: Date;
   monthlyPayment?: number;
   financerCompany?: Partial<Insurer>; //code del subdocumento de la financiera dentro de la compañia
 
@@ -37,9 +37,9 @@ export class SaleDto {
   premium: number; //[auto-calculated] Sum of al SaleItem details[premium];
   profits: number; //[auto-calculated] Sum of al SaleItem profits;
 
-  policyCancelledAt?: Date;
+  cancelledAt?: Date;
   status?: string;
-  policyNumber: string;
+  number: string;
 
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;

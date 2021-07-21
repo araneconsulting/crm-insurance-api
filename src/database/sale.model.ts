@@ -20,9 +20,9 @@ interface Sale extends Document<any> {
   readonly lineOfBusiness: string;
   readonly location: Partial<Location>;
   readonly monthlyPayment: number;
-  readonly policyEffectiveAt: Date;
-  readonly policyExpiresAt: Date;
-  readonly policyCancelledAt: Date;
+  readonly effectiveAt: Date;
+  readonly expiresAt: Date;
+  readonly cancelledAt: Date;
   readonly renewalReference: Partial<Sale>;
   readonly renewed: boolean;
   readonly seller: Partial<User>;
@@ -30,7 +30,7 @@ interface Sale extends Document<any> {
   readonly status: string; //can be: ACTIVE, INACTIVE, RENEWED, CANCELLED
   readonly type: string;
   readonly amountReceivable: number;
-  readonly policyNumber: string;
+  readonly number: string;
   readonly createdBy?: Partial<User>;
   readonly updatedBy?: Partial<User>;
 
@@ -85,10 +85,10 @@ const SaleSchema = new Schema<any>(
     lineOfBusiness: { type: SchemaTypes.String },
     location: { type: SchemaTypes.ObjectId, ref: 'Location', required: false },
     monthlyPayment: { type: SchemaTypes.Number },
-    policyExpiresAt: { type: SchemaTypes.Date },
-    policyEffectiveAt: { type: SchemaTypes.Date },
-    policyCancelledAt: { type: SchemaTypes.Date },
-    policyNumber: { type: SchemaTypes.String },
+    expiresAt: { type: SchemaTypes.Date },
+    effectiveAt: { type: SchemaTypes.Date },
+    cancelledAt: { type: SchemaTypes.Date },
+    number: { type: SchemaTypes.String },
     renewalFrequency: { type: SchemaTypes.String, default: 'ANNUAL' },
     renewalReference: { type: SchemaTypes.ObjectId, ref: 'Sale' },
     renewed: { type: SchemaTypes.Boolean, default: false },

@@ -430,9 +430,9 @@ export class SaleService {
               lang: 'js',
             },
           },
-          policyNumber: '$policyNumber',
-          policyEffectiveAt: '$policyEffectiveAt',
-          policyExpiresAt: '$policyExpiresAt',
+          number: '$number',
+          effectiveAt: '$effectiveAt',
+          expiresAt: '$expiresAt',
           premium: { $round: ['$premium', 2] },
           coverages: {
             $function: {

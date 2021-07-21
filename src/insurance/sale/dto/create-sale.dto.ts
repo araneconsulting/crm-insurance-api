@@ -63,9 +63,9 @@ export class CreateSaleDto {
   renewalReference: Partial<Sale>; 
   
   @IsOptional()
-  policyEffectiveAt: Date; 
+  effectiveAt: Date; 
 
-  policyExpiresAt: Date;
+  expiresAt: Date;
   
   @IsNumber()
   monthlyPayment: number;
@@ -76,14 +76,14 @@ export class CreateSaleDto {
 
   @IsOptional()
   @IsDateString()
-  policyCancelledAt?: Date;
+  cancelledAt?: Date;
 
   @IsOptional()
   @IsString()
   status?: string;
 
   @IsOptional()
-  policyNumber: string;
+  number: string;
 
   renewalFrequency: string; //can be: ANNUAL, SEMI-ANNUAL, QUARTERLY, MONTHLY, VARIABLE
   autoRenew: boolean;

@@ -380,7 +380,7 @@ export function setFiltersByParams(
 
   if (queryFilters['effectiveDateFrom'] || queryFilters['effectiveDateTo']) {
     conditions['$and'].push({
-      policyEffectiveAt: getDateMatchExpressionByDates(
+      effectiveAt: getDateMatchExpressionByDates(
         queryFilters['effectiveDateFrom'],
         queryFilters['effectiveDateTo'],
       ),
@@ -389,7 +389,7 @@ export function setFiltersByParams(
 
   if (queryFilters['expirationDateFrom'] || queryFilters['expirationDateTo']) {
     conditions['$and'].push({
-      policyExpiresAt: getDateMatchExpressionByDates(
+      expiresAt: getDateMatchExpressionByDates(
         queryFilters['expirationDateFrom'],
         queryFilters['expirationDateTo'],
       ),
