@@ -29,6 +29,7 @@ import { Location } from 'database/location.model';
 import { Customer } from 'database/customer.model';
 import { EndorsementDto } from './dto/endorsement.dto';
 import { Endorsement } from 'database/endorsement.model';
+import { COVERAGES_TYPES } from 'shared/const/catalog/coverages-types';
 
 const SALE_LAYOUT_DEFAULT = 'NORMAL';
 const SALE_LAYOUT_FULL = 'FULL';
@@ -465,22 +466,25 @@ export class SaleService {
           premium: { $round: ['$premium', 2] },
           coverages: {
             $function: {
-              body: function (items: SaleItem[]) {
+              body: function (items: SaleItem[], coverageTypes: []) {
                 return [
                   ...new Set(
-                    items.map((item) =>
-                      item.product
-                        .toLowerCase()
-                        .split(' ')
-                        .map(function (word) {
-                          return word.charAt(0).toUpperCase() + word.slice(1);
-                        })
-                        .join(' '),
-                    ),
+                    items.map((item) => {
+                      return (
+                        coverageTypes.find(
+                          (type) => item.product === type['id'],
+                        ) || {
+                          id: 'N/A',
+                          name: 'N/A',
+                          help: '',
+                          iconLabel: 'N/A',
+                        }
+                      );
+                    }),
                   ),
-                ].join('/');
+                ];
               },
-              args: ['$items'],
+              args: ['$items', COVERAGES_TYPES],
               lang: 'js',
             },
           },
