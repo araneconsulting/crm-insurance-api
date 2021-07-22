@@ -35,6 +35,7 @@ import { Customer } from 'database/customer.model';
 import { EndorsementDto } from './dto/endorsement.dto';
 import { Endorsement } from 'database/endorsement.model';
 import { COVERAGES_TYPES } from 'shared/const/catalog/coverages-types';
+import { PERMIT_TYPES } from 'shared/const/catalog/permits-types';
 
 const SALE_LAYOUT_DEFAULT = 'NORMAL';
 const SALE_LAYOUT_FULL = 'FULL';
@@ -390,7 +391,7 @@ export class SaleService {
   async search(queryParams?: any): Promise<any> {
     const queryFilters: Object = extractParamFilters(queryParams);
 
-    let conditions = buildQueryConditions(queryParams,queryFilters);
+    let conditions = buildQueryConditions(queryParams, queryFilters);
 
     let query = this.saleModel.aggregate();
 
@@ -434,27 +435,49 @@ export class SaleService {
           effectiveAt: '$effectiveAt',
           expiresAt: '$expiresAt',
           premium: { $round: ['$premium', 2] },
-          coverages: {
+          products: {
             $function: {
-              body: function (items: SaleItem[], coverageTypes: []) {
-                return [
-                  ...new Set(
-                    items.map((item) => {
-                      return (
-                        coverageTypes.find(
-                          (type) => item.product === type['id'],
-                        ) || {
-                          id: 'N/A',
-                          name: 'N/A',
-                          help: '',
-                          iconLabel: 'N/A',
-                        }
-                      );
-                    }),
-                  ),
-                ];
+              body: function (
+                type: string,
+                items: SaleItem[],
+                coverageTypes: [],
+                permitTypes: [],
+              ) {
+                return type === 'POLICY'
+                  ? [
+                      ...new Set(
+                        items.map((item) => {
+                          return (
+                            coverageTypes.find(
+                              (type) => item.product === type['id'],
+                            ) || {
+                              id: 'N/A',
+                              name: 'N/A',
+                              help: '',
+                              iconLabel: 'N/A',
+                            }
+                          );
+                        }),
+                      ),
+                    ]
+                  : [
+                      ...new Set(
+                        items.map((item) => {
+                          return (
+                            permitTypes.find(
+                              (type) => item.product === type['product'],
+                            ) || {
+                              ...item,
+                              iconLabel: `${item.product[0]}-${
+                                item.product[item.product.length - 1]
+                              }`,
+                            }
+                          );
+                        }),
+                      ),
+                    ];
               },
-              args: ['$items', COVERAGES_TYPES],
+              args: ['$type', '$items', COVERAGES_TYPES, PERMIT_TYPES],
               lang: 'js',
             },
           },
@@ -484,8 +507,6 @@ export class SaleService {
       totalCount: entities.length,
     };
   }
-
-  
 
   /**
    * @param  {EndorsementDto} endorsementDto

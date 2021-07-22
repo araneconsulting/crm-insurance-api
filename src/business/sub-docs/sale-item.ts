@@ -29,6 +29,9 @@ export class SaleItem {
   product: string;
   //Available values: see LINES_OF_BUSINESS
 
+  @IsNotEmpty()
+  name: string;
+
   @IsNumber()
   profits: number; //Auto calculated (commission % of amount)
 
@@ -53,6 +56,7 @@ export const SaleItemSchema = new Schema<any>({
   code: { type: SchemaTypes.String, default: () => nanoid(6), required: false },
   description: { type: SchemaTypes.String },
   details: { type: SchemaTypes.Map },
+  name: { type: SchemaTypes.String },
   premium: { type: SchemaTypes.Number },
   product: { type: SchemaTypes.String },
   profits: { type: SchemaTypes.Number },
