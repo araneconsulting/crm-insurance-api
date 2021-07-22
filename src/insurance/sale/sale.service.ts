@@ -453,7 +453,7 @@ export class SaleService {
                             ) || {
                               id: 'N/A',
                               name: 'N/A',
-                              help: '',
+                              description: '',
                               iconLabel: 'N/A',
                             }
                           );
