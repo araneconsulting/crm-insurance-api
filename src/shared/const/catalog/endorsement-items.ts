@@ -20,7 +20,7 @@ export const ENDORSEMENT_ITEMS = [
     permissions: [],
     color:"#7F32EC",
   },
-  {
+/*   {
     name: 'Agents Commission',
     id: 'AGENTS_COMMISSION',
     description: '',
@@ -33,7 +33,7 @@ export const ENDORSEMENT_ITEMS = [
     description: '',
     permissions: [],
     color:"#CB010B",
-  },
+  }, */
   {
     name: 'Financing / Direct Bill',
     id: 'FINANCING_DIRECT_BILL',

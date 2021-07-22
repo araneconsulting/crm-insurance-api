@@ -51,7 +51,7 @@ export const ENDORSEMENT_ITEM_TYPES = {
     { name: 'Filing Fee', id: 'FILING_FEE' },
     { name: 'Other', id: 'OTHER' },
   ],
-  AGENCY_COMMISSION: [
+/*   AGENCY_COMMISSION: [
     { name: 'Gross', id: 'GROSS' },
     { name: 'Monthly - Net', id: 'MONTHLY_NET' },
     { name: 'Net', id: 'NET' },
@@ -62,5 +62,5 @@ export const ENDORSEMENT_ITEM_TYPES = {
     { name: 'From Base Premium', id: 'FROM_BASE_PREMIUM' },
     { name: 'From Finance Company Incentive', id: 'FROM_FINANCE_COMPANY_INCENTIVE' },
     { name: 'Fee', id: 'FEE' },
-  ],
+  ], */
 };

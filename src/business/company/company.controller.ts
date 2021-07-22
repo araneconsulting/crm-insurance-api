@@ -48,6 +48,7 @@ import { ENDORSEMENT_TYPES } from 'shared/const/catalog/endorsement-types';
 import { PERMIT_TYPES, PERMIT_TYPES_BY_STATE } from 'shared/const/catalog/permits-types';
 import { ENDORSEMENT_ITEMS } from 'shared/const/catalog/endorsement-items';
 import { ENDORSEMENT_ITEM_TYPES } from 'shared/const/catalog/endorsement-item-types';
+import { REMIT_TO_OPTIONS } from 'shared/const/catalog/remit-to-options';
 
 @Controller({ path: 'companies', scope: Scope.REQUEST })
 export class CompanyController {
@@ -187,6 +188,7 @@ export class CompanyController {
       locationPayFrequencies: CompanyCatalog.locations.payrollFrequencies,
       permitTypes: PERMIT_TYPES,
       permitTypesByState: PERMIT_TYPES_BY_STATE,
+      remitToOptions: REMIT_TO_OPTIONS,
       roles: UserCatalog.roles,
       states: States,
       users: await this.userService.getCatalog(entitiesFilter),
