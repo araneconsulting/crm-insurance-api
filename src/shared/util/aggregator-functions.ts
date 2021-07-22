@@ -2,9 +2,10 @@ import * as moment from 'moment';
 import { GroupingCriteria } from 'shared/enum/grouping-criteria';
 
 export function getDateMatchExpressionByDates(
-  startDate?: string,
-  endDate?: string,
+  startDate?: Date,
+  endDate?: Date,
 ): any {
+
   if (startDate && endDate) {
     return {
       $gte: new Date(moment(startDate).startOf('day').toISOString()),

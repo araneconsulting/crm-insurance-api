@@ -1,0 +1,17 @@
+export const ENDORSEMENT_TYPES = [
+  { name: 'Initial Base Premium', id: 'INITIAL_BASE_PREMIUM' },
+  { name: 'Positive Endorsement Premium', id: 'POSITIVE_ENDORSEMENT_PREMIUM' },
+  { name: 'Negative Endorsement Premium', id: 'NEGATIVE_ENDORSEMENT_PREMIUM' },
+  { name: 'Cancel', id: 'CANCEL' },
+  { name: 'Renewal Premium', id: 'RENEWAL_PREMIUM' },
+  { name: 'Rewrite Premium', id: 'REWRITE_PREMIUM' },
+  { name: 'Reinstate', id: 'REINSTATE' },
+  { name: 'General Discount', id: 'GENERAL_DISCOUNT' },
+  { name: 'Govt Discount', id: 'GOVT_DISCOUNT' },
+  { name: 'Premium Audit', id: 'PREMIUM_AUDIT' },
+  { name: 'Credit', id: 'CREDIT' },
+  { name: 'Installment Premium', id: 'INSTALLMENT_PREMIUM' },
+  { name: 'New Policy Premium', id: 'NEW_POLICY_PREMIUM' },
+  { name: 'No Premium Impact', id: 'NO_PREMIUM_IMPACT' },
+  { name: 'Other', id: 'OTHER' },
+];

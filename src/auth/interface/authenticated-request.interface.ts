@@ -1,6 +1,6 @@
+import { User } from 'database/user.model';
 import { Request } from 'express';
-import { UserPrincipal } from './user-principal.interface';
 
 export interface AuthenticatedRequest extends Request {
-  readonly user: UserPrincipal;
+  readonly user: Partial<User>;
 }

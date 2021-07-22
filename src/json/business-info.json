@@ -1,0 +1,28 @@
+{
+  "alias": "MEXICO-I",
+  "info": {
+    "address": {
+      "address1": "1020 Katy Fwy",
+      "address2": "Ste 1100",
+      "city": "Houston",
+      "state": "Texas",
+      "country": "US",
+      "zip": "77034"
+    },
+    "email": "etransport@gmail.com",
+    "fax": "+2318341234",
+    "industry": "Trucking",
+    "logo": "https://cdn.araneconsulting.com/customers/logo1.png",
+    "name": "Ernest Transport",
+    "otherPhones": ["+182340987654"],
+    "primaryPhone": "+14852341245",
+    "primaryPhoneExtension": "200",
+    "secondaryPhone": "",
+    "secondaryPhoneExtension": "",
+    "sector": "Industrials",
+    "startedAt": "01-20-2014",
+    "type": "LLC",
+    "website": "etransport.com"
+  },
+  "payFrequency": "B"
+}

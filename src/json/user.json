@@ -1,0 +1,51 @@
+{
+    "address": {
+      "address2": "21211 Bending Green Way",
+      "address1": "Apt. 911",
+      "city": "Houston",
+      "state": "Texas",
+      "country": "US",
+      "zip": "77450"
+  },
+  "dob": "12-20-1990",
+  "communication": {
+    "email": true,
+    "sms": false,
+    "phone": false
+  },
+  "email": "john@example.com",
+  "emailSettings": {
+    "emailNotification": true,
+    "sendCopyToPersonalEmail": false,
+    "activityRelatesEmail": {
+      "youHaveNewNotifications": false,
+      "youAreSentADirectMessage": false,
+      "locationTargetReached": false,
+      "newTeamMember": false,
+      "employeeTargetReached": true
+    }
+  },
+  "firstName": "John",
+  "gender": "M",
+  "language": "en",
+  "lastName": "Ford",
+  "password": "89473asdasdk343498",
+  "mobilePhone": "+18329451235",
+  "phone": "+12813452398",
+  "roles": ["ADMIN"],
+  "startedAt": "12-30-2020",
+  "timezone": "CDT",
+  "username": "john.ford",
+  "website": "example.com",
+  "company": "___23723ghg3k2jh4j32j3jk4g32jh4",
+  "employeeInfo": {
+    "endedAt": "10-20-2020",
+    "location": "___23723ghg3k2jh4j32j3jk4g32jh4",
+    "position": "Sales Agent",
+    "payFrequency": "H",
+    "payRate": 20,
+    "overtimeAuthorized": true,
+    "overtimePayRate": 1.5,
+    "salaryFormula": "BASE + EMPLOYEE_SALES_BONUS_RANGE('0.5|25000|50000|0', '1|50000|100000|50', '1|100000|-1|100') + LOCATION_SALES_BONUS_EMPLOYEES_COUNT('1')"
+  }
+}

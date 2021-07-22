@@ -1,6 +1,14 @@
 export const DateCatalog = {
   ranges: [
     {
+      id: 'THIS_PAYMENT_PERIOD',
+      name: 'This Payment Period',
+    },
+    {
+      id: 'LAST_PAYMENT_PERIOD',
+      name: 'Last Payment Period',
+    },
+    {
       id: 'TODAY',
       name: 'Today',
     },

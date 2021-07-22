@@ -9,60 +9,54 @@ import { REQUEST } from '@nestjs/core';
 import { Sale } from 'database/sale.model';
 import { User } from 'database/user.model';
 import { Model, Types } from 'mongoose';
-import { EMPTY, from, Observable, of } from 'rxjs';
-import { mergeMap, throwIfEmpty } from 'rxjs/operators';
+import { from, Observable } from 'rxjs';
 import { AuthenticatedRequest } from '../../auth/interface/authenticated-request.interface';
 import {
   INSURER_MODEL,
   SALE_MODEL,
+  ENDORSEMENT_MODEL,
   USER_MODEL,
 } from '../../database/database.constants';
-import { CreateSaleDto } from './create-sale.dto';
-import { UpdateSaleDto } from './update-sale.dto';
-import * as DateFactory from 'shared/util/date-functions';
+import { CreateSaleDto } from './dto/create-sale.dto';
+import { SaleDto } from './dto/sale.dto';
 import { isAdmin, isExecutive } from 'shared/util/user-functions';
-import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import { Insurer } from 'database/insurer.model';
-import { roundAmount } from 'shared/util/math-functions';
-import { CompanyCatalog } from 'shared/const/catalog/company';
+import { UpdateSaleDto } from './dto/update-sale.dto';
+import {
+  buildQueryConditions,
+  extractParamFilters,
+  setSaleCalculations,
+  setSortCriteria,
+  unwindReferenceFields,
+} from './sale.utils';
+import { SaleItem } from 'business/sub-docs/sale-item';
+import { Location } from 'database/location.model';
+import { Customer } from 'database/customer.model';
+import { EndorsementDto } from './dto/endorsement.dto';
+import { Endorsement } from 'database/endorsement.model';
+import { COVERAGES_TYPES } from 'shared/const/catalog/coverages-types';
+import { PERMIT_TYPES } from 'shared/const/catalog/permits-types';
 
+const SALE_LAYOUT_DEFAULT = 'NORMAL';
+const SALE_LAYOUT_FULL = 'FULL';
 @Injectable({ scope: Scope.REQUEST })
 export class SaleService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
+    @Inject(ENDORSEMENT_MODEL) private endorsementModel: Model<Endorsement>,
     @Inject(INSURER_MODEL) private insurerModel: Model<Insurer>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
   /**
-   * @param  {Partial<User>} user
    * @param  {string} startDate?
    * @param  {string} endDate?
-   * @param  {string} type?
+   * @param  {string} lineOfBusiness?
    * @returns Promise
    */
-  async findAll(
-    user: Partial<User>,
-    startDate?: string,
-    endDate?: string,
-    type?: string,
-  ): Promise<any> {
-    const filterConditions = {
-      soldAt: getDateMatchExpressionByDates(startDate, endDate),
-    };
-
-    if (type) {
-      filterConditions['type'] = type;
-    }
-
-    if (!isAdmin(user) && !isExecutive(user)) {
-      filterConditions['seller'] = Types.ObjectId(user.id);
-    }
-
+  async findAll(): Promise<any> {
     const query = this.saleModel.aggregate();
-    query.match(filterConditions);
-
     query
       .unwind({ path: '$seller', preserveNullAndEmptyArrays: true })
       .lookup({
@@ -81,103 +75,62 @@ export class SaleService {
         foreignField: '_id',
         as: 'customer',
       })
-      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
 
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
       .lookup({
-        from: 'insurers',
-        localField: 'liabilityInsurer',
+        from: 'locations',
+        localField: 'location',
         foreignField: '_id',
-        as: 'liabilityInsurer',
+        as: 'location',
       })
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'cargoInsurer',
-        foreignField: '_id',
-        as: 'cargoInsurer',
-      })
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'insurers',
-        localField: 'physicalDamageInsurer',
-        foreignField: '_id',
-        as: 'physicalDamageInsurer',
-      })
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'wcGlUmbInsurer',
-        foreignField: '_id',
-        as: 'wcGlUmbInsurer',
-      })
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
 
       .append([
         {
           $project: {
-            type: '$type',
+            code: '$code',
+            items: '$items',
+            lineOfBusiness: '$lineOfBusiness',
             soldAt: '$soldAt',
-            liabilityCharge: { $round: ['$liabilityCharge', 2] },
-            liabilityProfit: { $round: ['$liabilityProfit', 2] },
-            cargoCharge: { $round: ['$cargoCharge', 2] },
-            cargoProfit: { $round: ['$cargoProfit', 2] },
-            physicalDamageCharge: { $round: ['$physicalDamageCharge', 2] },
-            physicalDamageProfit: { $round: ['$physicalDamageProfit', 2] },
-            wcGlUmbCharge: { $round: ['$wcGlUmbCharge', 2] },
-            wcGlUmbProfit: { $round: ['$wcGlUmbProfit', 2] },
             fees: { $round: ['$fees', 2] },
-            permits: { $round: ['$permits', 2] },
             tips: { $round: ['$tips', 2] },
             chargesPaid: { $round: ['$chargesPaid', 2] },
             premium: { $round: ['$premium', 2] },
             amountReceivable: { $round: ['$amountReceivable', 2] },
             totalCharge: { $round: ['$totalCharge', 2] },
+            downPayment: { $round: ['$downPayment', 2] },
             sellerName: {
               $concat: ['$seller.firstName', ' ', '$seller.lastName'],
             },
             locationName: {
               $function: {
-                body: function (seller, CompanyCatalog) {
-                  location = CompanyCatalog.locations.find(
-                    ({ id }) => id === seller.location,
-                  );
-                  return location ? location['name'] : '';
+                body: function (location: any) {
+                  return location ? location.business.name : 'N/A';
                 },
-                args: ['$seller', CompanyCatalog],
+                args: ['$location'],
                 lang: 'js',
               },
             },
             customerName: {
               $function: {
-                body: function (customer) {
-                  return customer ? customer.company || customer.name : '';
+                body: function (customer: any) {
+                  return customer
+                    ? customer.type === 'BUSINESS'
+                      ? customer.business.name
+                      : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                    : 'N/A';
                 },
                 args: ['$customer'],
                 lang: 'js',
               },
             },
-            location: '$location',
             createdBy: '$createdBy',
             updatedBy: '$updatedBy',
             seller: 1,
             customer: 1,
-            liabilityInsurer: 1,
-            cargoInsurer: 1,
-            physicalDamageInsurer: 1,
-            wcGlUmbInsurer: 1,
+            location: 1,
           },
         },
       ])
@@ -187,55 +140,111 @@ export class SaleService {
   }
 
   /**
+   * @param  {string} code
+   * @param  {} withSeller=false
+   * @param  {} withCustomer=false
+   * @param  {} withInsurers=false
+   * @returns Observable
+   */
+  async findByCode(
+    code: string,
+    withSeller = false,
+    withCustomer = false,
+    layout = SALE_LAYOUT_DEFAULT,
+  ): Promise<any> {
+    const saleQuery = this.saleModel.findOne({ code: code });
+
+    if (withSeller) {
+      saleQuery.populate('seller', 'roles firstName lastName fullName');
+    }
+
+    if (withCustomer) {
+      saleQuery.populate(
+        'customer',
+        'type contact.firstName contact.lastName business.name name',
+      );
+    }
+
+    const sale: Partial<Sale> = await saleQuery.exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale with code:${code} was not found`);
+    }
+
+    let saleDto: Partial<SaleDto> = { ...sale['_doc'] };
+
+    saleDto.endorsements = await this.endorsementModel
+      .find({ policy: sale._id })
+      .exec();
+
+    return saleDto;
+  }
+
+  /**
    * @param  {string} id
    * @param  {} withSeller=false
    * @param  {} withCustomer=false
    * @param  {} withInsurers=false
    * @returns Observable
    */
-  findById(
+  async findById(
     id: string,
     withSeller = false,
     withCustomer = false,
-    withInsurers = false,
-  ): Observable<Sale> {
+    layout = SALE_LAYOUT_DEFAULT,
+  ): Promise<Partial<any>> {
     const saleQuery = this.saleModel.findOne({ _id: id });
 
     if (withSeller) {
-      saleQuery.populate('seller');
+      saleQuery.populate('seller', 'roles firstName lastName fullName');
     }
 
     if (withCustomer) {
-      saleQuery.populate('customer');
+      saleQuery.populate(
+        'customer',
+        'type contact.firstName contact.lastName business.name name',
+      );
     }
 
-    if (withInsurers) {
-      saleQuery.populate('liabilityInsurer');
-      saleQuery.populate('cargoInsurer');
-      saleQuery.populate('physicalDamageInsurer');
-      saleQuery.populate('wcGlUmbInsurer');
+    let sale: Partial<any> = await saleQuery.exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale:${id} was not found`);
     }
 
-    return from(saleQuery.exec()).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
-    );
+    if (layout === SALE_LAYOUT_FULL) {
+      sale.endorsements = await this.endorsementModel
+        .find({ policy: sale.id })
+        .exec();
+    }
+
+    return sale;
   }
 
   /**
    * @param  {CreateSaleDto} saleDto
-   * @param  {Partial<User>} user
    * @returns Promise
    */
-  async save(saleDto: CreateSaleDto, user: Partial<User>): Promise<Sale> {
-    console.log(saleDto.soldAt);
+  async save(createSaleDto: CreateSaleDto): Promise<Partial<SaleDto>> {
+    let saleDto: Partial<SaleDto> = { ...createSaleDto };
+
+    if (!saleDto.isChargeItemized) {
+      saleDto.items = saleDto.items.map((item) => {
+        return {
+          ...item,
+          amount: 0,
+          premium: 0,
+          profits: 0,
+        };
+      });
+    }
 
     if (
       !saleDto.seller ||
-      (saleDto.seller && !isAdmin(user) && !isExecutive(user))
+      (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
     ) {
-      saleDto.seller = user.id;
-      saleDto['location'] = user.location;
+      saleDto.seller = this.req.user.id;
+      saleDto['location'] = this.req.user.location;
     } else {
       const seller = await this.userModel.findOne({ _id: saleDto.seller });
       if (!seller) {
@@ -245,54 +254,119 @@ export class SaleService {
       saleDto['location'] = seller.location;
     }
 
-    let saleData = await this.setSaleCalculations(saleDto);
+    const insurers = await this.insurerModel.find({}).exec();
+    let saleData = await setSaleCalculations(saleDto, insurers);
 
-    return this.saleModel.create({
+    const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+
+    if (endorsements) {
+      delete saleData['endorsements'];
+    }
+
+    const created: any = await this.saleModel.create({
       ...saleData,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
     });
+
+    const createdSaleDto: Partial<SaleDto> = { ...created['_doc'] };
+
+    await this.processEndorsements(endorsements, created, createdSaleDto);
+
+    return createdSaleDto;
   }
 
   /**
-   * @param  {string} id
+   * @param  {string} code
    * @param  {UpdateSaleDto} data
-   * @param  {Partial<User>} user
    * @returns Promise
    */
   async update(
-    id: string,
-    data: UpdateSaleDto,
-    user: Partial<User>,
-  ): Promise<Sale> {
-    if (data.seller && !isAdmin(user) && !isExecutive(user)) {
-      delete data.seller;
+    code: string,
+    updateSaleDto: UpdateSaleDto,
+  ): Promise<Partial<SaleDto>> {
+    let saleDto: Partial<SaleDto> = { ...updateSaleDto };
+
+    if (!saleDto.isChargeItemized && saleDto.items) {
+      saleDto.items = saleDto.items.map((item) => ({
+        ...item,
+        amount: 0,
+        premium: 0,
+        profits: 0,
+      }));
     }
 
-    let sale = await this.saleModel.findById(Types.ObjectId(id)).exec();
+    saleDto.updatedBy = this.req.user.id;
+
+    if (
+      saleDto.seller &&
+      !isAdmin(this.req.user) &&
+      !isExecutive(this.req.user)
+    ) {
+      delete saleDto.seller;
+    }
+
+    let sale: Partial<Sale> = await this.saleModel
+      .findOne({ code: code })
+      .exec();
 
     if (!sale) {
-      throw new NotFoundException(`sale:$id was not found`);
+      throw new NotFoundException(`sale:${code} was not found`);
     }
 
-    let saleDto: CreateSaleDto = { ...sale['_doc'], ...data };
+    saleDto = {
+      ...sale['_doc'],
+      ...saleDto,
+      updatedBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    };
 
-    let saleData = await this.setSaleCalculations(saleDto);
+    const insurers = await this.insurerModel.find({}).exec();
+    const saleData: any = await setSaleCalculations(saleDto, insurers);
 
-    return this.saleModel.findOneAndUpdate(
-      { _id: Types.ObjectId(id) },
-      saleData,
+    const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+    if (endorsements) {
+      delete saleData['endorsements'];
+    }
+
+    const updated = await this.saleModel.findOneAndUpdate(
+      { _id: Types.ObjectId(sale.id) },
+      {
+        ...saleData,
+      },
       { new: true },
     );
+
+    const updatedSaleDto: Partial<SaleDto> = { ...updated['_doc'] };
+
+    await this.processEndorsements(endorsements, updated, updatedSaleDto);
+
+    return updatedSaleDto;
   }
 
   /**
-   * @param  {string} id
+   * @param  {string} code
    * @returns Observable
    */
-  deleteById(id: string): Observable<Sale> {
-    return from(this.saleModel.findOneAndDelete({ _id: id }).exec()).pipe(
-      mergeMap((p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`sale:$id was not found`)),
+  async deleteByCode(code: string): Promise<Sale> {
+    let sale: Partial<Sale> = await this.saleModel
+      .findOne({ code: code })
+      .exec();
+
+    if (!sale) {
+      throw new NotFoundException(`sale:${code} was not found`);
+    }
+
+    const deleteEndorsementsResult = this.endorsementModel
+      .deleteMany({ policy: sale.id })
+      .exec();
+
+    console.log(
+      'Delete all sale endorsements result: ',
+      deleteEndorsementsResult,
     );
+
+    return this.saleModel.findOneAndDelete({ code: code }).exec();
   }
 
   /**
@@ -300,108 +374,307 @@ export class SaleService {
    */
 
   deleteAll(): Observable<any> {
+    this.endorsementModel.deleteMany({}).exec();
     return from(this.saleModel.deleteMany({}).exec());
   }
 
   /**
-   * @param  {string} dateRange
+   * @returns Observable
    */
-  getDateMatchExpressionByRange(dateRange: string): any {
-    //Set filtering conditions
-    const dates = DateFactory.dateRangeByName(dateRange);
 
-    return dateRange
-      ? {
-          $gte: new Date(dates.start + 'T00:00:00.000Z'),
-          $lte: new Date(dates.end + 'T23:59:59.999Z'),
-        }
-      : { $lte: new Date() };
+  async batchDelete(codes: string[]): Promise<any> {
+    //TODO: Delete all endorsements with (get all policies by codes, then delete all endorsement by policy Id)
+
+    return this.saleModel.deleteMany({ code: { $in: codes } }).exec();
+  }
+
+  async search(queryParams?: any): Promise<any> {
+    const queryFilters: Object = extractParamFilters(queryParams);
+
+    let conditions = buildQueryConditions(queryParams, queryFilters);
+
+    let query = this.saleModel.aggregate();
+
+    query = unwindReferenceFields(query);
+
+    if (conditions) {
+      query.match(conditions);
+    }
+
+    query.append([
+      {
+        $project: {
+          id: '$_id',
+          code: '$code',
+          createdAt: '$createdAt',
+          customerName: {
+            $function: {
+              body: function (customer: Customer) {
+                return customer
+                  ? customer.type === 'BUSINESS'
+                    ? customer.business.name
+                    : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                  : 'N/A';
+              },
+              args: ['$customer'],
+              lang: 'js',
+            },
+          },
+          deleted: '$deleted',
+          isRenewal: '$isRenewal',
+          locationName: {
+            $function: {
+              body: function (location: Location) {
+                return location ? location.business.name : 'N/A';
+              },
+              args: ['$location'],
+              lang: 'js',
+            },
+          },
+          number: '$number',
+          effectiveAt: '$effectiveAt',
+          expiresAt: '$expiresAt',
+          premium: { $round: ['$premium', 2] },
+          products: {
+            $function: {
+              body: function (
+                type: string,
+                items: SaleItem[],
+                coverageTypes: [],
+                permitTypes: [],
+              ) {
+                return type === 'POLICY'
+                  ? [
+                      ...new Set(
+                        items.map((item) => {
+                          return (
+                            coverageTypes.find(
+                              (type) => item.product === type['id'],
+                            ) || {
+                              id: 'N/A',
+                              name: 'N/A',
+                              description: '',
+                              iconLabel: 'N/A',
+                            }
+                          );
+                        }),
+                      ),
+                    ]
+                  : [
+                      ...new Set(
+                        items.map((item) => {
+                          return (
+                            permitTypes.find(
+                              (type) => item.product === type['product'],
+                            ) || {
+                              ...item,
+                              iconLabel: `${item.product[0]}-${
+                                item.product[item.product.length - 1]
+                              }`,
+                            }
+                          );
+                        }),
+                      ),
+                    ];
+              },
+              args: ['$type', '$items', COVERAGES_TYPES, PERMIT_TYPES],
+              lang: 'js',
+            },
+          },
+          sellerName: {
+            $concat: ['$seller.firstName', ' ', '$seller.lastName'],
+          },
+          soldAt: '$soldAt',
+          status: '$status',
+          totalCharge: { $round: ['$totalCharge', 2] },
+          downPayment: { $round: ['$downPayment', 2] },
+          lineOfBusiness: '$lineOfBusiness',
+          type: '$type',
+        },
+      },
+    ]);
+
+    const sortCriteria = setSortCriteria(queryParams);
+    const skipCriteria = (queryParams.pageNumber - 1) * queryParams.pageSize;
+    const limitCriteria = queryParams.pageSize;
+
+    query.skip(skipCriteria).limit(limitCriteria).sort(sortCriteria);
+
+    const entities = await query.exec();
+
+    return {
+      entities: entities,
+      totalCount: entities.length,
+    };
   }
 
   /**
-   * @param  {string} startDate?
-   * @param  {string} endDate?
-   */
-  getDateMatchExpressionByDates(startDate?: string, endDate?: string): Object {
-    if (startDate && endDate) {
-      return {
-        $gte: new Date(startDate + 'T00:00:00.000Z'),
-        $lte: new Date(endDate + 'T23:59:59.999Z'),
-      };
-    } else if (startDate) {
-      return { $gte: new Date(startDate + 'T00:00:00.000Z') };
-    } else if (endDate) {
-      return { $lte: new Date(endDate + 'T23:59:59.999Z') };
-    } else return { $lte: new Date() };
-  }
-
-  /**
-   * @param  {CreateSaleDto} sale
+   * @param  {EndorsementDto} endorsementDto
    * @returns Promise
    */
-  async setSaleCalculations(sale: CreateSaleDto): Promise<CreateSaleDto> {
+  async addEndorsement(endorsementDto: EndorsementDto): Promise<Endorsement> {
+    //TODO: set accountingClass by type value
+    //TODO: update sale calculations based on endorsement
+
+    return this.endorsementModel.create({
+      ...endorsementDto,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    });
+  }
+
+  /**
+   * @param  {CreateSaleDto} saleDto
+   * @returns Promise
+   */
+  async renew(
+    code: string,
+    createSaleDto: CreateSaleDto,
+  ): Promise<Partial<SaleDto>> {
+    let saleDto: Partial<SaleDto> = { ...createSaleDto };
+
+    if (!saleDto.isChargeItemized) {
+      saleDto.items = saleDto.items.map((item) => ({
+        ...item,
+        amount: 0,
+        premium: 0,
+        profits: 0,
+      }));
+    }
+
+    const updated: Partial<Sale> = await this.saleModel
+      .findOneAndUpdate({ code: code }, { renewed: true })
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException(
+        `Cannot renew sale:${code} because is missing. `,
+      );
+    }
+
+    if (
+      !saleDto.seller ||
+      (saleDto.seller && !isAdmin(this.req.user) && !isExecutive(this.req.user))
+    ) {
+      saleDto.seller = this.req.user.id;
+      saleDto.location = this.req.user.location;
+    } else {
+      const seller = await this.userModel.findOne({ _id: saleDto.seller });
+      if (!seller) {
+        throw new ConflictException('Seller not found');
+      }
+      saleDto.seller = seller._id;
+      saleDto.location = seller.location;
+    }
+
+    saleDto.renewalReference = updated.id;
+
     const insurers = await this.insurerModel.find({}).exec();
-    if (sale.liabilityInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.liabilityInsurer &&
-          sale.liabilityInsurer !== '' &&
-          insurer.id === sale.liabilityInsurer.toString(),
-      );
-      sale['liabilityProfit'] = insurer
-        ? roundAmount(
-            (insurer.liabilityCommission / 100) * sale.liabilityCharge,
-          )
-        : 0;
+    let saleData = await setSaleCalculations(saleDto, insurers);
+
+    const endorsements: Partial<EndorsementDto>[] = saleData.endorsements;
+
+    if (endorsements) {
+      delete saleData['endorsements'];
     }
 
-    if (sale.cargoInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.cargoInsurer &&
-          sale.cargoInsurer !== '' &&
-          insurer.id === sale.cargoInsurer.toString(),
+    let created: any = this.saleModel.create({
+      ...saleData,
+      createdBy: { _id: this.req.user.id },
+      company: { _id: this.req.user.company },
+    });
+
+    const createdSaleDto: Partial<SaleDto> = { ...created['_doc'] };
+
+    await this.processEndorsements(endorsements, created, createdSaleDto);
+
+    return createdSaleDto;
+  }
+
+  async upsertAndDeleteEndorsements(
+    endorsements: Partial<EndorsementDto>[],
+    policy: Partial<Sale>,
+  ) {
+    let endorsementDocs: any[] = [];
+
+    const user = this.req.user.id;
+    const company = this.req.user.company;
+
+    endorsements.forEach((endorsement) => {
+      if (!endorsement.followUpPerson || endorsement.followUpPerson === '') {
+        delete endorsement['followUpPerson'];
+      }
+
+      if (endorsement.items) {
+        endorsement.items = endorsement.items.map((item) => {
+          if (!item.followUpPerson || item.followUpPerson === '') {
+            delete item['followUpPerson'];
+          }
+          return item;
+        });
+      }
+
+      const markedToDelete = endorsement.markedToDelete;
+      delete endorsement['markedToDelete'];
+
+      if (endorsement.code) {
+        endorsement = {
+          ...endorsement,
+          updatedBy: user,
+        };
+        endorsementDocs.push({
+          updateOne: {
+            filter: { code: endorsement.code },
+            update: endorsement,
+            upsert: true,
+          },
+        });
+      } else if (markedToDelete) {
+        endorsementDocs.push({
+          deleteOne: {
+            filter: { code: endorsement.code },
+          },
+        });
+      } else {
+        endorsement = {
+          ...endorsement,
+          createdBy: user,
+          company: company,
+          policy: policy,
+        };
+        endorsementDocs.push({
+          insertOne: {
+            document: endorsement,
+          },
+        });
+      }
+    });
+
+    let endorsementUpsertResult = await this.endorsementModel.bulkWrite(
+      endorsementDocs,
+    );
+    return endorsementUpsertResult;
+  }
+
+  private async processEndorsements(
+    endorsements: Partial<EndorsementDto>[],
+    sale: any,
+    saleDto: Partial<SaleDto>,
+  ) {
+    if (endorsements) {
+      const endorsementUpsertResult = await this.upsertAndDeleteEndorsements(
+        endorsements,
+        sale,
       );
-      sale['cargoProfit'] = insurer
-        ? roundAmount((insurer.cargoCommission / 100) * sale.cargoCharge)
-        : 0;
+
+      if (endorsementUpsertResult.result['ok'] !== endorsements.length) {
+        console.log('Endorsement upsert failed at least in one of them');
+        console.log('Results: ', endorsementUpsertResult);
+      }
+
+      saleDto.endorsements = await this.endorsementModel
+        .find({ policy: sale.id })
+        .exec();
     }
-
-    if (sale.physicalDamageInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.physicalDamageInsurer &&
-          sale.physicalDamageInsurer !== '' &&
-          insurer.id === sale.physicalDamageInsurer.toString(),
-      );
-      sale['physicalDamageProfit'] = insurer
-        ? roundAmount(
-            (insurer.physicalDamageCommission / 100) *
-              sale.physicalDamageCharge,
-          )
-        : 0;
-    }
-
-    if (sale.wcGlUmbInsurer) {
-      const insurer = insurers.find(
-        (insurer) =>
-          sale.wcGlUmbInsurer &&
-          sale.wcGlUmbInsurer !== '' &&
-          insurer.id === sale.wcGlUmbInsurer.toString(),
-      );
-      sale['wcGlUmbProfit'] = insurer
-        ? roundAmount((insurer.wcGlUmbCommission / 100) * sale.wcGlUmbCharge)
-        : 0;
-    }
-
-    sale['premium'] =
-      (sale.liabilityCharge || 0) +
-      (sale.cargoCharge || 0) +
-      (sale.physicalDamageCharge || 0) +
-      (sale.wcGlUmbCharge || 0);
-    sale['amountReceivable'] =
-      (sale.totalCharge || 0) - (sale.chargesPaid || 0);
-
-    return sale;
   }
 }

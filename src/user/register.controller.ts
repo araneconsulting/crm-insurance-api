@@ -6,10 +6,10 @@ import { Observable } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
 import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
-import { RegisterDto } from './register.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 
-@Controller('register')
+/* @Controller('register')
 export class RegisterController {
     constructor(private userService: UserService) { }
 
@@ -18,9 +18,9 @@ export class RegisterController {
     @HttpCode(201)
     @UseFilters( MongoFilter)
     register(
-        @Body() registerDto: RegisterDto,
+        @Body() createUserDto: CreateUserDto,
         @Res() res: Response): Observable<Response> {
-        const email = registerDto.email;
+        const email = createUserDto.email;
 
         return this.userService.existsByEmail(email).pipe(
             mergeMap(exists => {
@@ -28,14 +28,14 @@ export class RegisterController {
                     throw new ConflictException(`email:${email} exists already`)
                 }
                 else {
-                    const email = registerDto.email;
+                    const email = createUserDto.email;
                     return this.userService.existsByEmail(email).pipe(
                         mergeMap(exists => {
                             if (exists) {
                                 throw new ConflictException(`email:${email} exists already`)
                             }
                             else {
-                                return this.userService.createUser(registerDto).pipe(
+                                return this.userService.createUser(createUserDto).pipe(
                                     map(user =>
                                         res.location('/users/' + user.id)
                                             .status(201)
@@ -49,4 +49,4 @@ export class RegisterController {
             })
         );
     }
-}
+} */

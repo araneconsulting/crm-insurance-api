@@ -28,9 +28,9 @@ import { JwtAuthGuard } from '../../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guard/roles.guard';
 import { ParseObjectIdPipe } from '../../shared/pipe/parse-object-id.pipe';
 import { Customer } from '../../database/customer.model';
-import { CreateCustomerDto } from './create-customer.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerService } from './customer.service';
-import { UpdateCustomerDto } from './update-customer.dto';
+import { UpdateCustomerDto } from './dto/customer.dto';
 import { BadRequestFilter } from 'shared/filter/bad-request.filter';
 import { MongoFilter } from 'shared/filter/mongo.filter';
 
@@ -42,15 +42,20 @@ export class CustomerController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async getAllCustomers(
-    @Query('q') keyword?: string,
-    @Query('limit', new DefaultValuePipe(0), ParseIntPipe) limit?: number,
-    @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
   ): Promise<any> {
-    const res = await this.customerService.findAll(keyword, skip, limit);
+    const res = await this.customerService.findAll();
     return {
-      totalCount: res.length,
-      entities: res,
+      data: res,
     };
+  }
+
+  @Post('/search')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async searchUsers(
+    @Body() query: any,
+  ): Promise<any> {
+    return await this.customerService.search(query.queryParams);
   }
 
   @Get(':id')

@@ -20,7 +20,7 @@ export class InsurerDataInitializerService
   ) { }
 
   async onModuleInit(): Promise<void> {
-    console.log('(InsuranceModule) is initialized...');
+    console.log('(InsurerModule) is initialized...');
     //await this.insurerModel.deleteMany({});
     //await this.insurerModel.insertMany(this.insurerData).then((r) => console.log(r));
   }

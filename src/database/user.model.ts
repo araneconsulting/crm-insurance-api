@@ -1,56 +1,159 @@
 import { compare, genSaltSync, hash } from 'bcrypt';
 import { Connection, Document, Model, Schema, SchemaTypes } from 'mongoose';
-import { from, Observable } from "rxjs";
-import { ADMIN_ROLES, SELLER_ROLES } from 'shared/const/project-constants';
-import { LocationType } from 'shared/enum/location-type.enum';
+import { from, Observable } from 'rxjs';
+import {
+  ADMIN_ROLES,
+  EXECUTIVE_ROLES,
+  SELLER_ROLES,
+  SUPER_ADMIN_ROLES,
+} from 'shared/const/project-constants';
+import {
+  Communication,
+  CommunicationSchema,
+} from 'shared/sub-documents/communication';
+import { Address, AddressSchema } from 'shared/sub-documents/address';
 import { RoleType } from '../shared/enum/role-type.enum';
+import { Company } from './company.model';
+import { EmailSettings } from 'user/dto/email-settings';
+import * as mongoSoftDelete from 'mongoosejs-soft-delete';
+import {
+  EmployeeInfo,
+  EmployeeInfoSchema,
+} from 'business/sub-docs/employee-info';
+import { Location } from './location.model';
+import { nanoid } from 'nanoid';
+
 interface User extends Document<any> {
-  comparePassword(password: string): Observable<boolean>;
-  readonly username: string;
+  readonly code: string;
+  readonly address: Address;
+  readonly dob: string;
+  readonly communication: Communication;
   readonly email: string;
-  readonly password: string;
+  readonly emailSettings: EmailSettings;
   readonly firstName: string;
+  readonly gender: string; //can be: male (M), female (F), transgender (T), other (O)
+  readonly language: string;
   readonly lastName: string;
+  readonly password: string;
+  readonly mobilePhone: string;
   readonly phone: string;
   readonly roles: RoleType[];
-  readonly location: string;
-  readonly position: string;
-  readonly baseSalary: number;
-  readonly startedAt: string,
+  readonly timezone: string;
+  readonly username: string;
+  readonly website: string;
+
+  //EMPLOYEE DATA (DEPENDS ON BUSINESS MODEL)
+  readonly company: Partial<Company>;
+  readonly employeeInfo: EmployeeInfo;
+  readonly supervisor: Partial<User>;
+  readonly location: Partial<Location>;
+
+  readonly createdBy: Partial<User>;
+  readonly updatedBy: Partial<User>;
+
+  comparePassword(password: string): Observable<boolean>;
 }
 
 type UserModel = Model<User>;
 
 const UserSchema = new Schema<any>(
   {
-    username: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
-    password: {type: SchemaTypes.String},
-    email: { type : SchemaTypes.String , unique : true, required : true, dropDups: true },
-    firstName: { type: SchemaTypes.String, required: false },
-    lastName: { type: SchemaTypes.String, required: false },
-    phone: { type : SchemaTypes.String , unique : true, required : false, dropDups: true },
-    location: { type: SchemaTypes.String, required: true },
-    position: { type: SchemaTypes.String, required: true },
-    baseSalary: SchemaTypes.Number,
-    startedAt: SchemaTypes.Date,
-    roles: [
-      { type: SchemaTypes.String, required: false },
-    ],
-    createdAt: { type: SchemaTypes.Date, required: false },
-    updatedAt: { type: SchemaTypes.Date, required: false },
+    code: {
+      type: SchemaTypes.String,
+      default: () => nanoid(6),
+      required: false,
+    },
+    address: {
+      type: AddressSchema,
+      default: {
+        address2: '',
+        address1: '',
+        city: '',
+        state: '',
+        country: 'US',
+        zip: '',
+      },
+    },
+    dob: { type: SchemaTypes.Date },
+    communication: {
+      type: CommunicationSchema,
+      default: {
+        email: true,
+        sms: true,
+        phone: false,
+      },
+    },
+    email: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: true,
+      dropDups: true,
+    },
+    emailSettings: {
+      type: {
+        emailNotification: SchemaTypes.Boolean,
+        sendCopyToPersonalEmail: SchemaTypes.Boolean,
+        activityRelatesEmail: {
+          youHaveNewNotifications: SchemaTypes.Boolean,
+          youAreSentADirectMessage: SchemaTypes.Boolean,
+          locationTargetReached: SchemaTypes.Boolean,
+          newTeamMember: SchemaTypes.Boolean,
+          employeeTargetReached: SchemaTypes.Boolean,
+        },
+      },
+      default: {
+        emailNotification: true,
+        sendCopyToPersonalEmail: false,
+        activityRelatesEmail: {
+          youHaveNewNotifications: false,
+          youAreSentADirectMessage: false,
+          locationTargetReached: false,
+          newTeamMember: false,
+          employeeTargetReached: true,
+        },
+      },
+    },
+    firstName: { type: SchemaTypes.String },
+    gender: { type: SchemaTypes.String },
+    language: { type: SchemaTypes.String, default: 'en' },
+    lastName: { type: SchemaTypes.String },
+    password: { type: SchemaTypes.String },
+    mobilePhone: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: false,
+      dropDups: true,
+    },
+    phone: { type: SchemaTypes.String, required: false },
+    roles: { type: [SchemaTypes.String] },
+    timezone: { type: SchemaTypes.String, default: 'CDT' },
+    username: {
+      type: SchemaTypes.String,
+      unique: true,
+      required: true,
+      dropDups: true,
+    },
+    website: { type: SchemaTypes.String },
+
+    //EMPLOYEE DATA
+    company: { type: SchemaTypes.ObjectId, ref: 'Company' },
+    employeeInfo: { type: EmployeeInfoSchema, default: {} },
+    supervisor: { type: SchemaTypes.ObjectId, ref: 'User' },
+    location: { type: SchemaTypes.ObjectId, ref: 'Location' },
+    createdBy: { type: SchemaTypes.ObjectId, ref: 'User' },
+    updatedBy: { type: SchemaTypes.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,
     toJSON: {
-      virtuals: true
-    }
+      virtuals: true,
+    },
   },
 );
 
-// see: https://wanago.io/2020/05/25/api-nestjs-authenticating-users-bcrypt-passport-jwt-cookies/
-// and https://stackoverflow.com/questions/48023018/nodejs-bcrypt-async-mongoose-login
-async function preSaveHook(next) {
+UserSchema.plugin(mongoSoftDelete);
 
+async function preSaveHook(next) {
   // Only run this function if password was modified
   if (!this.isModified('password')) return next();
 
@@ -65,17 +168,19 @@ async function preSaveHook(next) {
 UserSchema.pre<User>('save', preSaveHook);
 
 UserSchema.pre('findOneAndUpdate', async function (this) {
-  let update = {...this.getUpdate()};
+
+  let updateAction: any = this.getUpdate();
+
+  let update:any = { ...updateAction };
 
   // Only run this function if password was modified
-  if (update.password){
-
-  // Hash the password
-  const salt = genSaltSync();
-  update.password = await hash(this.getUpdate().password, salt);
-  this.setUpdate(update);
+  if (update.password) {
+    // Hash the password
+    const salt = genSaltSync();
+    update.password = await hash(updateAction.password, salt);
+    this.setUpdate(update);
   }
-})
+});
 
 function comparePasswordMethod(password: string): Observable<boolean> {
   return from(compare(password, this.password));
@@ -83,19 +188,31 @@ function comparePasswordMethod(password: string): Observable<boolean> {
 
 UserSchema.methods.comparePassword = comparePasswordMethod;
 
-function nameGetHook() : string {
+function fullNameGetHook(): string {
   return `${this.firstName} ${this.lastName}`;
 }
 
-UserSchema.virtual('name').get(nameGetHook);
+UserSchema.virtual('fullName').get(fullNameGetHook);
 
-function isAdminGetHook() : boolean{
+function isAdminGetHook(): boolean {
   return ADMIN_ROLES.includes(this.roles[0]);
 }
 
 UserSchema.virtual('isAdmin').get(isAdminGetHook);
 
-function isSellerGetHook() : boolean{
+function isSuperAdminGetHook(): boolean {
+  return SUPER_ADMIN_ROLES.includes(this.roles[0]);
+}
+
+UserSchema.virtual('isSuperAdmin').get(isSuperAdminGetHook);
+
+function isExecutiveGetHook(): boolean {
+  return EXECUTIVE_ROLES.includes(this.roles[0]);
+}
+
+UserSchema.virtual('isExecutive').get(isExecutiveGetHook);
+
+function isSellerGetHook(): boolean {
   return SELLER_ROLES.includes(this.roles[0]);
 }
 
@@ -110,4 +227,16 @@ UserSchema.virtual('sales', {
 const userModelFn: (conn: Connection) => UserModel = (conn: Connection) =>
   conn.model<User, UserModel>('User', UserSchema, 'users');
 
-export { User, UserModel, UserSchema, preSaveHook, nameGetHook, isAdminGetHook, isSellerGetHook, comparePasswordMethod, userModelFn };
+export {
+  User,
+  UserModel,
+  UserSchema,
+  preSaveHook,
+  fullNameGetHook,
+  isAdminGetHook,
+  isExecutiveGetHook,
+  isSuperAdminGetHook,
+  isSellerGetHook,
+  comparePasswordMethod,
+  userModelFn,
+};

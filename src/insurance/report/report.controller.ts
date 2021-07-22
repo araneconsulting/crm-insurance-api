@@ -32,8 +32,8 @@ export class ReportController {
   async getSalesReport(
     @Req() req: Request,
     @Response() res,
-    @Query('start_date') startDate?: string,
-    @Query('end_date') endDate?: string,
+    @Query('start_date') startDate?: Date,
+    @Query('end_date') endDate?: Date,
     @Query('filter_field') filterField?: string,
     @Query('filter_value') filterValue?: string,
     @Query('group_by') groupBy?: string,
@@ -50,8 +50,7 @@ export class ReportController {
       : [];
 
     const response = {
-      metrics: await this.reportService.getSalesMetrics(
-        user,
+       metrics: await this.reportService.getSalesMetrics(
         startDate,
         endDate,
         filterField ? filterField.toLowerCase() : null,
@@ -60,12 +59,11 @@ export class ReportController {
         groupByFieldsArray,
         fieldsArray,
         Boolean(withCount),
-      ),
+      ), 
     };
 
     if (Boolean(withSales)) {
       response['sales'] = await this.reportService.getAllSales(
-        user,
         startDate,
         endDate,
         filterField ? filterField.toLowerCase() : null,
@@ -100,7 +98,6 @@ export class ReportController {
         month,
         year,
         seller,
-        location,
       ),
     };
 
@@ -166,7 +163,7 @@ export class ReportController {
     }
 
     const baseDate =
-      moment().date() < 21
+      moment().date() < COMPANY.payrollDay
         ? moment({
             year: year,
             month: month,
@@ -195,7 +192,7 @@ export class ReportController {
         subtitle: '',
         label: 'Accumulated Salary',
         valuePrefix: '$',
-        value: userMetrics.totalSalary,
+        value: userMetrics.totalRegularSalary,
         valueSuffix: '',
         description:
           'Salary is the sum of your base salary plus bonus and tips minus discounts.',

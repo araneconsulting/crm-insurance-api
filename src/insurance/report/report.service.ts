@@ -7,33 +7,39 @@ import {
   SALE_MODEL,
   USER_MODEL,
   CUSTOMER_MODEL,
+  LOCATION_MODEL,
 } from '../../database/database.constants';
 import * as DateFactory from 'shared/util/date-functions';
 import { GroupingCriteria } from 'shared/enum/metrics-layout.enum';
 import { COMPANY, METRICS } from 'shared/const/project-constants';
 import * as moment from 'moment';
-import { bonusByRole } from '../../shared/util/salary-functions';
 import { getDateMatchExpressionByDates } from 'shared/util/aggregator-functions';
 import {
   getPrimaryRole,
   isAdmin,
   isExecutive,
+  isSuperAdmin,
 } from 'shared/util/user-functions';
 import { roundAmount } from 'shared/util/math-functions';
-import { CompanyCatalog } from '../../shared/const/catalog/company';
+import { REQUEST } from '@nestjs/core';
+import { AuthenticatedRequest } from 'auth/interface/authenticated-request.interface';
+import { Location } from 'database/location.model';
+import { bonusByRole } from 'shared/vl17-specific/salary/mexico-bonus';
 
+const GROUP_BY_SELLER = 'SELLER';
 @Injectable({ scope: Scope.REQUEST })
 export class ReportService {
   constructor(
     @Inject(SALE_MODEL) private saleModel: Model<Sale>,
     @Inject(USER_MODEL) private userModel: Model<User>,
     @Inject(CUSTOMER_MODEL) private customerModel: Model<Customer>,
+    @Inject(LOCATION_MODEL) private locationModel: Model<Location>,
+    @Inject(REQUEST) private req: AuthenticatedRequest,
   ) {}
 
   async getSalesMetrics(
-    user: Partial<User>,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     filterField?: string,
     filterValue?: string,
     groupBy?: string,
@@ -43,10 +49,11 @@ export class ReportService {
   ): Promise<any> {
     let seller: Partial<User> = null;
     let customer: Partial<Customer> = null;
-    let location: string = null;
+    let location: Partial<Location> = null;
 
     const filterConditions = {
       soldAt: getDateMatchExpressionByDates(startDate, endDate),
+      deleted: false,
     };
 
     switch (filterField) {
@@ -67,8 +74,11 @@ export class ReportService {
         break;
 
       case 'location':
-        location = filterValue;
-        filterConditions['location'] = location;
+        location = await this.locationModel.findById(filterValue).exec();
+        if (!location) {
+          throw new NotFoundException(`Location: ${filterValue} not found`);
+        }
+        filterConditions['location'] = Types.ObjectId(location.id);
         break;
     }
 
@@ -121,9 +131,8 @@ export class ReportService {
   }
 
   async getAllSales(
-    user: Partial<User>,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Date,
+    endDate?: Date,
     filterField?: string,
     filterValue?: string,
   ): Promise<any> {
@@ -186,69 +195,30 @@ export class ReportService {
         foreignField: '_id',
         as: 'customer',
       })
-      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$customer', preserveNullAndEmptyArrays: true });
 
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
+    query
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
       .lookup({
-        from: 'insurers',
-        localField: 'liabilityInsurer',
+        from: 'locations',
+        localField: 'location',
         foreignField: '_id',
-        as: 'liabilityInsurer',
+        as: 'location',
       })
-      .unwind({ path: '$liabilityInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'cargoInsurer',
-        foreignField: '_id',
-        as: 'cargoInsurer',
-      })
-      .unwind({ path: '$cargoInsurer', preserveNullAndEmptyArrays: true })
-
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-      .lookup({
-        from: 'insurers',
-        localField: 'physicalDamageInsurer',
-        foreignField: '_id',
-        as: 'physicalDamageInsurer',
-      })
-      .unwind({
-        path: '$physicalDamageInsurer',
-        preserveNullAndEmptyArrays: true,
-      })
-
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
-      .lookup({
-        from: 'insurers',
-        localField: 'wcGlUmbInsurer',
-        foreignField: '_id',
-        as: 'wcGlUmbInsurer',
-      })
-      .unwind({ path: '$wcGlUmbInsurer', preserveNullAndEmptyArrays: true })
+      .unwind({ path: '$location', preserveNullAndEmptyArrays: true })
 
       .append([
         {
           $project: {
+            items: '$items',
             soldAt: '$soldAt',
-            liabilityCharge: '$liabilityCharge',
-            liabilityProfit: '$liabilityProfit',
-            cargoCharge: '$cargoCharge',
-            cargoProfit: '$cargoProfit',
-            physicalDamageCharge: '$physicalDamageCharge',
-            physicalDamageProfit: '$physicalDamageProfit',
-            wcGlUmbCharge: '$wcGlUmbCharge',
-            wcGlUmbProfit: '$wcGlUmbProfit',
             fees: '$fees',
-            permits: '$permits',
             tips: '$tips',
             chargesPaid: '$chargesPaid',
             premium: '$premium',
             amountReceivable: '$amountReceivable',
             totalCharge: '$totalCharge',
+            downPayment: '$downPayment',
             createdBy: '$createdBy',
             updatedBy: '$updatedBy',
             sellerName: {
@@ -256,36 +226,29 @@ export class ReportService {
             },
             locationName: {
               $function: {
-                body: function (seller, CompanyCatalog) {
-                  location = CompanyCatalog.locations.find(
-                    ({ id }) => id === seller.location,
-                  );
-                  return location ? location['name'] : '';
+                body: function (location: any) {
+                  return location ? location.business.name : 'N/A';
                 },
-                args: ['$seller', CompanyCatalog],
+                args: ['$location'],
                 lang: 'js',
               },
             },
             customerName: {
               $function: {
-                body: function (customer) {
-                  return customer ? customer.company || customer.name : '';
+                body: function (customer: any) {
+                  return customer
+                    ? customer.type === 'BUSINESS'
+                      ? customer.business.name
+                      : `${customer.contact.firstName}  ${customer.contact.lastName}`
+                    : 'N/A';
                 },
                 args: ['$customer'],
                 lang: 'js',
               },
             },
-            insurerNames: {
-              $concat: [
-                { $ifNull: ['$liabilityInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$cargoInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$physicalDamageInsurer.name', ''] },
-                '/',
-                { $ifNull: ['$wcGlUmbInsurer.name', ''] },
-              ],
-            },
+            seller: 1,
+            customer: 1,
+            location: 1,
           },
         },
       ])
@@ -315,7 +278,7 @@ export class ReportService {
           id: '$seller._id',
           firstName: '$seller.firstName',
           lastName: '$seller.lastName',
-          location: '$location',
+          location: '$location.name',
           roles: '$seller.roles',
         };
 
@@ -330,8 +293,9 @@ export class ReportService {
       case GroupingCriteria.CUSTOMER:
         idExpression = {
           id: '$customer._id',
-          name: '$customer.name',
-          company: '$customer.company',
+          firstName: '$customer.contact.firstName',
+          lastName: '$customer.contact.lastName',
+          company: '$customer.business.name',
         };
 
         fields.map(
@@ -344,43 +308,73 @@ export class ReportService {
 
       case GroupingCriteria.LOCATION:
         idExpression = {
-          location: '$location',
+          id: '$location._id',
+          name: '$location.business.name',
         };
     }
     return idExpression;
   }
 
   async getSalaryReport(
-    user: Partial<User>,
+    currentUser: Partial<User>,
     month: number,
     year: number,
     seller?: string,
-    location?: string,
   ): Promise<any> {
-    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'month')
-      .toISOString();
-    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'day')
-      .toISOString();
+    const startDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'month')
+        .toISOString(),
+    );
+    const endDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'day')
+        .toISOString(),
+    );
 
+    return await this.getEmployeesSalaryMetrics(
+      currentUser,
+      startDate,
+      endDate,
+      seller,
+    );
+  }
+
+  async getEmployeesSalaryMetrics(
+    currentUser: Partial<User>,
+    startDate: Date,
+    endDate: Date,
+    sellerId?: string,
+  ): Promise<any> {
     let employeeMetrics = await this.getSalesMetrics(
-      user,
       startDate,
       endDate,
       null,
       null,
-      'SELLER',
+      GROUP_BY_SELLER,
       [],
-      ['premium', 'tips'],
+      [
+        'totalCharge',
+        'tips',
+        'permits',
+        'fees',
+        'premium',
+        'downPayment',
+        'profits',
+      ],
       true,
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
       //metric._id contains groupingId object from aggregator
       const result = metric._id;
+      result['totalCharge'] = roundAmount(metric.totalCharge);
+      result['tips'] = roundAmount(metric.tips);
+      result['permits'] = roundAmount(metric.permits);
+      result['fees'] = roundAmount(metric.fees);
       result['premium'] = roundAmount(metric.premium);
-      result['tips'] = metric.tips;
+      result['downPayment'] = roundAmount(metric.downPayment);
+      result['profits'] = roundAmount(metric.profits);
 
       return result;
     });
@@ -393,113 +387,82 @@ export class ReportService {
           )
         : 0;
 
-    let allUsers = [];
+    let allEmployeeSalaryMetrics = [];
 
-    if (seller) {
-      try {
-        const user: any = await this.userModel.findOne({ _id: seller }).exec();
-        const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
-
-        const result = {
-          ...user._doc,
-          premium: userMetrics ? userMetrics.premium : 0,
-          tips: userMetrics ? userMetrics.tips : 0,
-          sellerName: user.firstName + ' ' + user.lastName,
-        };
-
-        allUsers.push(result);
-      } catch (e) {
-        throw new NotFoundException('User not found');
-      }
+    if (sellerId) {
+      await this.getEmployeeSalaryMetricBySeller(sellerId, employeeMetrics);
     } else {
-      const users: any[] = await this.userModel.find({}).exec();
-      allUsers = users
-        .filter((user) => !isAdmin(user) && !isExecutive(user))
-        .map((user) => {
-          const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
-
-          const result = {
-            ...user._doc,
-            premium: userMetrics ? userMetrics.premium : 0,
-            tips: userMetrics ? userMetrics.tips : 0,
-            sellerName: user.firstName + ' ' + user.lastName,
-          };
-
-          return result;
-        });
+      allEmployeeSalaryMetrics = await this.getAllEmployeeSalaryMetrics(
+        employeeMetrics,
+      );
     }
 
-    const userFilteredByLocation =
-      isExecutive(user) && !isAdmin(user)
-        ? allUsers.filter((employee) => employee.location === user.location)
-        : allUsers;
+    //TODO: Improve this solution to give access to Boris to all Mexico locations (assign multiple locations)
+    const salaryMetricsByAuthUserLocation = allEmployeeSalaryMetrics;
+    /* !isAdmin(currentUser) && isExecutive(currentUser)
+        ? allEmployeeSalaryMetrics.filter((employee) => {
+            return employee.locationId === currentUser.location;
+          })
+        : allEmployeeSalaryMetrics; */
 
-    const payroll = userFilteredByLocation.map((employeeInfo) => {
-      employeeInfo['bonus'] = bonusByRole(
-        getPrimaryRole(employeeInfo),
-        employeeInfo.location,
-        employeeInfo.premium,
-        employeeInfo.permits,
-        employeeInfo.fees,
-        employeeInfo.tips,
-        employeeMetrics.length,
-        officeTotalSales,
-      );
-      employeeInfo['total'] = roundAmount(
-        employeeInfo.baseSalary + employeeInfo.bonus,
-      );
+    const payroll = salaryMetricsByAuthUserLocation.map((employeeInfo) => {
 
-      return employeeInfo;
+      if (employeeInfo.location) {
+        employeeInfo['salesBonus'] = bonusByRole(
+          getPrimaryRole(employeeInfo),
+          employeeInfo.location.business
+            ? employeeInfo.location.business.address.country
+            : 'N/A',
+          employeeInfo.premium,
+          employeeInfo.permits,
+          employeeInfo.fees,
+          employeeMetrics.length,
+          officeTotalSales,
+        );
+        return employeeInfo;
+      }
     });
 
     return payroll;
   }
 
   async getProfitsReport(
-    user: Partial<User>,
+    currentUser: Partial<User>,
     month: number,
     year: number,
     seller?: string,
   ): Promise<any> {
-    const startDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'month')
-      .toISOString();
-    const endDate: string = moment([year, month - 1, COMPANY.payrollDay])
-      .subtract(1, 'day')
-      .toISOString();
+    const startDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'month')
+        .toISOString(),
+    );
+    const endDate: Date = new Date(
+      moment([year, month - 1, COMPANY.payrollDay])
+        .subtract(1, 'day')
+        .toISOString(),
+    );
 
     let employeeMetrics = await this.getSalesMetrics(
-      user,
       startDate,
       endDate,
       null,
       null,
       'SELLER',
       [],
-      [
-        'premium',
-        'permits',
-        'fees',
-        'tips',
-        'liabilityProfit',
-        'cargoProfit',
-        'physicalDamageProfit',
-        'wcGlUmbProfit',
-      ],
+      ['totalCharge', 'premium', 'downPayment', 'permits', 'fees', 'tips'],
       true,
     );
 
     employeeMetrics = employeeMetrics.map((metric) => {
       const result = metric._id;
+      result['totalCharge'] = roundAmount(metric.totalCharge);
       result['premium'] = roundAmount(metric.premium);
+      result['downPayment'] = roundAmount(metric.downPayment);
       result['tips'] = roundAmount(metric.tips);
       result['permits'] = roundAmount(metric.permits);
       result['fees'] = roundAmount(metric.fees);
-      result['liabilityProfit'] = roundAmount(metric.liabilityProfit);
-      result['cargoProfit'] = roundAmount(metric.cargoProfit);
-      result['physicalDamageProfit'] = roundAmount(metric.physicalDamageProfit);
-      result['wcGlUmbProfit'] = roundAmount(metric.wcGlUmbProfit);
-
+      result['profits'] = roundAmount(metric.profits);
       return result;
     });
 
@@ -521,7 +484,9 @@ export class ReportService {
         throw new NotFoundException('User not found');
       }
     } else {
-      users = await this.userModel.find({}).exec();
+      users = await this.userModel
+        .find({ $and: [{ deleted: false }, { location: { $exists: true } }] })
+        .exec();
     }
 
     const profitsReport = users
@@ -531,40 +496,25 @@ export class ReportService {
 
         const result = {
           ...user._doc,
+          totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+          downPayment: userMetrics ? userMetrics.downPayment : 0,
           premium: userMetrics ? userMetrics.premium : 0,
           tips: userMetrics ? userMetrics.tips : 0,
           fees: userMetrics ? userMetrics.fees : 0,
           permits: userMetrics ? userMetrics.permits : 0,
+          profits: userMetrics ? userMetrics.profits : 0,
           sellerName: user.firstName + ' ' + user.lastName,
-          liabilityProfit: userMetrics ? userMetrics.liabilityProfit : 0,
-          cargoProfit: userMetrics ? userMetrics.cargoProfit : 0,
-          physicalDamageProfit: userMetrics
-            ? userMetrics.physicalDamageProfit
-            : 0,
-          wcGlUmbProfit: userMetrics ? userMetrics.wcGlUmbProfit : 0,
         };
 
-        result['bonus'] = bonusByRole(
+        result['salesBonus'] = bonusByRole(
           getPrimaryRole(user),
           user.location,
           result.premium,
           result.permits,
           result.fees,
-          result.tips,
           employeeMetrics.length,
           officeTotalSales,
         );
-        result['totalSalary'] = roundAmount(result.bonus + user.baseSalary);
-        result['totalSaleGrossProfit'] = roundAmount(
-          result.liabilityProfit +
-            result.cargoProfit +
-            result.physicalDamageProfit +
-            result.wcGlUmbProfit,
-        );
-        result['totalSaleNetProfit'] = roundAmount(
-          result.totalSaleGrossProfit - result.baseSalary - result.bonus,
-        );
-
         return result;
       });
 
@@ -578,5 +528,57 @@ export class ReportService {
     seller?: string,
   ): Promise<any> {
     return await this.getProfitsReport(user, month, year, seller);
+  }
+
+  async getAllEmployeeSalaryMetrics(employeeMetrics: any) {
+    const users: any[] = await this.userModel
+      .find({ $and: [{ deleted: false }, { location: { $exists: true } }] })
+      .populate('location')
+      .exec();
+
+    return users
+      .filter((user) => !isSuperAdmin(user))
+      .map((user) => {
+        const userMetrics = employeeMetrics.find(({ id }) => id == user.id);
+        const salaryMetrics = this.setEmployeeSalaryMetric(user, userMetrics);
+        return salaryMetrics;
+      });
+  }
+
+  async getEmployeeSalaryMetricBySeller(
+    sellerId: string,
+    employeeMetrics: any,
+  ) {
+    let result = [];
+    try {
+      const user: any = await this.userModel
+        .findOne({ _id: sellerId })
+        .populate('location')
+        .exec();
+      const userMetrics = employeeMetrics.find(({ id }) => id === user.id);
+      const salaryMetrics = this.setEmployeeSalaryMetric(user, userMetrics);
+
+      result.push(salaryMetrics);
+    } catch (e) {
+      throw new NotFoundException('User not found');
+    }
+
+    return result;
+  }
+
+  setEmployeeSalaryMetric(user: any, userMetrics: any) {
+    return {
+      id: user.id,
+      roles: user.roles,
+      permits: userMetrics ? userMetrics.permits : 0,
+      fees: userMetrics ? userMetrics.fees : 0,
+      tips: userMetrics ? userMetrics.tips : 0,
+      location: user.location ? user.location : null,
+      locationId: user.location ? user.location.id : null,
+      totalCharge: userMetrics ? userMetrics.totalCharge : 0,
+      premium: userMetrics ? userMetrics.premium : 0,
+      downPayment: userMetrics ? userMetrics.downPayment : 0,
+      sellerName: user.firstName + ' ' + user.lastName,
+    };
   }
 }
